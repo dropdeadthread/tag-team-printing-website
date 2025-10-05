@@ -1,0 +1,355 @@
+.print-order-form {
+  background: #000;
+  border: 3px solid #fff5d1;
+  padding: 2rem;
+  border-radius: 12px;
+  color: #fff5d1;
+  font-family: var(--main-font);
+  max-width: 600px;
+  margin: 2rem auto;
+  box-shadow: 5px 5px 0 #c32b14;
+  font-size: 0.9rem; /* Reduced from default */
+}
+
+.print-order-form.embedded {
+  margin: 0;
+  max-width: none;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #fff5d1;
+  box-shadow: 3px 3px 0 #ff5050;
+}
+
+.print-order-form h2 {
+  font-size: 1.6rem; /* Reduced from 2rem */
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #ff5050;
+}
+
+.print-order-form label {
+  display: block;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  position: relative;
+}
+
+.print-order-form input[type="number"],
+.print-order-form select,
+.print-order-form textarea,
+.print-order-form input[type="file"] {
+  width: 100%;
+  padding: 0.6rem; /* Reduced from 0.75rem */
+  font-size: 0.9rem; /* Reduced from 1rem */
+  border-radius: 8px;
+  border: 2px solid #fff5d1;
+  background-color: #111;
+  color: #fff5d1;
+  margin-top: 0.5rem;
+}
+
+.print-order-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Garment Source Selection Styles */
+.garment-source-section {
+  background: rgba(255, 245, 208, 0.1);
+  border: 2px solid #fff5d1;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.garment-source-section h3 {
+  color: #ff5050;
+  margin-bottom: 1rem;
+  font-size: 1.1rem; /* Reduced from 1.3rem */
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #666;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+  border-color: #fff5d1;
+  background: rgba(255, 245, 208, 0.1);
+}
+
+.radio-option input[type="radio"]:checked + span {
+  color: #ff5050;
+  font-weight: bold;
+}
+
+.radio-option input[type="radio"] {
+  margin-right: 0.75rem;
+  transform: scale(1.2);
+  width: auto;
+  padding: 0;
+  margin-top: 0;
+}
+
+.radio-option span {
+  font-size: 0.95rem; /* Reduced from 1.1rem */
+  flex: 1;
+}
+
+.recommended-options {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #4CAF50;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.recommended-options h4 {
+  color: #4CAF50;
+  margin-bottom: 0.5rem;
+  font-size: 1rem; /* Reduced from 1.2rem */
+}
+
+.garment-description {
+  color: #ccc;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.color-selector {
+  margin-top: 0.5rem;
+  max-width: 200px;
+  font-size: 0.9rem; /* Reduced from 1rem */
+}
+
+.price-preview {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4CAF50;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.own-blanks-notice {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid #FFC107;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.own-blanks-notice p {
+  margin-bottom: 0.5rem;
+  color: #FFC107;
+}
+
+.own-blanks-notice a {
+  color: #ff5050;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.warning-box {
+  background: rgba(255, 87, 34, 0.2);
+  border: 2px solid #FF5722;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #FF5722;
+  font-weight: bold;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.toggle-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-tooltip {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+  cursor: help;
+  color: #ffcc00;
+  text-decoration: none;
+}
+
+.quote-box {
+  background-color: #111;
+  border: 2px solid #fff5d1;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.quote-box h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.quote-box p {
+  margin: 0.5rem 0;
+  font-family: monospace;
+}
+
+.quote-breakdown {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.selected-garment-info {
+  background-color: #111;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #fff5d1;
+}
+
+.selected-garment-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: #007bff;
+  font-size: 1.2rem;
+}
+
+.selected-garment-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.grand-total {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ff5050;
+  margin-top: 1rem;
+}
+
+.confirm-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.print-order-form button[type="submit"] {
+  background-color: #fff5d1;
+  color: #000;
+  padding: 0.8rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: 3px solid #000;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.print-order-form button:hover {
+  background-color: #ff5050;
+  color: white;
+  transform: scale(1.05);
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .print-order-form {
+    padding: 1rem;
+  }
+
+  .print-order-form button {
+    width: 100%;
+  }
+}
+
+/* New Ink Color Fields */
+.print-order-form .ink-color-field {
+  margin-bottom: 1rem;
+}
+
+.print-order-form .ink-color-field input[type="text"] {
+  background-color: #111;
+  color: #fff5d1;
+  border: 2px solid #fff5d1;
+  padding: 0.65rem;
+  width: 100%;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 0.25rem;
+}
+
+/* Garment color input for clarity */
+.print-order-form input[type="text"]:not([type="file"]) {
+  background-color: #111;
+  color: #fff5d1;
+  border: 2px solid #fff5d1;
+  padding: 0.75rem;
+  width: 100%;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+/* Enhanced underbase indicators */
+.auto-calculated {
+  color: #4ade80;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-left: 0.5rem;
+}
+
+.manual-override {
+  color: #f59e0b;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-left: 0.5rem;
+}
+
+.reset-auto {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+  transition: background-color 0.2s;
+}
+
+.reset-auto:hover {
+  background: #4f46e5;
+}

@@ -1,0 +1,50 @@
+{
+  "Anvil": {
+    "adult": {
+      "sizes": [
+        {"size": "XS", "chest": "32-34", "length": "26"},
+        {"size": "S", "chest": "34-36", "length": "27"},
+        {"size": "M", "chest": "38-40", "length": "28"},
+        {"size": "L", "chest": "42-44", "length": "29"},
+        {"size": "XL", "chest": "46-48", "length": "30"},
+        {"size": "XXL", "chest": "50-52", "length": "31"}
+      ]
+    }
+  },
+  "Bella + Canvas": {
+    "adult": {
+      "sizes": [
+        {"size": "XS", "chest": "31-34", "length": "25.5"},
+        {"size": "S", "chest": "34-37", "length": "26.5"},
+        {"size": "M", "chest": "38-41", "length": "27.5"},
+        {"size": "L", "chest": "42-45", "length": "28.5"},
+        {"size": "XL", "chest": "46-49", "length": "29.5"},
+        {"size": "XXL", "chest": "50-53", "length": "30.5"}
+      ]
+    }
+  },
+  "Gildan": {
+    "adult": {
+      "sizes": [
+        {"size": "XS", "chest": "32-34", "length": "25.5"},
+        {"size": "S", "chest": "34-36", "length": "27"},
+        {"size": "M", "chest": "38-40", "length": "28.5"},
+        {"size": "L", "chest": "42-44", "length": "30"},
+        {"size": "XL", "chest": "46-48", "length": "31.5"},
+        {"size": "XXL", "chest": "50-52", "length": "33"}
+      ]
+    }
+  },
+  "default": {
+    "adult": {
+      "sizes": [
+        {"size": "XS", "chest": "32-34", "length": "26"},
+        {"size": "S", "chest": "34-36", "length": "27"},
+        {"size": "M", "chest": "38-40", "length": "28"},
+        {"size": "L", "chest": "42-44", "length": "29"},
+        {"size": "XL", "chest": "46-48", "length": "30"},
+        {"size": "XXL", "chest": "50-52", "length": "31"}
+      ]
+    }
+  }
+}

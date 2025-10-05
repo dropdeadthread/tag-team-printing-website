@@ -1,0 +1,41 @@
+.floating-cart-button {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 80px !important;
+  height: 80px !important;
+  background: red !important;
+  border: 3px solid yellow !important;
+  border-radius: 50% !important;
+  color: white !important;
+  font-size: 32px !important;
+  cursor: pointer !important;
+  z-index: 9999999 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.8) !important;
+  animation: pulse 2s infinite !important;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.cart-badge {
+  position: absolute !important;
+  top: -3px !important;
+  right: -3px !important;
+  background: blue !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+}

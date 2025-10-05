@@ -1,0 +1,49 @@
+.saved-items-wrapper {
+  padding: 2rem;
+  font-family: 'LuchitaPayol-Tecnica', sans-serif;
+  text-align: center;
+}
+
+.saved-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.saved-item-card {
+  background: #fff5d1;
+  border: 3px solid black;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 5px 5px 0px black;
+}
+
+.saved-item-card img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 1rem;
+  border: 2px solid black;
+}
+
+.saved-item-card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.saved-item-card p {
+  margin-bottom: 1rem;
+}
+
+.saved-item-card button {
+  background-color: #ff5050;
+  color: black;
+  border: 2px solid black;
+  padding: 0.5rem 1rem;
+  font-family: 'LuchitaPayol-Tecnica', sans-serif;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px black;
+  transition: all 0.2s ease;
+}

@@ -1,0 +1,91 @@
+/* src/components/header.css */
+
+.site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000; /* Increased z-index to appear above content */
+  padding: 1rem 6vw; /* reduce side padding to bring content closer to center */
+  display: flex;
+  justify-content: space-between; /* Moves nav links to the far right */
+  align-items: center;
+  background: transparent;
+  height: 140px; /* or larger, to fit the bigger logo */
+}
+
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'LuchitaPayol-Tecnica', sans-serif;
+  color: #fff5d1;
+  text-decoration: none;
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+}
+
+/* Hamburger button */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #fff5d1;
+  cursor: pointer;
+}
+
+/* Default nav (desktop) */
+.nav-links {
+  display: flex;
+  align-items: center;
+  margin-right: 24rem; /* Decrease this value to move links inward */
+}
+
+.nav-links a {
+  margin-left: 1.5rem; /* More spacing between links */
+  color: #fff5d1;
+  font-family: 'LuchitaPayol-Tecnica', sans-serif;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 1.7rem; /* larger font size for legibility */
+  letter-spacing: 0.09em;
+  transition: letter-spacing 0.2s;
+}
+
+.nav-links a:hover {
+  color: #ff5050;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 70px;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    background: #000;
+    width: 100%;
+    padding: 1rem 2rem;
+    display: none;
+    border-top: 2px solid #fff5d1;
+    z-index: 999;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-links a {
+    margin: 0.5rem 0;
+  }
+}

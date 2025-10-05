@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'HawlersEightRough';
+    src: url('/fonts/HawlersEightRough.otf') format('opentype');
+}
+  
+@font-face {
+    font-family: 'LuchitaPayolLaRuda';
+    src: url('/fonts/LuchitaPayol-LaRuda.ttf') format('truetype');
+}
+  
+@font-face {
+    font-family: 'LuchitaPayolTecnica';
+    src: url('/fonts/LuchitaPayol-Tecnica.ttf') format('truetype');
+}

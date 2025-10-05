@@ -1,0 +1,14 @@
+[build]
+  command = "gatsby build"
+  functions = "netlify/functions"
+  publish = "public"
+
+  [build.environment]
+    NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  query = {imgcdn = "true"}
+  to = "/.netlify/images?url=/:splat&fm=webp"
+  status = 200
+  force = true
