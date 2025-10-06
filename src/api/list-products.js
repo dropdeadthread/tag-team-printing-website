@@ -29,38 +29,44 @@ module.exports = async (req, res) => {
     }
 
     // Read from local JSON file instead of S&S API
-    // Try multiple possible paths for different environments
-    let dataPath;
+    // Read from local JSON file - use path relative to function bundle
     let rawData;
+    let data;
 
     try {
-      // First try the build output location (copied by onPostBuild)
-      dataPath = path.join(
-        process.cwd(),
-        'public',
-        'data',
-        'all_styles_raw.json',
+      // In Netlify functions, try relative to the function's location first
+      const dataPath = path.resolve(
+        __dirname,
+        '../../../data/all_styles_raw.json',
       );
       rawData = fs.readFileSync(dataPath, 'utf8');
+      data = JSON.parse(rawData);
+      console.log(
+        `Loaded ${data.length} total styles from function bundle path`,
+      );
     } catch (error) {
       try {
-        // Fallback to build output root
-        dataPath = path.join(process.cwd(), 'public', 'all_styles_raw.json');
+        // Fallback to current working directory
+        const dataPath = path.join(
+          process.cwd(),
+          'data',
+          'all_styles_raw.json',
+        );
         rawData = fs.readFileSync(dataPath, 'utf8');
+        data = JSON.parse(rawData);
+        console.log(`Loaded ${data.length} total styles from cwd path`);
       } catch (error2) {
-        try {
-          // Fallback to data directory
-          dataPath = path.join(process.cwd(), 'data', 'all_styles_raw.json');
-          rawData = fs.readFileSync(dataPath, 'utf8');
-        } catch (error3) {
-          // Final fallback to relative path
-          dataPath = path.resolve(__dirname, '../../data/all_styles_raw.json');
-          rawData = fs.readFileSync(dataPath, 'utf8');
-        }
+        console.error(
+          'Failed to load data from both paths:',
+          error.message,
+          error2.message,
+        );
+        return res.status(500).json({
+          error: 'Unable to load product data',
+          details: `Bundle path error: ${error.message}, CWD error: ${error2.message}`,
+        });
       }
     }
-
-    const data = JSON.parse(rawData);
 
     console.log(`Loaded ${data.length} total styles from local file`);
 
