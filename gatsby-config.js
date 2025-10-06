@@ -13,17 +13,17 @@ module.exports = {
     },
     `gatsby-transformer-json`,
     {
-  resolve: `gatsby-plugin-manifest`,
-  options: {
-    name: `Tag Team Printing`,
-    short_name: `TTP`,
-    start_url: `/`,
-    background_color: `#000000`,
-    theme_color: `#c32b14`,
-    display: `minimal-ui`,
-    icon: `static/images/manifest-icon.svg`,
-  },
-},
+      resolve: `gatsby-plugin-manifest`,
+      options: {
+        name: `Tag Team Printing`,
+        short_name: `TTP`,
+        start_url: `/`,
+        background_color: `#000000`,
+        theme_color: `#c32b14`,
+        display: `minimal-ui`,
+        icon: `static/images/placeholder.png`,
+      },
+    },
 
     `gatsby-plugin-postcss`,
     `gatsby-plugin-image`,
