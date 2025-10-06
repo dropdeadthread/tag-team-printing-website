@@ -1,4 +1,4 @@
-// Fixed version - CommonJS syntax for Netlify
+// Fixed version - CommonJS with CORRECT API key header
 const fetch = require('node-fetch');
 
 /**
@@ -54,12 +54,12 @@ async function sendToControlHub(orderData, orderId) {
       })),
     };
 
-    // Send to Control Hub
+    // Send to Control Hub with CORRECT API key header
     const response = await fetch(`${CONTROL_HUB_URL}/api/webhooks/order`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.CONTROL_HUB_API_KEY || ''}`,
+        'x-api-key': process.env.CONTROL_HUB_API_KEY || '', // ✅ CORRECT header name
       },
       body: JSON.stringify(hubOrderData),
     });
@@ -162,7 +162,7 @@ exports.handler = async function (event, context) {
     const hubSuccess = !!hubResult;
 
     // Log the order details
-    console.log('New streamlined order:', {
+    console.log('✅ New streamlined order:', {
       orderId,
       customer: order.customer.name,
       email: order.customer.email,
@@ -183,7 +183,7 @@ exports.handler = async function (event, context) {
       }),
     };
   } catch (error) {
-    console.error('Error processing streamlined order:', error);
+    console.error('❌ Error processing streamlined order:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({

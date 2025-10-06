@@ -23,7 +23,7 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    // Parse request body (Netlify already parses it, but keeping for safety)
+    // Parse request body safely
     const body =
       typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
     const { token, amount, currency = 'USD', locationId } = body;
@@ -62,7 +62,7 @@ exports.handler = async function (event, context) {
       locationId: locationId || process.env.GATSBY_SQUARE_LOCATION_ID,
     });
 
-    console.log('Payment Success:', {
+    console.log('✅ Payment Success:', {
       paymentId: result.payment.id,
       amount: result.payment.amountMoney.amount,
       status: result.payment.status,
@@ -78,7 +78,7 @@ exports.handler = async function (event, context) {
       }),
     };
   } catch (error) {
-    console.error('Payment Failure:', error);
+    console.error('❌ Payment Failure:', error);
 
     // Return appropriate error response
     const statusCode = error.statusCode || 500;
