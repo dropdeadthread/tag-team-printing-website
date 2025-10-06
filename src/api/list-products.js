@@ -35,7 +35,15 @@ module.exports = async (req, res) => {
           : 'http://localhost:8000/data/all_styles_raw.json';
 
       console.log(`Fetching data from: ${dataUrl}`);
-      const response = await fetch(dataUrl);
+
+      // Use global fetch if available (Node 18+) or import node-fetch
+      let fetchFn = globalThis.fetch;
+      if (!fetchFn) {
+        const nodeFetch = await import('node-fetch');
+        fetchFn = nodeFetch.default;
+      }
+
+      const response = await fetchFn(dataUrl);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch data: ${response.status}`);
