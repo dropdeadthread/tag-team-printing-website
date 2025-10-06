@@ -1,5 +1,4 @@
-const fs = require('fs');
-const path = require('path');
+// Removed unused fs and path imports since we're using S&S API directly
 
 const SELECTED_BRANDS = [
   'Gildan',
@@ -28,44 +27,82 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Category parameter is required' });
     }
 
-    // Read from local JSON file instead of S&S API
-    // Read from local JSON file - use path relative to function bundle
-    let rawData;
+    // Use S&S API directly - this is reliable and works in serverless
+    const username = process.env.SNS_API_USERNAME;
+    const password = process.env.SNS_API_KEY;
     let data;
 
-    try {
-      // In Netlify functions, try relative to the function's location first
-      const dataPath = path.resolve(
-        __dirname,
-        '../../../data/all_styles_raw.json',
+    if (username && password) {
+      console.log('S&S API credentials available, fetching live data');
+
+      const basicAuth = Buffer.from(`${username}:${password}`).toString(
+        'base64',
       );
-      rawData = fs.readFileSync(dataPath, 'utf8');
-      data = JSON.parse(rawData);
-      console.log(
-        `Loaded ${data.length} total styles from function bundle path`,
-      );
-    } catch (error) {
+      const fetch = (await import('node-fetch')).default;
+
       try {
-        // Fallback to current working directory
-        const dataPath = path.join(
-          process.cwd(),
-          'data',
-          'all_styles_raw.json',
+        const response = await fetch(
+          'https://api-ca.ssactivewear.com/v2/styles/',
+          {
+            headers: {
+              Authorization: `Basic ${basicAuth}`,
+              'Content-Type': 'application/json',
+            },
+          },
         );
-        rawData = fs.readFileSync(dataPath, 'utf8');
-        data = JSON.parse(rawData);
-        console.log(`Loaded ${data.length} total styles from cwd path`);
-      } catch (error2) {
-        console.error(
-          'Failed to load data from both paths:',
-          error.message,
-          error2.message,
+
+        if (!response.ok) {
+          throw new Error(`S&S API error: ${response.status}`);
+        }
+
+        data = await response.json();
+        console.log(`Fetched ${data.length} total products from S&S API`);
+
+        // Use the live data
+        const selectedBrands = [
+          'Gildan',
+          'JERZEES',
+          'BELLA + CANVAS',
+          'Next Level',
+          'Hanes',
+          'Comfort Colors',
+          'Threadfast Apparel',
+          'M&O',
+          'Richardson',
+          'YP Classics',
+          'Valucap',
+        ];
+        const selectedCategories = ['21', '36', '38', '56', '9', '64', '11'];
+
+        const filteredData = data.filter((item) => {
+          const brandMatch = selectedBrands.includes(item.brandName);
+          const categoryMatch =
+            item.categories &&
+            selectedCategories.some((catId) =>
+              item.categories
+                .split(',')
+                .map((id) => id.trim())
+                .includes(catId),
+            );
+          return brandMatch && categoryMatch && item.noeRetailing !== true;
+        });
+
+        console.log(
+          `Filtered to ${filteredData.length} products from selected brands`,
         );
+        data = filteredData;
+      } catch (apiError) {
+        console.error('S&S API failed, no fallback available:', apiError);
         return res.status(500).json({
-          error: 'Unable to load product data',
-          details: `Bundle path error: ${error.message}, CWD error: ${error2.message}`,
+          error: 'Unable to fetch product data from S&S API',
+          details: apiError.message,
         });
       }
+    } else {
+      console.error('Missing S&S API credentials');
+      return res.status(500).json({
+        error: 'S&S API credentials not configured',
+      });
     }
 
     console.log(`Loaded ${data.length} total styles from local file`);
