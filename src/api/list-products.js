@@ -1,5 +1,3 @@
-// Removed unused fs and path imports since we're using S&S API directly
-
 const SELECTED_BRANDS = [
   'Gildan',
   'JERZEES', // Hanes brand
@@ -27,82 +25,43 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Category parameter is required' });
     }
 
-    // Use S&S API directly - this is reliable and works in serverless
-    const username = process.env.SNS_API_USERNAME;
-    const password = process.env.SNS_API_KEY;
+    // Try to read from the public data file URL (works in both dev and production)
     let data;
+    try {
+      // In production, fetch from the public URL
+      const dataUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://tagteamprints.com/data/all_styles_raw.json'
+          : 'http://localhost:8000/data/all_styles_raw.json';
 
-    if (username && password) {
-      console.log('S&S API credentials available, fetching live data');
+      console.log(`Fetching data from: ${dataUrl}`);
+      const response = await fetch(dataUrl);
 
-      const basicAuth = Buffer.from(`${username}:${password}`).toString(
-        'base64',
-      );
-      const fetch = (await import('node-fetch')).default;
-
-      try {
-        const response = await fetch(
-          'https://api-ca.ssactivewear.com/v2/styles/',
-          {
-            headers: {
-              Authorization: `Basic ${basicAuth}`,
-              'Content-Type': 'application/json',
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`S&S API error: ${response.status}`);
-        }
-
-        data = await response.json();
-        console.log(`Fetched ${data.length} total products from S&S API`);
-
-        // Use the live data
-        const selectedBrands = [
-          'Gildan',
-          'JERZEES',
-          'BELLA + CANVAS',
-          'Next Level',
-          'Hanes',
-          'Comfort Colors',
-          'Threadfast Apparel',
-          'M&O',
-          'Richardson',
-          'YP Classics',
-          'Valucap',
-        ];
-        const selectedCategories = ['21', '36', '38', '56', '9', '64', '11'];
-
-        const filteredData = data.filter((item) => {
-          const brandMatch = selectedBrands.includes(item.brandName);
-          const categoryMatch =
-            item.categories &&
-            selectedCategories.some((catId) =>
-              item.categories
-                .split(',')
-                .map((id) => id.trim())
-                .includes(catId),
-            );
-          return brandMatch && categoryMatch && item.noeRetailing !== true;
-        });
-
-        console.log(
-          `Filtered to ${filteredData.length} products from selected brands`,
-        );
-        data = filteredData;
-      } catch (apiError) {
-        console.error('S&S API failed, no fallback available:', apiError);
-        return res.status(500).json({
-          error: 'Unable to fetch product data from S&S API',
-          details: apiError.message,
-        });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data: ${response.status}`);
       }
-    } else {
-      console.error('Missing S&S API credentials');
-      return res.status(500).json({
-        error: 'S&S API credentials not configured',
-      });
+
+      data = await response.json();
+    } catch (fetchError) {
+      console.error(
+        'Failed to fetch from URL, trying local file system:',
+        fetchError,
+      );
+
+      // Fallback: try to read from local file system (development only)
+      if (process.env.NODE_ENV !== 'production') {
+        const fs = require('fs');
+        const path = require('path');
+        const dataPath = path.join(
+          process.cwd(),
+          'data',
+          'all_styles_raw.json',
+        );
+        const rawData = fs.readFileSync(dataPath, 'utf8');
+        data = JSON.parse(rawData);
+      } else {
+        throw new Error('Unable to load product data in production');
+      }
     }
 
     console.log(`Loaded ${data.length} total styles from local file`);
