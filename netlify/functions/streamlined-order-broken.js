@@ -1,15 +1,31 @@
-// Fixed version - CommonJS syntax for Netlify
-const fetch = require('node-fetch');
+import { promises as fs } from 'fs';
+import path from 'path';
+
+const ORDERS_FILE = path.join(process.cwd(), 'data', 'streamlined-orders.json');
+
+// Initialize orders file if it doesn't exist
+async function initializeOrdersFile() {
+  try {
+    await fs.access(ORDERS_FILE);
+  } catch (error) {
+    // File doesn't exist, create it
+    await fs.writeFile(ORDERS_FILE, JSON.stringify([], null, 2));
+  }
+}
 
 /**
  * Sends order data to Control Hub after successful order creation
+ * @param {Object} orderData - The complete order object from your website
+ * @param {string} orderId - The generated order ID
+ * @returns {Promise<boolean>} - Success status
  */
 async function sendToControlHub(orderData, orderId) {
   try {
+    // Your Control Hub URL (update this with your actual server URL)
     const CONTROL_HUB_URL =
       process.env.CONTROL_HUB_URL || 'http://localhost:4000';
 
-    // Transform order data to Control Hub format
+    // Transform your order data to Control Hub format
     const hubOrderData = {
       orderId: orderId,
       source: 'tag-team-website',
@@ -59,7 +75,7 @@ async function sendToControlHub(orderData, orderId) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.CONTROL_HUB_API_KEY || ''}`,
+        Authorization: `Bearer ${process.env.CONTROL_HUB_SECRET || ''}`, // Optional auth
       },
       body: JSON.stringify(hubOrderData),
     });
@@ -88,19 +104,15 @@ async function sendToControlHub(orderData, orderId) {
   }
 }
 
-// Netlify Function Handler - Using CommonJS exports
-exports.handler = async function (event, context) {
-  // Only allow POST requests
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ message: 'Method not allowed' }),
-    };
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
   }
 
   try {
-    // Parse the request body (Netlify already does this for us)
-    const orderData = JSON.parse(event.body);
+    await initializeOrdersFile();
+
+    const orderData = req.body;
 
     // Validate required fields
     if (
@@ -109,10 +121,7 @@ exports.handler = async function (event, context) {
       !orderData.quantity ||
       !orderData.garment
     ) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Missing required fields' }),
-      };
+      return res.status(400).json({ message: 'Missing required fields' });
     }
 
     // Generate order ID
@@ -157,39 +166,73 @@ exports.handler = async function (event, context) {
       premiumUpgrade: orderData.addOns?.premiumUpgrade || false,
     };
 
-    // Send to Control Hub (this is the primary storage mechanism)
+    // Read existing orders
+    const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
+    const orders = JSON.parse(ordersData);
+
+    // Add new order
+    orders.push(order);
+
+    // Save updated orders
+    await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
+
+    // 🎯 NEW: Send to Control Hub
     const hubResult = await sendToControlHub(orderData, orderId);
     const hubSuccess = !!hubResult;
 
-    // Log the order details
-    console.log('New streamlined order:', {
-      orderId,
-      customer: order.customer.name,
-      email: order.customer.email,
-      total: order.quote.totalWithTax,
-      hubSync: hubSuccess,
-    });
+    // Send email notification (you would integrate with your email service here)
+    const emailSubject = `New Streamlined Order: ${orderId}${hubSuccess ? ' [Synced to Hub]' : ''}`;
+    const emailBody = `
+New streamlined order received:
 
-    // Return success response
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        orderId,
-        jobId: hubSuccess ? hubResult.jobId : null,
-        controlHub: hubSuccess ? 'synced' : 'failed',
-        preflightCheck: hubSuccess ? hubResult.preflightCheck : null,
-        message: `Order submitted successfully!${hubSuccess ? ' Job created in Control Hub.' : ' Order saved locally, Control Hub sync pending.'}`,
-      }),
-    };
+ORDER ID: ${orderId}
+${hubSuccess ? `JOB ID: ${hubResult.jobId}` : 'STATUS: Local only (Hub sync failed)'}
+CUSTOMER: ${order.customer.name} (${order.customer.email})
+GARMENT: ${order.garment.brand} ${order.garment.style} - ${order.garment.color}
+QUANTITY: ${order.printing.quantity}
+PRINT: ${order.printing.colors} color(s), ${order.printing.locations} location(s)
+TOTAL: $${order.quote.totalWithTax} ($${order.quote.pricePerShirt}/shirt)
+
+${order.rushOrder ? '⚡ RUSH ORDER (+25%)' : ''}
+${order.premiumUpgrade ? '⭐ PREMIUM UPGRADE' : ''}
+${
+  hubSuccess && hubResult.preflightCheck
+    ? `
+📋 PREFLIGHT CHECK:
+   Status: ${hubResult.preflightCheck.status}
+   Score: ${hubResult.preflightCheck.score}/100
+   Priority: ${hubResult.preflightCheck.priority || 'normal'}
+   Issues Found: ${hubResult.preflightCheck.issuesFound}
+`
+    : ''
+}
+
+SETUP: ${order.quote.screenBreakdown}
+NOTES: ${order.notes}
+
+---
+Contact customer at ${order.customer.email}${order.customer.phone ? ` or ${order.customer.phone}` : ''} to confirm details.
+    `;
+
+    console.log('New streamlined order:', emailSubject);
+    console.log(emailBody);
+
+    res.status(200).json({
+      success: true,
+      orderId,
+      jobId: hubSuccess ? hubResult.jobId : null,
+      controlHub: hubSuccess ? 'synced' : 'failed',
+      preflightCheck: hubSuccess ? hubResult.preflightCheck : null,
+      message: `Order submitted successfully!${hubSuccess ? ' Job created in Control Hub.' : ''}`,
+    });
   } catch (error) {
     console.error('Error processing streamlined order:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        success: false,
-        message: 'Internal server error. Please try again.',
-      }),
-    };
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error. Please try again.',
+    });
   }
-};
+}
+
+// Export the helper function for use in other parts of your site
+export { sendToControlHub };

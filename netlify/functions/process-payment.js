@@ -1,35 +1,99 @@
-// src/api/process-payment.js
-import { Client, Environment } from 'square';
-import crypto from 'crypto'; // ✅ Make sure this is imported!
+// Fixed version - CommonJS syntax for Netlify
+const { Client, Environment } = require('square');
+const crypto = require('crypto');
 
+// Initialize Square client
 const client = new Client({
   accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment: Environment.Sandbox, // ✅ sandbox for testing
+  environment:
+    process.env.NODE_ENV === 'production'
+      ? Environment.Production
+      : Environment.Sandbox,
 });
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+// Netlify Function Handler
+exports.handler = async function (event, context) {
+  // Only allow POST requests
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
+    };
   }
 
   try {
-    const body = JSON.parse(req.body); // ✅ THIS is the fix!
-    const { token } = body;
+    // Parse request body (Netlify already parses it, but keeping for safety)
+    const body =
+      typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+    const { token, amount, currency = 'USD', locationId } = body;
 
+    // Validate required fields
+    if (!token) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: false,
+          message: 'Payment token is required',
+        }),
+      };
+    }
+
+    if (!amount || amount <= 0) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          success: false,
+          message: 'Valid amount is required',
+        }),
+      };
+    }
+
+    // Create payment with Square
     const { result } = await client.paymentsApi.createPayment({
       idempotencyKey: crypto.randomUUID(),
       sourceId: token,
       amountMoney: {
-        amount: 2500, // $25.00 in cents
-        currency: 'USD',
+        amount: Math.round(amount), // Amount in cents
+        currency: currency,
       },
-      locationId: process.env.SQUARE_LOCATION_ID,
+      locationId: locationId || process.env.GATSBY_SQUARE_LOCATION_ID,
     });
 
-    console.log('Payment Success:', result);
-    return res.status(200).json({ success: true, payment: result });
+    console.log('Payment Success:', {
+      paymentId: result.payment.id,
+      amount: result.payment.amountMoney.amount,
+      status: result.payment.status,
+    });
+
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: true,
+        payment: result.payment,
+        message: 'Payment processed successfully',
+      }),
+    };
   } catch (error) {
     console.error('Payment Failure:', error);
-    return res.status(500).json({ success: false, message: error.message });
+
+    // Return appropriate error response
+    const statusCode = error.statusCode || 500;
+    const errorMessage =
+      error.errors?.[0]?.detail || error.message || 'Payment processing failed';
+
+    return {
+      statusCode: statusCode,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        success: false,
+        message: errorMessage,
+        error:
+          process.env.NODE_ENV === 'development' ? error.toString() : undefined,
+      }),
+    };
   }
-}
+};
