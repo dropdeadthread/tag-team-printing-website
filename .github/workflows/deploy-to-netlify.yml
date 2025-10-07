@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -26,6 +26,16 @@ jobs:
 
       - name: Build Site
         run: npm run build
+        env:
+          # Gatsby build-time environment variables
+          GATSBY_GA_TRACKING_ID: G-220DWNXBFQ
+          GATSBY_SQUARE_APP_ID: sq0idp-5lvym4cTdjzdki3BV6B2MA
+          GATSBY_SQUARE_LOCATION_ID: LFC0M330KWB8V
+          SITE_URL: https://tagteamprints.com
+          NODE_ENV: production
+          # S&S API credentials for build-time data fetching
+          SNS_API_USERNAME: ${{ secrets.SNS_API_USERNAME }}
+          SNS_API_KEY: ${{ secrets.SNS_API_KEY }}
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
