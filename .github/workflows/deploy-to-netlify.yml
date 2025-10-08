@@ -28,9 +28,9 @@ jobs:
         run: npm run build
         env:
           # Gatsby build-time environment variables
-          GATSBY_GA_TRACKING_ID: ${{ secrets.GATSBY_GA_TRACKING_ID }}
-          GATSBY_SQUARE_APP_ID: ${{ secrets.GATSBY_SQUARE_APP_ID }}
-          GATSBY_SQUARE_LOCATION_ID: ${{ secrets.GATSBY_SQUARE_LOCATION_ID }}
+          GATSBY_GA_TRACKING_ID: G-220DWNXBFQ
+          GATSBY_SQUARE_APP_ID: sq0idp-5lvym4cTdjzdki3BV6B2MA
+          GATSBY_SQUARE_LOCATION_ID: LFC0M330KWB8V
           SITE_URL: https://tagteamprints.com
           NODE_ENV: production
           # S&S API credentials for build-time data fetching
