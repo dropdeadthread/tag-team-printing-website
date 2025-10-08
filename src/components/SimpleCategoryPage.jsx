@@ -893,14 +893,14 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                       prod.styleID ||
                       'unknown';
 
-                    // Try multiple image URL formats
+                    // Try multiple image URL formats - USE NETLIFY PROXY
                     let imageUrl = '/images/placeholder.png'; // Default fallback
                     if (prod.styleImage) {
-                      // Use the styleImage path from the product data
-                      imageUrl = `https://images.ssactivewear.com/${prod.styleImage}`;
+                      // Use Netlify proxy to avoid CORS
+                      imageUrl = `/ss-images/${prod.styleImage}`;
                     } else if (styleID) {
-                      // Fallback to constructed URL
-                      imageUrl = `https://images.ssactivewear.com/Images/Style/${styleID}_fm.jpg`;
+                      // Fallback to constructed URL via proxy
+                      imageUrl = `/ss-images/Images/Style/${styleID}_fm.jpg`;
                     }
 
                     console.log(`Product ${index}:`, {
