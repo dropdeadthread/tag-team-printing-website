@@ -1,14 +1,19 @@
-// src/pages/checkout.jsx
-import React, { useEffect, useState, useContext } from "react";
-import { loadSquareSdk } from "../utils/loadSquareSdk";
-import { CartContext } from "../context/CartContext";
-import "../styles/checkout.css";
+// src/pages/checkout.jsx - FIXED
+import React, { useEffect, useState, useContext } from 'react';
+import { loadSquareSdk } from '../utils/loadSquareSdk';
+import { CartContext } from '../context/CartContext';
+import '../styles/checkout.css';
 
 const CheckoutPage = () => {
   const { cartItems, clearCart } = useContext(CartContext);
   const [card, setCard] = useState(null);
-  const [status, setStatus] = useState("");
-  const [fields, setFields] = useState({ name: "", email: "", address: "" });
+  const [status, setStatus] = useState('');
+  const [fields, setFields] = useState({
+    name: '',
+    email: '',
+    address: '',
+    phone: '',
+  });
 
   useEffect(() => {
     async function initializeSquare() {
@@ -17,111 +22,210 @@ const CheckoutPage = () => {
 
       const paymentsInstance = window.Square.payments(
         process.env.GATSBY_SQUARE_APP_ID,
-        process.env.GATSBY_SQUARE_LOCATION_ID
+        process.env.GATSBY_SQUARE_LOCATION_ID,
       );
 
       const cardInstance = await paymentsInstance.card();
-      await cardInstance.attach("#card-container");
+      await cardInstance.attach('#card-container');
       setCard(cardInstance);
     }
 
     initializeSquare();
   }, []);
 
-  const handleChange = e => setFields({ ...fields, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFields({ ...fields, [e.target.name]: e.target.value });
 
-  const handlePayment = async e => {
+  const handlePayment = async (e) => {
     if (e) e.preventDefault();
     if (!card) return;
 
     try {
-      setStatus("Processing...");
+      setStatus('Processing...');
+
+      // Calculate total in cents
+      const totalAmount = cartItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      );
+      const amountInCents = Math.round(totalAmount * 100);
+
+      // Step 1: Tokenize card
       const result = await card.tokenize();
 
-      if (result.status === "OK") {
-        const response = await fetch("/api/process-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: result.token }),
+      if (result.status === 'OK') {
+        // Step 2: Process payment with Square
+        const response = await fetch('/.netlify/functions/process-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: result.token,
+            amount: amountInCents,
+            currency: 'USD',
+          }),
         });
 
         const paymentResult = await response.json();
 
         if (paymentResult.success) {
-          // Create order in backend
-          const orderResponse = await fetch("/api/create-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...fields,
-              items: cartItems,
-              paymentId: paymentResult.paymentId || null,
-            }),
-          });
-          
-          const orderData = await orderResponse.json();
-          
-          // Sync to Control Hub
+          // Step 3: Send order to Control Hub
           try {
-            await fetch("/api/order-webhook", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                type: "order.completed",
-                data: {
-                  id: orderData.orderId || `TTP-${Date.now()}`,
+            const orderResponse = await fetch(
+              '/.netlify/functions/streamlined-order',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                   customer: {
                     name: fields.name,
                     email: fields.email,
-                    phone: fields.phone || null
+                    phone: fields.phone || '',
+                    notes: `Checkout order - Payment ID: ${paymentResult.payment.id}`,
                   },
                   items: cartItems,
-                  total: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                  billingDetails: { ...fields },
-                  paymentId: paymentResult.paymentId,
-                  orderType: cartItems.some(item => item.customDesign) ? 'custom-design' : 'standard'
-                }
-              }),
-            });
-            console.log("✅ Order synced to Control Hub");
+                  total: totalAmount,
+                  paymentId: paymentResult.payment.id,
+                  paymentStatus: 'completed',
+                  orderType: 'checkout-cart',
+                  shippingAddress: fields.address,
+                }),
+              },
+            );
+
+            const orderData = await orderResponse.json();
+            console.log('✅ Order synced to Control Hub:', orderData);
           } catch (hubError) {
-            console.warn("⚠️ Control Hub sync failed (order still processed):", hubError);
+            console.warn(
+              '⚠️ Control Hub sync failed (payment still processed):',
+              hubError,
+            );
           }
-          
+
           clearCart();
-          setStatus("Payment Successful! Redirecting...");
+          setStatus('Payment Successful! Redirecting...');
           setTimeout(() => {
-            window.location.href = "/order-confirmed";
+            window.location.href = '/order-confirmed';
           }, 2000);
         } else {
-          setStatus("Payment Failed: " + (paymentResult.message || "Unknown error"));
+          setStatus(
+            'Payment Failed: ' + (paymentResult.message || 'Unknown error'),
+          );
         }
       } else {
-        setStatus("Card validation failed");
+        setStatus(
+          'Card validation failed: ' +
+            (result.errors?.[0]?.message || 'Unknown error'),
+        );
       }
     } catch (error) {
-      console.error("Payment error:", error);
-      setStatus("Error during payment");
+      console.error('Payment error:', error);
+      setStatus('Error during payment: ' + error.message);
     }
   };
 
+  // Calculate cart total for display
+  const cartTotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
   return (
-    <div className="checkout-container" style={{ fontFamily: "var(--font-luchita-rueda)" }}>
+    <div
+      className="checkout-container"
+      style={{ fontFamily: 'var(--font-luchita-rueda)' }}
+    >
       <div className="checkout-box">
         <h1>Checkout</h1>
+
+        {/* Cart Summary */}
+        <div
+          style={{
+            marginBottom: '2rem',
+            padding: '1rem',
+            background: '#f5f5f5',
+            borderRadius: '8px',
+          }}
+        >
+          <h3>Order Summary</h3>
+          {cartItems.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem',
+              }}
+            >
+              <span>
+                {item.name} x {item.quantity}
+              </span>
+              <span>${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+          ))}
+          <hr />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+            }}
+          >
+            <span>Total:</span>
+            <span>${cartTotal.toFixed(2)}</span>
+          </div>
+        </div>
+
         <form onSubmit={handlePayment}>
-          <input name="name" value={fields.name} onChange={handleChange} placeholder="Name" required />
-          <input name="email" value={fields.email} onChange={handleChange} placeholder="Email" required />
-          <input name="address" value={fields.address} onChange={handleChange} placeholder="Shipping Address" required />
-          <div id="card-container"></div>
-          <button className="checkout-button" type="submit">
-            Pay Now
+          <input
+            name="name"
+            value={fields.name}
+            onChange={handleChange}
+            placeholder="Full Name"
+            required
+          />
+          <input
+            name="email"
+            value={fields.email}
+            onChange={handleChange}
+            placeholder="Email"
+            type="email"
+            required
+          />
+          <input
+            name="phone"
+            value={fields.phone}
+            onChange={handleChange}
+            placeholder="Phone Number"
+            type="tel"
+          />
+          <input
+            name="address"
+            value={fields.address}
+            onChange={handleChange}
+            placeholder="Shipping Address"
+            required
+          />
+
+          <div id="card-container" style={{ marginBottom: '1rem' }}></div>
+
+          <button
+            className="checkout-button"
+            type="submit"
+            disabled={!card || status.includes('Processing')}
+          >
+            {status.includes('Processing')
+              ? 'Processing...'
+              : `Pay $${cartTotal.toFixed(2)}`}
           </button>
         </form>
+
         {status && (
           <div
             className={`payment-status ${
-              status.includes("Failed") || status.includes("Error") ? "error" : "success"
+              status.includes('Failed') || status.includes('Error')
+                ? 'error'
+                : 'success'
             }`}
           >
             {status}
