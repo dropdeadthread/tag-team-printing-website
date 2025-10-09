@@ -247,25 +247,6 @@ module.exports = async (req, res) => {
         );
       }
 
-      // For crewnecks category (400), include fleece crewnecks and sweatshirts
-      if (category.toString() === '400') {
-        return (
-          itemCategories.includes('9') ||
-          (item.baseCategory &&
-            (item.baseCategory.includes('Fleece - Premium - Crew') ||
-              item.baseCategory.includes('Fleece - Core - Crew'))) ||
-          (item.title &&
-            (item.title.toLowerCase().includes('sweatshirt') ||
-              item.title.toLowerCase().includes('crewneck')) &&
-            // Exclude hooded items (those go in hoodies category)
-            !item.title.toLowerCase().includes('hoodie') &&
-            !item.title.toLowerCase().includes('hooded') &&
-            // Exclude tank tops
-            !item.title.toLowerCase().includes('tank') &&
-            !itemCategories.includes('64'))
-        );
-      }
-
       // For hoodies category (22 or 36), include ONLY fleece hooded sweatshirts, NOT hooded t-shirts
       if (category.toString() === '22' || category.toString() === '36') {
         return (

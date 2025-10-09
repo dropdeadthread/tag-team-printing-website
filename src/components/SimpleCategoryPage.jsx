@@ -117,7 +117,12 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
     setLoading(true);
 
     // First, get all products in category for brand filtering (without pagination)
-    fetch(`/.netlify/functions/list-products?category=${categoryId}&limit=1000`) // Get all products
+    const apiEndpoint =
+      typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? '/api/list-products'
+        : '/.netlify/functions/list-products';
+
+    fetch(`${apiEndpoint}?category=${categoryId}&limit=1000`) // Get all products
       .then((response) => response.json())
       .then((data) => {
         console.log(
@@ -132,9 +137,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
       });
 
     // Then get paginated products for display
-    fetch(
-      `/.netlify/functions/list-products?category=${categoryId}&page=${currentPage}&limit=20`,
-    )
+    fetch(`${apiEndpoint}?category=${categoryId}&page=${currentPage}&limit=20`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
