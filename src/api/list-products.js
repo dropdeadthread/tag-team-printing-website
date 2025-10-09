@@ -128,8 +128,8 @@ module.exports = async (req, res) => {
         );
       }
 
-      // For long sleeve category (8), use specific approved styles for BELLA + CANVAS
-      if (category.toString() === '8') {
+      // For long sleeve category (8 or 56), use specific approved styles for BELLA + CANVAS
+      if (category.toString() === '8' || category.toString() === '56') {
         // BELLA + CANVAS approved long sleeve styles
         const bellaApprovedLongSleeve = [
           '3501Y',
@@ -195,6 +195,20 @@ module.exports = async (req, res) => {
         );
       }
 
+      // For full-zips category (38), include zip-up sweatshirts and hoodies
+      if (category.toString() === '38') {
+        return (
+          (item.title.toLowerCase().includes('zip') ||
+            item.title.toLowerCase().includes('full-zip') ||
+            item.title.toLowerCase().includes('full zip') ||
+            item.title.toLowerCase().includes('quarter-zip') ||
+            item.title.toLowerCase().includes('quarter zip')) &&
+          // Exclude tank tops
+          !item.title.toLowerCase().includes('tank') &&
+          !itemCategories.includes('64')
+        );
+      }
+
       // For lightweight hoodies category (401), include BELLA + CANVAS lightweight/sponge fleece hoodies
       if (category.toString() === '401') {
         return (
@@ -216,6 +230,25 @@ module.exports = async (req, res) => {
 
       // For sweatshirts category (9), include fleece crewnecks and sweatshirts
       if (category.toString() === '9') {
+        return (
+          itemCategories.includes('9') ||
+          (item.baseCategory &&
+            (item.baseCategory.includes('Fleece - Premium - Crew') ||
+              item.baseCategory.includes('Fleece - Core - Crew'))) ||
+          (item.title &&
+            (item.title.toLowerCase().includes('sweatshirt') ||
+              item.title.toLowerCase().includes('crewneck')) &&
+            // Exclude hooded items (those go in hoodies category)
+            !item.title.toLowerCase().includes('hoodie') &&
+            !item.title.toLowerCase().includes('hooded') &&
+            // Exclude tank tops
+            !item.title.toLowerCase().includes('tank') &&
+            !itemCategories.includes('64'))
+        );
+      }
+
+      // For crewnecks category (400), include fleece crewnecks and sweatshirts
+      if (category.toString() === '400') {
         return (
           itemCategories.includes('9') ||
           (item.baseCategory &&
@@ -273,8 +306,8 @@ module.exports = async (req, res) => {
         );
       }
 
-      // For headwear category (6), include specific 5 panel hats from hat specialist brands
-      if (category.toString() === '6') {
+      // For headwear category (6 or 11), include specific 5 panel hats from hat specialist brands
+      if (category.toString() === '6' || category.toString() === '11') {
         // Approved 5 panel hat styles
         const approved5PanelHats = [
           '112FP', // Richardson Five-Panel Trucker Cap
