@@ -7,6 +7,11 @@
     NODE_VERSION = "18"
 
 [[redirects]]
+  from = "/ss-images/*"
+  to = "/.netlify/functions/ss-images?path=:splat"
+  status = 200
+
+[[redirects]]
   from = "/*"
   query = {imgcdn = "true"}
   to = "/.netlify/images?url=/:splat&fm=webp"

@@ -896,14 +896,32 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                       prod.styleID ||
                       'unknown';
 
-                    // Try multiple image URL formats - USE NETLIFY PROXY
+                    // Try multiple image URL formats - Direct URLs for local, proxy for production
                     let imageUrl = '/images/placeholder.png'; // Default fallback
+
                     if (prod.styleImage) {
-                      // Use Netlify proxy to avoid CORS
-                      imageUrl = `/ss-images/${prod.styleImage}`;
+                      if (
+                        typeof window !== 'undefined' &&
+                        window.location.hostname === 'localhost'
+                      ) {
+                        // Direct SanMar URL for local development
+                        imageUrl = `https://images.ssactivewear.com/${prod.styleImage}`;
+                      } else {
+                        // Use Netlify proxy for production to avoid CORS
+                        imageUrl = `/ss-images/${prod.styleImage}`;
+                      }
                     } else if (styleID) {
-                      // Fallback to constructed URL via proxy
-                      imageUrl = `/ss-images/Images/Style/${styleID}_fm.jpg`;
+                      const imagePath = `Images/Style/${styleID}_fm.jpg`;
+                      if (
+                        typeof window !== 'undefined' &&
+                        window.location.hostname === 'localhost'
+                      ) {
+                        // Direct SanMar URL for local development
+                        imageUrl = `https://images.ssactivewear.com/${imagePath}`;
+                      } else {
+                        // Use Netlify proxy for production to avoid CORS
+                        imageUrl = `/ss-images/${imagePath}`;
+                      }
                     }
 
                     console.log(`Product ${index}:`, {
