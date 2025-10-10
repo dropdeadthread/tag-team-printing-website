@@ -8,23 +8,46 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to get proper product image URL - USE NETLIFY PROXY
+  // Function to get proper product image URL - Dynamic proxy/direct URLs
   const getProductImageUrl = (product, colorName = null) => {
     if (!product?.styleID) return '/images/placeholder.png';
 
-    // If a color is specified, try to get color-specific image via proxy
+    // If a color is specified, try to get color-specific image
     if (colorName) {
       const colorCode = colorName.toLowerCase().replace(/\s+/g, '');
-      return `/ss-images/Images/Style/${product.styleID}_${colorCode}_fm.jpg`;
+      const imagePath = `Images/Style/${product.styleID}_${colorCode}_fm.jpg`;
+      if (
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+      ) {
+        return `https://images.ssactivewear.com/${imagePath}`;
+      } else {
+        return `/ss-images/${imagePath}`;
+      }
     }
 
-    // Default product image from API response via proxy
+    // Default product image from API response
     if (product.styleImage) {
-      return `/ss-images/${product.styleImage}`;
+      if (
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+      ) {
+        return `https://images.ssactivewear.com/${product.styleImage}`;
+      } else {
+        return `/ss-images/${product.styleImage}`;
+      }
     }
 
-    // Fallback to constructed URL via proxy
-    return `/ss-images/Images/Style/${product.styleID}_fm.jpg`;
+    // Fallback to constructed URL
+    const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname === 'localhost'
+    ) {
+      return `https://images.ssactivewear.com/${imagePath}`;
+    } else {
+      return `/ss-images/${imagePath}`;
+    }
   };
 
   useEffect(() => {
@@ -33,7 +56,13 @@ const ProductPage = () => {
       return;
     }
     setLoading(true);
-    fetch(`/.netlify/functions/get-product?styleID=${styleID}`)
+
+    const apiEndpoint =
+      typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? '/api/get-product'
+        : '/.netlify/functions/get-product';
+
+    fetch(`${apiEndpoint}?styleID=${styleID}`)
       .then((res) => res.json())
       .then((data) => {
         setProduct(data);
