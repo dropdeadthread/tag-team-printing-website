@@ -936,30 +936,37 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                       return labels[categoryId] || 'APPAREL';
                     };
 
-                    // For development, use mockups directly since SSActivewear images are not accessible
+                    // Always try to load real images first, with graceful fallback
                     const isLocalDev =
                       typeof window !== 'undefined' &&
                       window.location.hostname === 'localhost';
 
-                    let imageUrl = getFallbackImage(categoryId); // Default to mockup
+                    let imageUrl = getFallbackImage(categoryId); // Default fallback
                     let primaryImageUrl = null;
 
-                    // Only try external images in production
-                    if (!isLocalDev) {
-                      if (prod.styleImage) {
-                        const ssImagePath = prod.styleImage;
-                        primaryImageUrl = `/ss-images/${ssImagePath}`;
-                      } else if (styleID) {
-                        const imagePath = `Images/Style/${styleID}_fm.jpg`;
-                        primaryImageUrl = `/ss-images/${imagePath}`;
-                      }
-
-                      // Use primary image if available in production, otherwise fallback
-                      if (primaryImageUrl) {
-                        imageUrl = primaryImageUrl;
-                      }
+                    // Try to get real product images (both dev and production)
+                    if (prod.styleImage) {
+                      const ssImagePath = prod.styleImage;
+                      // Use direct URL for now, proxy for production
+                      primaryImageUrl =
+                        typeof window !== 'undefined' &&
+                        window.location.hostname === 'localhost'
+                          ? `https://www.ssactivewear.com/${ssImagePath}`
+                          : `/ss-images/${ssImagePath}`;
+                    } else if (styleID) {
+                      const imagePath = `Images/Style/${styleID}_fm.jpg`;
+                      // Use direct URL for now, proxy for production
+                      primaryImageUrl =
+                        typeof window !== 'undefined' &&
+                        window.location.hostname === 'localhost'
+                          ? `https://www.ssactivewear.com/${imagePath}`
+                          : `/ss-images/${imagePath}`;
                     }
-                    // For local development, just use the mockups directly
+
+                    // Use primary image if available, fallback will be handled by onError
+                    if (primaryImageUrl) {
+                      imageUrl = primaryImageUrl;
+                    }
 
                     console.log(`Product ${index}:`, {
                       name,

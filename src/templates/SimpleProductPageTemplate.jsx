@@ -205,18 +205,9 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
   // Use dynamic images based on product and color with better fallback strategy
   const getProductImageUrl = (product, selectedColor) => {
-    if (!product?.styleID) return getProductFallbackImage();
+    if (!product?.styleID) return getProductFallbackImage(product);
 
-    // For development, use mockups directly since SSActivewear images are not accessible
-    const isLocalDev =
-      typeof window !== 'undefined' && window.location.hostname === 'localhost';
-
-    if (isLocalDev) {
-      // In development, return appropriate fallback based on product type
-      return getProductFallbackImage(product);
-    }
-
-    // For production, try external images with fallback
+    // Always try to load real images first, with graceful fallback
     let primaryImageUrl = null;
 
     // If a color is selected, try to get color-specific image
@@ -224,16 +215,31 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       // Construct URL with color variant
       const colorCode = selectedColor.name.toLowerCase().replace(/\s+/g, '');
       const imagePath = `Images/Style/${product.styleID}_${colorCode}_fm.jpg`;
-      primaryImageUrl = `/ss-images/${imagePath}`;
+      // Use direct URL for dev, proxy for production
+      primaryImageUrl =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+          ? `https://www.ssactivewear.com/${imagePath}`
+          : `/ss-images/${imagePath}`;
     }
     // Default product image
     else if (product.styleImage) {
-      primaryImageUrl = `/ss-images/${product.styleImage}`;
+      // Use direct URL for dev, proxy for production
+      primaryImageUrl =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+          ? `https://www.ssactivewear.com/${product.styleImage}`
+          : `/ss-images/${product.styleImage}`;
     }
     // Fallback to constructed URL
     else {
       const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
-      primaryImageUrl = `/ss-images/${imagePath}`;
+      // Use direct URL for dev, proxy for production
+      primaryImageUrl =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+          ? `https://www.ssactivewear.com/${imagePath}`
+          : `/ss-images/${imagePath}`;
     }
 
     return primaryImageUrl || getProductFallbackImage(product);

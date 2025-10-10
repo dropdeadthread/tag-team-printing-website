@@ -10,8 +10,8 @@ exports.handler = async (event) => {
     };
   }
 
-  // Construct the SanMar image URL
-  const imageUrl = `https://images.ssactivewear.com/${imagePath}`;
+  // Construct the SSActivewear image URL (using correct domain)
+  const imageUrl = `https://www.ssactivewear.com/${imagePath}`;
 
   try {
     console.log(`Proxying image request: ${imageUrl}`);
