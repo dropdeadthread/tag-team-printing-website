@@ -952,10 +952,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                         }}
                       >
                         <Link
-                          to={`/products/${styleID}/${(name || styleName)
-                            .toLowerCase()
-                            .replace(/[^a-z0-9]+/g, '-')
-                            .replace(/^-+|-+$/g, '')}/`}
+                          to={`/products/${styleName || name}`}
                           style={{
                             textDecoration: 'none',
                             color: 'inherit',
