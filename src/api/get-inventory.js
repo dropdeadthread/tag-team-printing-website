@@ -122,8 +122,16 @@ export default async function handler(req, res) {
         // If a specific color is requested, simulate color-specific inventory
         // by applying a color-based multiplier to make inventory numbers different per color
         if (color) {
-          const colorSeed = color.toLowerCase().charCodeAt(0) + color.length;
-          const multiplier = 0.4 + (colorSeed % 60) / 100; // Between 0.4 and 1.0
+          // Better hash algorithm to avoid duplicate seeds
+          let colorSeed = 0;
+          const colorLower = color.toLowerCase();
+          for (let i = 0; i < colorLower.length; i++) {
+            colorSeed =
+              ((colorSeed << 5) - colorSeed + colorLower.charCodeAt(i)) &
+              0xffffffff;
+          }
+          // Convert to positive and create multiplier between 0.3 and 0.95
+          const multiplier = 0.3 + (Math.abs(colorSeed) % 650) / 1000;
 
           // Apply multiplier to each size
           Object.keys(sortedSizes).forEach((size) => {
