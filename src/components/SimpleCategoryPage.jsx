@@ -896,33 +896,70 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                       prod.styleID ||
                       'unknown';
 
-                    // Try multiple image URL formats - Direct URLs for local, proxy for production
-                    let imageUrl = '/images/placeholder.png'; // Default fallback
-
-                    if (prod.styleImage) {
-                      if (
-                        typeof window !== 'undefined' &&
-                        window.location.hostname === 'localhost'
-                      ) {
-                        // Direct SanMar URL for local development
-                        imageUrl = `https://images.ssactivewear.com/${prod.styleImage}`;
-                      } else {
-                        // Use Netlify proxy for production to avoid CORS
-                        imageUrl = `/ss-images/${prod.styleImage}`;
+                    // Get fallback image and styling based on category
+                    const getFallbackImage = (categoryId) => {
+                      // For t-shirts, use actual mockups
+                      if (categoryId === 21 || categoryId === '21') {
+                        return '/images/black tshirt mockup.png';
                       }
-                    } else if (styleID) {
-                      const imagePath = `Images/Style/${styleID}_fm.jpg`;
-                      if (
-                        typeof window !== 'undefined' &&
-                        window.location.hostname === 'localhost'
-                      ) {
-                        // Direct SanMar URL for local development
-                        imageUrl = `https://images.ssactivewear.com/${imagePath}`;
-                      } else {
-                        // Use Netlify proxy for production to avoid CORS
-                        imageUrl = `/ss-images/${imagePath}`;
+
+                      // For other categories, use placeholder with category-specific colors
+                      return '/images/placeholder.png';
+                    };
+
+                    // Get category-specific background color for placeholders
+                    const getCategoryPlaceholderStyle = (categoryId) => {
+                      const styles = {
+                        21: { backgroundColor: '#2c2c2c' }, // T-Shirts - dark
+                        36: { backgroundColor: '#1e3a8a', color: 'white' }, // Hoodies - navy blue
+                        38: { backgroundColor: '#3b82f6', color: 'white' }, // Full-Zips - royal blue
+                        56: { backgroundColor: '#15803d', color: 'white' }, // Long Sleeves - green
+                        64: { backgroundColor: '#dc2626', color: 'white' }, // Tank Tops - red
+                        11: { backgroundColor: '#6b7280', color: 'white' }, // Headwear - gray
+                        400: { backgroundColor: '#eab308', color: 'black' }, // Crewnecks - yellow
+                      };
+                      return (
+                        styles[categoryId] || { backgroundColor: '#f3f4f6' }
+                      );
+                    };
+
+                    const getCategoryLabel = (categoryId) => {
+                      const labels = {
+                        21: 'T-SHIRT',
+                        36: 'HOODIE',
+                        38: 'ZIP-UP',
+                        56: 'LONG SLEEVE',
+                        64: 'TANK TOP',
+                        11: 'HAT',
+                        400: 'CREWNECK',
+                      };
+                      return labels[categoryId] || 'APPAREL';
+                    };
+
+                    // For development, use mockups directly since SSActivewear images are not accessible
+                    const isLocalDev =
+                      typeof window !== 'undefined' &&
+                      window.location.hostname === 'localhost';
+
+                    let imageUrl = getFallbackImage(categoryId); // Default to mockup
+                    let primaryImageUrl = null;
+
+                    // Only try external images in production
+                    if (!isLocalDev) {
+                      if (prod.styleImage) {
+                        const ssImagePath = prod.styleImage;
+                        primaryImageUrl = `/ss-images/${ssImagePath}`;
+                      } else if (styleID) {
+                        const imagePath = `Images/Style/${styleID}_fm.jpg`;
+                        primaryImageUrl = `/ss-images/${imagePath}`;
+                      }
+
+                      // Use primary image if available in production, otherwise fallback
+                      if (primaryImageUrl) {
+                        imageUrl = primaryImageUrl;
                       }
                     }
+                    // For local development, just use the mockups directly
 
                     console.log(`Product ${index}:`, {
                       name,
@@ -959,25 +996,71 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                             display: 'block',
                           }}
                         >
-                          <img
-                            src={imageUrl}
-                            alt={name}
-                            style={{
-                              width: '220px',
-                              height: '220px',
-                              objectFit: 'contain',
-                              background: '#f8f8f8',
-                              borderRadius: '8px',
-                              marginBottom: '1rem',
-                              border: '2px solid #ddd',
-                            }}
-                            onError={(e) => {
-                              console.log('Image failed to load:', imageUrl);
-                              // Set to a more informative placeholder
-                              e.target.src = '/images/placeholder.png';
-                              e.target.style.backgroundColor = '#f0f0f0';
-                            }}
-                          />
+                          {/* Custom placeholder for non-t-shirt categories */}
+                          {categoryId !== 21 &&
+                          categoryId !== '21' &&
+                          imageUrl.includes('placeholder') ? (
+                            <div
+                              style={{
+                                width: '220px',
+                                height: '220px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '8px',
+                                marginBottom: '1rem',
+                                border: '2px solid #ddd',
+                                fontWeight: 'bold',
+                                fontSize: '18px',
+                                textAlign: 'center',
+                                ...getCategoryPlaceholderStyle(categoryId),
+                              }}
+                            >
+                              {getCategoryLabel(categoryId)}
+                            </div>
+                          ) : (
+                            <img
+                              src={imageUrl}
+                              alt={name}
+                              style={{
+                                width: '220px',
+                                height: '220px',
+                                objectFit: 'contain',
+                                background: '#f8f8f8',
+                                borderRadius: '8px',
+                                marginBottom: '1rem',
+                                border: '2px solid #ddd',
+                              }}
+                              onError={(e) => {
+                                console.log('Image failed to load:', imageUrl);
+
+                                // If it's already a fallback image, don't try again
+                                if (
+                                  e.target.src.includes('mockup') ||
+                                  e.target.src.includes('placeholder')
+                                ) {
+                                  e.target.style.backgroundColor = '#f0f0f0';
+                                  return;
+                                }
+
+                                // First fallback: try category-specific mockup
+                                const categoryFallback =
+                                  getFallbackImage(categoryId);
+                                if (
+                                  !e.target.src.includes(
+                                    categoryFallback.split('/').pop(),
+                                  )
+                                ) {
+                                  e.target.src = categoryFallback;
+                                  return;
+                                }
+
+                                // Final fallback: placeholder
+                                e.target.src = '/images/placeholder.png';
+                                e.target.style.backgroundColor = '#f0f0f0';
+                              }}
+                            />
+                          )}
 
                           <h3
                             style={{

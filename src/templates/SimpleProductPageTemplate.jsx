@@ -153,47 +153,90 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     );
   }
 
-  // Use dynamic images based on product and color - Direct URLs for local, proxy for production
+  // Get fallback image for product page based on product category
+  const getProductFallbackImage = (product) => {
+    // For t-shirts, use actual mockup
+    if (
+      product?.baseCategory?.toLowerCase().includes('shirt') ||
+      product?.categories?.includes('21')
+    ) {
+      return '/images/black tshirt mockup.png';
+    }
+
+    // For other categories, use placeholder (will be replaced with styled div)
+    return '/images/placeholder.png';
+  };
+
+  // Get category-specific styling for product placeholders
+  const getProductPlaceholderStyle = (product) => {
+    const category = product?.baseCategory?.toLowerCase() || '';
+
+    if (category.includes('hoodie') || category.includes('sweatshirt')) {
+      return { backgroundColor: '#1e3a8a', color: 'white' }; // Navy blue
+    } else if (category.includes('zip')) {
+      return { backgroundColor: '#3b82f6', color: 'white' }; // Royal blue
+    } else if (category.includes('long')) {
+      return { backgroundColor: '#15803d', color: 'white' }; // Green
+    } else if (category.includes('tank')) {
+      return { backgroundColor: '#dc2626', color: 'white' }; // Red
+    } else if (category.includes('headwear') || category.includes('hat')) {
+      return { backgroundColor: '#6b7280', color: 'white' }; // Gray
+    } else if (category.includes('crew')) {
+      return { backgroundColor: '#eab308', color: 'black' }; // Yellow
+    }
+
+    return { backgroundColor: '#f3f4f6' }; // Default gray
+  };
+
+  const getProductLabel = (product) => {
+    const category = product?.baseCategory?.toLowerCase() || '';
+
+    if (category.includes('hoodie') || category.includes('sweatshirt'))
+      return 'HOODIE';
+    if (category.includes('zip')) return 'ZIP-UP';
+    if (category.includes('long')) return 'LONG SLEEVE';
+    if (category.includes('tank')) return 'TANK TOP';
+    if (category.includes('headwear') || category.includes('hat')) return 'HAT';
+    if (category.includes('crew')) return 'CREWNECK';
+    if (category.includes('shirt')) return 'T-SHIRT';
+
+    return 'APPAREL';
+  };
+
+  // Use dynamic images based on product and color with better fallback strategy
   const getProductImageUrl = (product, selectedColor) => {
-    if (!product?.styleID) return '/images/placeholder.png';
+    if (!product?.styleID) return getProductFallbackImage();
+
+    // For development, use mockups directly since SSActivewear images are not accessible
+    const isLocalDev =
+      typeof window !== 'undefined' && window.location.hostname === 'localhost';
+
+    if (isLocalDev) {
+      // In development, return appropriate fallback based on product type
+      return getProductFallbackImage(product);
+    }
+
+    // For production, try external images with fallback
+    let primaryImageUrl = null;
 
     // If a color is selected, try to get color-specific image
     if (selectedColor?.name) {
       // Construct URL with color variant
       const colorCode = selectedColor.name.toLowerCase().replace(/\s+/g, '');
       const imagePath = `Images/Style/${product.styleID}_${colorCode}_fm.jpg`;
-      if (
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-      ) {
-        return `https://images.ssactivewear.com/${imagePath}`;
-      } else {
-        return `/ss-images/${imagePath}`;
-      }
+      primaryImageUrl = `/ss-images/${imagePath}`;
     }
-
     // Default product image
-    if (product.styleImage) {
-      if (
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-      ) {
-        return `https://images.ssactivewear.com/${product.styleImage}`;
-      } else {
-        return `/ss-images/${product.styleImage}`;
-      }
+    else if (product.styleImage) {
+      primaryImageUrl = `/ss-images/${product.styleImage}`;
+    }
+    // Fallback to constructed URL
+    else {
+      const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
+      primaryImageUrl = `/ss-images/${imagePath}`;
     }
 
-    // Fallback to constructed URL
-    const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
-    if (
-      typeof window !== 'undefined' &&
-      window.location.hostname === 'localhost'
-    ) {
-      return `https://images.ssactivewear.com/${imagePath}`;
-    } else {
-      return `/ss-images/${imagePath}`;
-    }
+    return primaryImageUrl || getProductFallbackImage(product);
   };
 
   const imageUrl = getProductImageUrl(product, selectedColor);
@@ -368,34 +411,85 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                 }}
                 aria-label="Click to zoom image"
               >
-                <img
-                  src={imageUrl}
-                  alt={product.title}
-                  onError={(e) => {
-                    // Fallback to placeholder if color-specific image fails
-                    console.log('Image failed to load:', imageUrl);
-                    e.target.src = '/images/placeholder.png';
-                  }}
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    height: 'auto',
-                    background: '#f8f8f8',
-                    border: '3px solid #fff',
-                    borderRadius: '12px',
-                    padding: '20px',
-                    boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
-                    cursor: 'zoom-in',
-                    transition: 'all 0.3s ease',
-                    transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
-                    zIndex: imageZoomed ? 1000 : 1,
-                    position: imageZoomed ? 'fixed' : 'relative',
-                    top: imageZoomed ? '50%' : 'auto',
-                    left: imageZoomed ? '50%' : 'auto',
-                    marginTop: imageZoomed ? '-250px' : '0',
-                    marginLeft: imageZoomed ? '-250px' : '0',
-                  }}
-                />
+                {/* Custom placeholder for non-t-shirt products */}
+                {imageUrl.includes('placeholder') &&
+                !product?.baseCategory?.toLowerCase().includes('shirt') ? (
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: '500px',
+                      height: '400px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '12px',
+                      border: '3px solid #fff',
+                      fontWeight: 'bold',
+                      fontSize: '24px',
+                      textAlign: 'center',
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
+                      cursor: 'zoom-in',
+                      transition: 'all 0.3s ease',
+                      transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
+                      zIndex: imageZoomed ? 1000 : 1,
+                      position: imageZoomed ? 'fixed' : 'relative',
+                      top: imageZoomed ? '50%' : 'auto',
+                      left: imageZoomed ? '50%' : 'auto',
+                      marginTop: imageZoomed ? '-250px' : '0',
+                      marginLeft: imageZoomed ? '-250px' : '0',
+                      ...getProductPlaceholderStyle(product),
+                    }}
+                  >
+                    {getProductLabel(product)}
+                  </div>
+                ) : (
+                  <img
+                    src={imageUrl}
+                    alt={product.title}
+                    onError={(e) => {
+                      console.log('Image failed to load:', imageUrl);
+
+                      // If it's already a fallback image, don't try again
+                      if (
+                        e.target.src.includes('mockup') ||
+                        e.target.src.includes('placeholder')
+                      ) {
+                        e.target.style.backgroundColor = '#f0f0f0';
+                        return;
+                      }
+
+                      // First fallback: try product mockup
+                      const fallbackImage = getProductFallbackImage(product);
+                      if (!e.target.src.includes('mockup')) {
+                        e.target.src = fallbackImage;
+                        return;
+                      }
+
+                      // Final fallback: placeholder
+                      e.target.src = '/images/placeholder.png';
+                      e.target.style.backgroundColor = '#f0f0f0';
+                    }}
+                    style={{
+                      width: '100%',
+                      maxWidth: '500px',
+                      height: 'auto',
+                      background: '#f8f8f8',
+                      border: '3px solid #fff',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
+                      cursor: 'zoom-in',
+                      transition: 'all 0.3s ease',
+                      transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
+                      zIndex: imageZoomed ? 1000 : 1,
+                      position: imageZoomed ? 'fixed' : 'relative',
+                      top: imageZoomed ? '50%' : 'auto',
+                      left: imageZoomed ? '50%' : 'auto',
+                      marginTop: imageZoomed ? '-250px' : '0',
+                      marginLeft: imageZoomed ? '-250px' : '0',
+                    }}
+                  />
+                )}
               </button>
               {imageZoomed && (
                 <div
