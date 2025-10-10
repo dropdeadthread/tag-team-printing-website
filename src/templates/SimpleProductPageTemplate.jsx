@@ -391,6 +391,135 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
             paddingTop: '2rem', // Override the container padding-top since we set it on parent
           }}
         >
+          {/* Category Navigation */}
+          <div style={{ marginBottom: '2rem' }}>
+            {/* Breadcrumb */}
+            <div
+              style={{
+                marginBottom: '1rem',
+                fontSize: '14px',
+                color: '#ccc',
+              }}
+            >
+              <a href="/" style={{ color: '#fff', textDecoration: 'none' }}>
+                Home
+              </a>
+              <span style={{ margin: '0 0.5rem' }}>›</span>
+              <span>Products</span>
+              {product && (
+                <>
+                  <span style={{ margin: '0 0.5rem' }}>›</span>
+                  <span>{product.title}</span>
+                </>
+              )}
+            </div>
+
+            {/* Category Quick Navigation */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                marginBottom: '1rem',
+              }}
+            >
+              {[
+                {
+                  id: '21',
+                  slug: 't-shirts',
+                  name: 'T-Shirts',
+                  color: '#2c2c2c',
+                },
+                {
+                  id: '36',
+                  slug: 'hoodies',
+                  name: 'Hoodies',
+                  color: '#1e3a8a',
+                },
+                {
+                  id: '38',
+                  slug: 'zip-ups',
+                  name: 'Zip-Ups',
+                  color: '#3b82f6',
+                },
+                {
+                  id: '56',
+                  slug: 'long-sleeves',
+                  name: 'Long Sleeves',
+                  color: '#15803d',
+                },
+                {
+                  id: '64',
+                  slug: 'tank-tops',
+                  name: 'Tank Tops',
+                  color: '#dc2626',
+                },
+                {
+                  id: '11',
+                  slug: 'headwear',
+                  name: 'Headwear',
+                  color: '#6b7280',
+                },
+                {
+                  id: '400',
+                  slug: 'crewnecks',
+                  name: 'Crewnecks',
+                  color: '#eab308',
+                },
+              ].map((category) => (
+                <a
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: category.color,
+                    color: category.color === '#eab308' ? '#000' : '#fff',
+                    textDecoration: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease',
+                    border: '2px solid transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  {category.name}
+                </a>
+              ))}
+            </div>
+
+            {/* Back to Category Button */}
+            {product && (
+              <button
+                onClick={() => window.history.back()}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                }}
+              >
+                ← Back to Previous Page
+              </button>
+            )}
+          </div>
           <div
             style={{
               display: 'grid',
@@ -1763,6 +1892,132 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Browse More Products Section */}
+          <div
+            style={{
+              marginTop: '4rem',
+              borderTop: '2px solid rgba(255,255,255,0.2)',
+              paddingTop: '2rem',
+            }}
+          >
+            <h3
+              style={{
+                color: '#fff',
+                textAlign: 'center',
+                marginBottom: '1.5rem',
+                fontSize: '1.5rem',
+              }}
+            >
+              Browse More Products
+            </h3>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '1rem',
+                marginBottom: '2rem',
+              }}
+            >
+              {[
+                {
+                  id: '21',
+                  slug: 't-shirts',
+                  name: 'T-Shirts',
+                  description: 'Classic comfort for everyday wear',
+                  color: '#2c2c2c',
+                },
+                {
+                  id: '36',
+                  slug: 'hoodies',
+                  name: 'Hoodies',
+                  description: 'Cozy warmth for cooler days',
+                  color: '#1e3a8a',
+                },
+                {
+                  id: '38',
+                  slug: 'zip-ups',
+                  name: 'Zip-Ups',
+                  description: 'Versatile layering pieces',
+                  color: '#3b82f6',
+                },
+                {
+                  id: '56',
+                  slug: 'long-sleeves',
+                  name: 'Long Sleeves',
+                  description: 'Extended coverage and style',
+                  color: '#15803d',
+                },
+                {
+                  id: '64',
+                  slug: 'tank-tops',
+                  name: 'Tank Tops',
+                  description: 'Light and breathable options',
+                  color: '#dc2626',
+                },
+                {
+                  id: '11',
+                  slug: 'headwear',
+                  name: 'Headwear',
+                  description: 'Complete your look',
+                  color: '#6b7280',
+                },
+                {
+                  id: '400',
+                  slug: 'crewnecks',
+                  name: 'Crewnecks',
+                  description: 'Classic pullover style',
+                  color: '#eab308',
+                },
+              ].map((category) => (
+                <a
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  style={{
+                    padding: '1.5rem',
+                    backgroundColor: `${category.color}20`,
+                    border: `2px solid ${category.color}40`,
+                    borderRadius: '12px',
+                    textDecoration: 'none',
+                    color: '#fff',
+                    transition: 'all 0.3s ease',
+                    display: 'block',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-4px)';
+                    e.target.style.backgroundColor = `${category.color}40`;
+                    e.target.style.borderColor = category.color;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.backgroundColor = `${category.color}20`;
+                    e.target.style.borderColor = `${category.color}40`;
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 'bold',
+                      fontSize: '1.1rem',
+                      marginBottom: '0.5rem',
+                      color: category.color,
+                    }}
+                  >
+                    {category.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '0.9rem',
+                      color: '#ccc',
+                      lineHeight: '1.4',
+                    }}
+                  >
+                    {category.description}
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         </div>
