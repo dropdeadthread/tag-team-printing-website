@@ -38,18 +38,46 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Fetch product data
+    // FIXED: Use real-time S&S ActiveWear API instead of cached JSON
     let data;
     try {
-      const dataUrl = 'https://tagteamprints.com/data/all_styles_raw.json';
-      console.log(`Fetching data from: ${dataUrl}`);
+      const username = process.env.SNS_API_USERNAME;
+      const apiKey = process.env.SNS_API_KEY;
 
-      const response = await fetch(dataUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch data: ${response.status}`);
+      if (!username || !apiKey) {
+        console.warn(
+          'S&S API credentials not found, falling back to cached data',
+        );
+        // Fallback to cached data if credentials not available
+        const dataUrl = 'https://tagteamprints.com/data/all_styles_raw.json';
+        const response = await fetch(dataUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch fallback data: ${response.status}`);
+        }
+        data = await response.json();
+      } else {
+        // Use real-time S&S API
+        console.log('Fetching real-time data from S&S ActiveWear API');
+        const authHeader =
+          'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
+
+        const response = await fetch(
+          'https://api-ca.ssactivewear.com/v2/styles/',
+          {
+            headers: {
+              Authorization: authHeader,
+              Accept: 'application/json',
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`S&S API error: ${response.status}`);
+        }
+
+        data = await response.json();
+        console.log(`Fetched ${data.length} products from live S&S API`);
       }
-
-      data = await response.json();
     } catch (fetchError) {
       console.error('Failed to fetch product data:', fetchError);
       return {
