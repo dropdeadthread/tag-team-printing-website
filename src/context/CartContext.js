@@ -1,5 +1,5 @@
-// src/context/CartContext.js
-import React, { createContext, useState } from "react";
+// src/context/CartContext.js - FIXED: Standardized cart data format
+import { createContext, useState } from 'react';
 
 // ✅ Named export for context
 export const CartContext = createContext();
@@ -9,31 +9,46 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
   const addToCart = (product) => {
-    setCartItems(prevItems => {
+    setCartItems((prevItems) => {
+      // Standardize product data format (normalize to lowercase field names)
+      const standardizedProduct = {
+        styleID: product.StyleID || product.styleID,
+        styleName: product.styleName || product.StyleName,
+        name: product.name || product.title || product.Title,
+        price: parseFloat(product.price || product.Price || 0),
+        quantity: parseInt(product.quantity || product.Quantity || 1),
+        size: product.size || product.Size,
+        color: product.color || product.Color,
+        image: product.image || product.styleImage || product.Image,
+        brand: product.brand || product.brandName || product.Brand,
+      };
+
       // Create unique key for each product variant (styleID + size + color)
-      const productKey = `${product.StyleID || product.styleID}-${product.Size}-${product.Color}`;
-      const existingItemIndex = prevItems.findIndex(item => {
-        const itemKey = `${item.StyleID || item.styleID}-${item.Size}-${item.Color}`;
+      const productKey = `${standardizedProduct.styleID}-${standardizedProduct.size}-${standardizedProduct.color}`;
+      const existingItemIndex = prevItems.findIndex((item) => {
+        const itemKey = `${item.styleID}-${item.size}-${item.color}`;
         return itemKey === productKey;
       });
-      
+
       if (existingItemIndex !== -1) {
         // Item exists, increment quantity
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          Quantity: (updatedItems[existingItemIndex].Quantity || 1) + (product.Quantity || 1),
+          quantity:
+            (updatedItems[existingItemIndex].quantity || 1) +
+            standardizedProduct.quantity,
         };
         return updatedItems;
       }
-      
-      // New item
-      return [...prevItems, { ...product, Quantity: product.Quantity || 1 }];
+
+      // New item with standardized format
+      return [...prevItems, standardizedProduct];
     });
   };
 
   const removeFromCart = (index) => {
-    setCartItems(prevItems => prevItems.filter((_, i) => i !== index));
+    setCartItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
 
   const clearCart = () => {
@@ -41,11 +56,11 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateCartItemQuantity = (index, newQuantity) => {
-    setCartItems(prevItems => {
+    setCartItems((prevItems) => {
       const updatedItems = [...prevItems];
       updatedItems[index] = {
         ...updatedItems[index],
-        Quantity: newQuantity,
+        quantity: newQuantity, // Use lowercase field name
       };
       return updatedItems;
     });

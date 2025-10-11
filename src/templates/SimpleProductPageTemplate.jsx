@@ -203,49 +203,167 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     return 'APPAREL';
   };
 
-  // Use dynamic images based on product and color with better fallback strategy
+  // Helper function to determine product type from category information
+  const getProductType = (product) => {
+    if (!product) return 'APPAREL';
+
+    const category = (product.baseCategory || '').toLowerCase();
+    const title = (product.title || '').toLowerCase();
+
+    // Check for headwear
+    if (
+      category.includes('headwear') ||
+      title.includes('cap') ||
+      title.includes('hat') ||
+      title.includes('beanie')
+    ) {
+      return 'HEADWEAR';
+    }
+
+    // Check for hoodies
+    if (
+      category.includes('hood') ||
+      title.includes('hoodie') ||
+      title.includes('hooded')
+    ) {
+      return 'HOODIE';
+    }
+
+    // Check for crewneck sweatshirts
+    if (
+      category.includes('crew') ||
+      title.includes('crewneck') ||
+      title.includes('crew neck')
+    ) {
+      return 'CREWNECK';
+    }
+
+    // Check for t-shirts
+    if (
+      category.includes('shirt') ||
+      title.includes('tee') ||
+      title.includes('t-shirt')
+    ) {
+      return 'T-SHIRT';
+    }
+
+    // Check for other categories
+    if (category.includes('quarter') || title.includes('quarter-zip')) {
+      return 'QUARTER-ZIP';
+    }
+
+    if (category.includes('polo') || title.includes('polo')) {
+      return 'POLO';
+    }
+
+    return 'APPAREL';
+  };
+
+  // REMOVED: Old color mapping - now using real S&S API color image data
+
+  // Get color-aware product image using S&S API color images
   const getProductImageUrl = (product, selectedColor) => {
     if (!product?.styleID) return getProductFallbackImage(product);
 
-    // Always try to load real images first, with graceful fallback
-    let primaryImageUrl = null;
-
-    // If a color is selected, try to get color-specific image
-    if (selectedColor?.name) {
-      // Construct URL with color variant
-      const colorCode = selectedColor.name.toLowerCase().replace(/\s+/g, '');
-      const imagePath = `Images/Style/${product.styleID}_${colorCode}_fm.jpg`;
-      // Use direct URL for dev, proxy for production
-      primaryImageUrl =
+    // NEW: Use S&S API color-specific images if available
+    if (selectedColor && selectedColor.colorFrontImage) {
+      const colorImageUrl =
         typeof window !== 'undefined' &&
         window.location.hostname === 'localhost'
-          ? `https://www.ssactivewear.com/${imagePath}`
-          : `/ss-images/${imagePath}`;
+          ? `https://www.ssactivewear.com/${selectedColor.colorFrontImage}`
+          : `/ss-images/${selectedColor.colorFrontImage}`;
+
+      console.log(
+        `Using S&S color front image for ${selectedColor.name}:`,
+        colorImageUrl,
+      );
+      return colorImageUrl;
     }
-    // Default product image
-    else if (product.styleImage) {
-      // Use direct URL for dev, proxy for production
-      primaryImageUrl =
+
+    // NEW: Alternative - use colorSideImage if colorFrontImage not available
+    if (selectedColor && selectedColor.colorSideImage) {
+      const colorImageUrl =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+          ? `https://www.ssactivewear.com/${selectedColor.colorSideImage}`
+          : `/ss-images/${selectedColor.colorSideImage}`;
+
+      console.log(
+        `Using S&S color side image for ${selectedColor.name}:`,
+        colorImageUrl,
+      );
+      return colorImageUrl;
+    }
+
+    // Fallback to main product image if no color-specific S&S image
+    if (product.styleImage) {
+      const mainImageUrl =
         typeof window !== 'undefined' &&
         window.location.hostname === 'localhost'
           ? `https://www.ssactivewear.com/${product.styleImage}`
           : `/ss-images/${product.styleImage}`;
-    }
-    // Fallback to constructed URL
-    else {
-      const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
-      // Use direct URL for dev, proxy for production
-      primaryImageUrl =
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-          ? `https://www.ssactivewear.com/${imagePath}`
-          : `/ss-images/${imagePath}`;
+
+      console.log('Using main product image:', mainImageUrl);
+      return mainImageUrl;
     }
 
-    return primaryImageUrl || getProductFallbackImage(product);
+    // Final fallback to constructed URL using styleID
+    const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
+    const fallbackImageUrl =
+      typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? `https://www.ssactivewear.com/${imagePath}`
+        : `/ss-images/${imagePath}`;
+
+    console.log('Using constructed fallback image:', fallbackImageUrl);
+    return fallbackImageUrl || getProductFallbackImage(product);
   };
 
   const imageUrl = getProductImageUrl(product, selectedColor);
+
+  // Handle image loading errors and provide fallback
+  const handleImageError = (event) => {
+    console.log(
+      'Color-specific image not found, falling back to main product image',
+    );
+
+    // Try main product image first
+    if (
+      product?.styleImage &&
+      event.target.src !== `https://www.ssactivewear.com/${product.styleImage}`
+    ) {
+      const mainImageUrl =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+          ? `https://www.ssactivewear.com/${product.styleImage}`
+          : `/ss-images/${product.styleImage}`;
+
+      event.target.src = mainImageUrl;
+      return;
+    }
+
+    // Ultimate fallback based on product type
+    const productType = getProductType(product);
+    let fallbackImage = '/api/placeholder/400/400';
+
+    switch (productType) {
+      case 'T-SHIRT':
+        fallbackImage = '/images/black tshirt mockup.png';
+        break;
+      case 'HOODIE':
+        fallbackImage = '/images/black hoodie mockup.png';
+        break;
+      case 'CREWNECK':
+        fallbackImage = '/images/black crewneck mockup.png';
+        break;
+      case 'HEADWEAR':
+        fallbackImage = '/images/black hat mockup.png';
+        break;
+      default:
+        fallbackImage = '/api/placeholder/400/400';
+    }
+
+    event.target.src = fallbackImage;
+  };
 
   const brandLogoUrl = null; // Disable brand logos for now due to CORS issues
 
@@ -581,29 +699,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                   <img
                     src={imageUrl}
                     alt={product.title}
-                    onError={(e) => {
-                      console.log('Image failed to load:', imageUrl);
-
-                      // If it's already a fallback image, don't try again
-                      if (
-                        e.target.src.includes('mockup') ||
-                        e.target.src.includes('placeholder')
-                      ) {
-                        e.target.style.backgroundColor = '#f0f0f0';
-                        return;
-                      }
-
-                      // First fallback: try product mockup
-                      const fallbackImage = getProductFallbackImage(product);
-                      if (!e.target.src.includes('mockup')) {
-                        e.target.src = fallbackImage;
-                        return;
-                      }
-
-                      // Final fallback: placeholder
-                      e.target.src = '/images/placeholder.png';
-                      e.target.style.backgroundColor = '#f0f0f0';
-                    }}
+                    onError={handleImageError}
                     style={{
                       width: '100%',
                       maxWidth: '500px',
@@ -654,6 +750,89 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                   }}
                 />
               )}
+
+              {/* Enhanced Color indicator overlay */}
+              {selectedColor && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '15px',
+                    left: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background:
+                      'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 240, 240, 0.95) 100%)',
+                    padding: '10px 16px',
+                    borderRadius: '25px',
+                    boxShadow:
+                      '0 4px 16px rgba(0,0,0,0.25), 0 0 0 2px rgba(255,255,255,0.8)',
+                    zIndex: 10,
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.9)',
+                    animation: 'slideDown 0.4s ease-out',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      backgroundColor: selectedColor.hex,
+                      border: '3px solid #fff',
+                      boxShadow:
+                        '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4)',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Color ring animation */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '-3px',
+                        left: '-3px',
+                        right: '-3px',
+                        bottom: '-3px',
+                        borderRadius: '50%',
+                        border: '2px solid transparent',
+                        borderTop: '2px solid #ff5050',
+                        animation: 'spin 2s linear infinite',
+                        opacity: 0.7,
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: '700',
+                        color: '#333',
+                        textShadow: '0 1px 2px rgba(255,255,255,0.8)',
+                      }}
+                    >
+                      {selectedColor.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: '500',
+                        color: '#666',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      Selected
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div
                 style={{
                   position: 'absolute',
@@ -1889,6 +2068,84 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                         </div>
                       );
                     })}
+                  </div>
+
+                  {/* Enhanced Color Information Note */}
+                  <div
+                    style={{
+                      marginTop: '1rem',
+                      padding: '1rem',
+                      background:
+                        'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      backdropFilter: 'blur(8px)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      <span style={{ fontSize: '20px' }}>🎨</span>
+                      <strong style={{ color: '#fff', fontSize: '0.9rem' }}>
+                        Color & Image Info
+                      </strong>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: '0.85rem',
+                        color: '#e8e8e8',
+                        margin: 0,
+                        lineHeight: '1.5',
+                        textAlign: 'left',
+                      }}
+                    >
+                      The product image shows the style and fit. Your selected
+                      color{' '}
+                      {selectedColor && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '2px 8px',
+                            background: 'rgba(255,255,255,0.2)',
+                            borderRadius: '12px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '12px',
+                              height: '12px',
+                              borderRadius: '50%',
+                              backgroundColor: selectedColor.hex,
+                              border: '1px solid rgba(255,255,255,0.5)',
+                            }}
+                          />
+                          {selectedColor.name}
+                        </span>
+                      )}{' '}
+                      will be the actual garment color you receive.
+                    </p>
+                    {product?.baseCategory?.toLowerCase().includes('shirt') && (
+                      <p
+                        style={{
+                          fontSize: '0.8rem',
+                          color: '#ccc',
+                          margin: '0.5rem 0 0 0',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        💡 Tip: Some t-shirt colors may show color-matched
+                        mockups above for reference.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

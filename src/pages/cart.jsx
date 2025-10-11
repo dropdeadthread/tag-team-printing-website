@@ -19,26 +19,26 @@ const CartPage = () => {
       });
   }, []);
 
-  // Merge cart items with product details
+  // Merge cart items with product details - FIXED: Use standardized field names
   const mergedCart = cartItems.map((item) => {
     const product = products.find(
       (p) => String(p.styleID) === String(item.styleID),
     );
     return {
       ...item,
-      ...product,
-      Quantity: item.Quantity || 1,
+      // Cart items now use standardized lowercase format, no need to merge different field names
+      quantity: item.quantity || 1,
     };
   });
 
   const handleQuantityChange = (index, delta) => {
     const item = cartItems[index];
-    const newQty = Math.max(1, (item.Quantity || 1) + delta);
+    const newQty = Math.max(1, (item.quantity || 1) + delta); // Use lowercase field name
     updateCartItemQuantity(index, newQty);
   };
 
   const total = mergedCart.reduce(
-    (acc, item) => acc + (item.Price || 0) * (item.Quantity || 1),
+    (acc, item) => acc + (item.price || 0) * (item.quantity || 1), // Use standardized lowercase field names
     0,
   );
 
@@ -55,24 +55,25 @@ const CartPage = () => {
               {mergedCart.map((item, idx) => (
                 <div className="cart-item" key={item.styleID || idx}>
                   <img
-                    src={item.styleImage || item.Image}
-                    alt={item.title || item.Title}
+                    src={item.image}
+                    alt={item.name}
                     className="cart-thumbnail"
                   />
                   <div className="cart-info">
-                    <h3>{item.title || item.Title}</h3>
-                    <p>Fit: {item.Fit || item.fit}</p>
-                    <p>Size: {item.Size || item.size}</p>
+                    <h3>{item.name}</h3>
+                    <p>Brand: {item.brand}</p>
+                    <p>Size: {item.size}</p>
+                    <p>Color: {item.color}</p>
                     <div className="cart-qty-controls">
                       <button onClick={() => handleQuantityChange(idx, -1)}>
                         -
                       </button>
-                      <span>{item.Quantity}</span>
+                      <span>{item.quantity}</span>
                       <button onClick={() => handleQuantityChange(idx, 1)}>
                         +
                       </button>
                     </div>
-                    <p>${((item.Price || 0) * item.Quantity).toFixed(2)}</p>
+                    <p>${(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                   <button
                     className="remove-button"

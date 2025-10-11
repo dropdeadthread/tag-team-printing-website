@@ -107,6 +107,13 @@ export default async function handler(req, res) {
             swatchImg: product.colorSwatchImage
               ? `https://www.ssactivewear.com/${product.colorSwatchImage.replace('_fm', '_fs')}`
               : null,
+            // NEW: Add S&S color-specific image fields for real color images!
+            colorFrontImage: product.colorFrontImage || null,
+            colorSideImage: product.colorSideImage || null,
+            colorBackImage: product.colorBackImage || null,
+            colorOnModelFrontImage: product.colorOnModelFrontImage || null,
+            colorOnModelSideImage: product.colorOnModelSideImage || null,
+            colorOnModelBackImage: product.colorOnModelBackImage || null,
           };
         }
       });

@@ -20,59 +20,58 @@ module.exports = async (req, res) => {
     const { category, limit = 20, page = 1 } = req.query;
 
     console.log(`list-products API called with query:`, req.query);
+    // Force reload
 
     if (!category) {
       return res.status(400).json({ error: 'Category parameter is required' });
     }
 
-    // Try to read from the public data file URL (works in both dev and production)
     let data;
-    try {
-      // In production, fetch from the public URL
-      const dataUrl =
-        process.env.NODE_ENV === 'production'
-          ? 'https://tagteamprints.com/data/all_styles_raw.json'
-          : 'http://localhost:8000/data/all_styles_raw.json';
+    const dataUrl = 'http://localhost:8000/data/all_styles_raw.json';
 
-      console.log(`Fetching data from: ${dataUrl}`);
-
-      // Use global fetch if available (Node 18+) or import node-fetch
-      let fetchFn = globalThis.fetch;
-      if (!fetchFn) {
-        const nodeFetch = await import('node-fetch');
-        fetchFn = nodeFetch.default;
-      }
-
-      const response = await fetchFn(dataUrl);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch data: ${response.status}`);
-      }
-
-      data = await response.json();
-    } catch (fetchError) {
-      console.error(
-        'Failed to fetch from URL, trying local file system:',
-        fetchError,
-      );
-
-      // Fallback: try to read from local file system (development only)
-      if (process.env.NODE_ENV !== 'production') {
-        const fs = require('fs');
-        const path = require('path');
-        const dataPath = path.join(
-          process.cwd(),
-          'data',
-          'all_styles_raw.json',
-        );
+    // For development, read directly from file system to avoid Gatsby static file serving issues
+    if (process.env.NODE_ENV !== 'production') {
+      const fs = require('fs');
+      const path = require('path');
+      const dataPath = path.join(process.cwd(), 'data', 'all_styles_raw.json');
+      console.log(`Reading from local file: ${dataPath}`);
+      try {
         const rawData = fs.readFileSync(dataPath, 'utf8');
+        console.log(`Raw data length: ${rawData.length}`);
         data = JSON.parse(rawData);
-      } else {
+        console.log(
+          `Parsed data type: ${typeof data}, is array: ${Array.isArray(data)}`,
+        );
+      } catch (fileError) {
+        console.error('Error reading/parsing local file:', fileError);
+        throw fileError;
+      }
+    } else {
+      // For production, try to fetch data from the URL
+      try {
+        console.log(`Fetching data from: ${dataUrl}`);
+        const response = await fetch(dataUrl);
+        if (response.ok) {
+          data = await response.json();
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (fetchError) {
+        console.error('Failed to fetch from URL:', fetchError);
         throw new Error('Unable to load product data in production');
       }
     }
 
-    console.log(`Loaded ${data.length} total styles from local file`);
+    console.log(
+      `Loaded ${data?.length || 'undefined'} total styles from local file`,
+    );
+
+    // Ensure data is an array before filtering
+    if (!Array.isArray(data)) {
+      throw new Error(
+        `Expected array, got ${typeof data}. Data: ${JSON.stringify(data?.slice?.(0, 2) || data)}`,
+      );
+    }
 
     // Filter by selected brands, exclude unwanted brands, and exclude noeRetailing products
     const brandFiltered = data.filter(
