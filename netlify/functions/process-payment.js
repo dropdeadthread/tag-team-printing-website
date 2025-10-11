@@ -26,7 +26,7 @@ exports.handler = async function (event, context) {
     // Parse request body safely
     const body =
       typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-    const { token, amount, currency = 'USD', locationId } = body;
+    const { token, amount, currency = 'CAD', locationId } = body; // FIXED: Default to CAD for Canadian business
 
     // Validate required fields
     if (!token) {

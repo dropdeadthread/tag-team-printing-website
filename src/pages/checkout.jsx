@@ -1,5 +1,5 @@
-// src/pages/checkout.jsx - FIXED
-import React, { useEffect, useState, useContext } from 'react';
+// src/pages/checkout.jsx - FIXED: Added inventory validation + React import fix
+import { useEffect, useState, useContext } from 'react';
 import { loadSquareSdk } from '../utils/loadSquareSdk';
 import { CartContext } from '../context/CartContext';
 import '../styles/checkout.css';
@@ -43,6 +43,35 @@ const CheckoutPage = () => {
     try {
       setStatus('Processing...');
 
+      // NEW: Step 1 - Validate inventory before processing payment
+      setStatus('Validating inventory...');
+      for (const item of cartItems) {
+        try {
+          const inventoryResponse = await fetch(
+            `/.netlify/functions/get-inventory?styleID=${item.styleID}&color=${encodeURIComponent(item.color)}`,
+          );
+
+          if (inventoryResponse.ok) {
+            const inventory = await inventoryResponse.json();
+            const sizeInventory = inventory.sizes && inventory.sizes[item.size];
+
+            if (!sizeInventory || sizeInventory.available < item.quantity) {
+              setStatus(
+                `Sorry, ${item.name} in ${item.color} size ${item.size} is ${sizeInventory ? 'low in stock' : 'out of stock'}. Available: ${sizeInventory?.available || 0}, Requested: ${item.quantity}`,
+              );
+              return;
+            }
+          } else {
+            console.warn(
+              `Could not validate inventory for ${item.name}, proceeding with payment`,
+            );
+          }
+        } catch (inventoryError) {
+          console.warn('Inventory validation failed:', inventoryError);
+          // Continue with payment if inventory check fails to avoid blocking valid orders
+        }
+      }
+
       // Calculate total in cents
       const totalAmount = cartItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
@@ -50,25 +79,25 @@ const CheckoutPage = () => {
       );
       const amountInCents = Math.round(totalAmount * 100);
 
-      // Step 1: Tokenize card
+      // Step 2: Tokenize card
       const result = await card.tokenize();
 
       if (result.status === 'OK') {
-        // Step 2: Process payment with Square
+        // Step 3: Process payment with Square
         const response = await fetch('/.netlify/functions/process-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             token: result.token,
             amount: amountInCents,
-            currency: 'USD',
+            currency: 'CAD', // FIXED: Use CAD to match Canadian business and create-checkout.js
           }),
         });
 
         const paymentResult = await response.json();
 
         if (paymentResult.success) {
-          // Step 3: Send order to Control Hub
+          // Step 4: Send order to Control Hub
           try {
             const orderResponse = await fetch(
               '/.netlify/functions/streamlined-order',
