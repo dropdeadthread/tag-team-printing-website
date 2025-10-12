@@ -7,7 +7,65 @@
 - **Framework**: Gatsby.js v5.14.5 (React-based static site generator)
 - **Deployment**: Netlify with build commands
 - **Environment**: Node.js with PowerShell terminal
-- **Workspace Path**: `C:\Users\Stacey\Documents\tag team printing website\tag team printing website`
+- **Workspace Path**: `C:\Users\Stacey\Documents\tag team prin---
+
+## 🎯 OCTOBER 2025 API FIXES COMPLETED
+
+### ✅ Issue #1: Cart Data Format Consistency - FIXED
+
+**Problem**: Inconsistent field names across cart system (StyleID vs styleID, Price vs price, Quantity vs quantity)
+**Solution**: Standardized all cart data to lowercase format in CartContext.js
+
+- **Files Updated**: `src/context/CartContext.js`, `src/pages/cart.jsx`
+- **New Standard**: `{styleID, name, price, quantity, size, color, image, brand}`
+- **Benefits**: Eliminates data transformation errors, consistent cart/checkout flow
+
+### ✅ Issue #2: Static Product Data - FIXED
+
+**Problem**: Product listing used cached JSON instead of real-time S&S API
+**Solution**: Enhanced list-products.js and search-products.js with live S&S API integration
+
+- **Files Updated**: `netlify/functions/list-products.js`, `src/api/search-products.js`
+- **New Behavior**: Uses live S&S `/v2/styles/` API when credentials available, intelligent fallback to cached data
+- **Benefits**: Always shows current product catalog, includes new S&S products immediately
+
+### ✅ Issue #3: Missing Inventory Validation - FIXED
+
+**Problem**: Checkout allowed purchasing out-of-stock items
+**Solution**: Added real-time inventory validation before payment processing
+
+- **Files Updated**: `src/pages/checkout.jsx`
+- **New Process**: Validates each cart item against S&S inventory API before Square payment
+- **Benefits**: Prevents selling out-of-stock items, better customer experience
+
+### ✅ Issue #4: Currency Inconsistencies - FIXED
+
+**Problem**: Mixed USD/CAD usage across Square integration  
+**Solution**: Standardized all payments to CAD (Canadian business)
+
+- **Files Updated**: `src/pages/checkout.jsx`, `netlify/functions/process-payment.js`
+- **Change**: checkout.jsx now sends CAD, process-payment.js defaults to CAD
+- **Benefits**: Consistent pricing, matches Canadian business location
+
+### 📊 IMPACT SUMMARY
+
+- **4 Critical Issues Resolved**
+- **6 Files Enhanced**
+- **Real-time Data Integration**: Products and inventory now use live S&S API
+- **Improved Reliability**: Inventory validation prevents overselling
+- **Better User Experience**: Consistent data format and currency handling
+- **Future-Proof**: Smart fallbacks ensure system resilience
+
+### 🔄 ONGOING OPTIMIZATION OPPORTUNITIES
+
+1. **Database cart storage** - Replace file-based cart system
+2. **API call consolidation** - Reduce multiple S&S API requests
+3. **Caching layer** - Add Redis for S&S API response caching
+4. **Real-time webhooks** - S&S inventory updates via webhooks
+
+---
+
+*This document should be updated every time we discover something new about the system architecture, API behavior, or build process.*g website\tag team printing website`
 
 ### Build Commands
 
