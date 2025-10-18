@@ -55,7 +55,8 @@
     "react-slick": "^0.30.3",
     "square": "^43.0.0",
     "styled-components": "^6.1.19",
-    "webpack": "^5.99.9"
+    "webpack": "^5.99.9",
+    "husky": "^9.1.7"
   },
   "devDependencies": {
     "@babel/core": "^7.27.4",
@@ -68,7 +69,6 @@
     "ajv-keywords": "^5.1.0",
     "babel-jest": "^30.0.2",
     "eslint": "^7.32.0",
-    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
