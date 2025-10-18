@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
-import Layout from '../components/Layout';
 import { CartContext } from '../context/CartContext';
-import IntegratedPrintOrderForm from '../components/IntegratedPrintOrderForm';
+import Layout from '../components/Layout';
 
 // Simple working product template that loads data directly
 const SimpleProductPageTemplate = ({ pageContext }) => {
@@ -44,9 +43,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           (p) => p.styleName === pageContext.styleCode,
         );
 
-        console.log('Looking for styleCode:', pageContext.styleCode);
-        console.log('Found product:', foundProduct);
-        console.log('Total products loaded:', allProducts.length);
+        // Product lookup completed
 
         setProduct(foundProduct);
 
@@ -386,10 +383,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
 
-    // Show success message
-    alert(
-      `Added ${quantity} x ${product.title} (${selectedSize}${selectedColor ? `, ${selectedColor.name}` : ''}) to cart!`,
-    );
+    // Item added to cart - no popup needed, floating cart button will show the count
   };
 
   const handleSizeChange = (size) => {

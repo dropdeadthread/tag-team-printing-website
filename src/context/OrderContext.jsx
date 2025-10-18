@@ -17,22 +17,11 @@ export const OrderProvider = ({ children }) => {
   const [selectedGarment, setSelectedGarment] = useState('gildan5000');
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
-  // Debug logging for file changes
   const setUploadedFilesWithLogging = (files) => {
-    console.log('🔄 OrderContext: setUploadedFiles called with:', files);
-    console.log('🔄 OrderContext: files detail:', files.map(f => ({
-      name: f.name, 
-      hasPreview: !!f.preview,
-      previewStartsWith: f.preview ? f.preview.substring(0, 30) : 'no preview',
-      id: f.id
-    })));
-    console.log('🔄 Stack trace for uploadedFiles update:', new Error().stack);
     setUploadedFiles(files);
   };
 
-  // Debug logging for artwork selection
   const setSelectedArtworkWithLogging = (artworkUrl) => {
-    console.log('🎨 OrderContext: selectedArtwork changed to:', artworkUrl ? `URL (${artworkUrl.substring(0, 50)}...)` : 'null');
     setSelectedArtwork(artworkUrl);
   };
 
@@ -50,8 +39,6 @@ export const OrderProvider = ({ children }) => {
   };
 
   return (
-    <OrderContext.Provider value={value}>
-      {children}
-    </OrderContext.Provider>
+    <OrderContext.Provider value={value}>{children}</OrderContext.Provider>
   );
 };

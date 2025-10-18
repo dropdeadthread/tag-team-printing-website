@@ -19,8 +19,10 @@ module.exports = async (req, res) => {
   try {
     const { category, limit = 20, page = 1 } = req.query;
 
-    console.log(`list-products API called with query:`, req.query);
-    // Force reload
+    // Development logging only
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`list-products API called with query:`, req.query);
+    }
 
     if (!category) {
       return res.status(400).json({ error: 'Category parameter is required' });
@@ -34,14 +36,22 @@ module.exports = async (req, res) => {
       const fs = require('fs');
       const path = require('path');
       const dataPath = path.join(process.cwd(), 'data', 'all_styles_raw.json');
-      console.log(`Reading from local file: ${dataPath}`);
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Reading from local file: ${dataPath}`);
+      }
+
       try {
         const rawData = fs.readFileSync(dataPath, 'utf8');
-        console.log(`Raw data length: ${rawData.length}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`Raw data length: ${rawData.length}`);
+        }
         data = JSON.parse(rawData);
-        console.log(
-          `Parsed data type: ${typeof data}, is array: ${Array.isArray(data)}`,
-        );
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(
+            `Parsed data type: ${typeof data}, is array: ${Array.isArray(data)}`,
+          );
+        }
       } catch (fileError) {
         console.error('Error reading/parsing local file:', fileError);
         throw fileError;
@@ -49,7 +59,9 @@ module.exports = async (req, res) => {
     } else {
       // For production, try to fetch data from the URL
       try {
-        console.log(`Fetching data from: ${dataUrl}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`Fetching data from: ${dataUrl}`);
+        }
         const response = await fetch(dataUrl);
         if (response.ok) {
           data = await response.json();
@@ -62,9 +74,11 @@ module.exports = async (req, res) => {
       }
     }
 
-    console.log(
-      `Loaded ${data?.length || 'undefined'} total styles from local file`,
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        `Loaded ${data?.length || 'undefined'} total styles from local file`,
+      );
+    }
 
     // Ensure data is an array before filtering
     if (!Array.isArray(data)) {
@@ -80,14 +94,17 @@ module.exports = async (req, res) => {
         !EXCLUDED_BRANDS.includes(item.brandName) &&
         item.noeRetailing !== true, // Exclude closeout/discontinued items
     );
-    console.log(`After brand filtering: ${brandFiltered.length} products`);
-    console.log(
-      `Brand distribution:`,
-      brandFiltered.reduce((acc, item) => {
-        acc[item.brandName] = (acc[item.brandName] || 0) + 1;
-        return acc;
-      }, {}),
-    );
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`After brand filtering: ${brandFiltered.length} products`);
+      console.log(
+        `Brand distribution:`,
+        brandFiltered.reduce((acc, item) => {
+          acc[item.brandName] = (acc[item.brandName] || 0) + 1;
+          return acc;
+        }, {}),
+      );
+    }
 
     // Filter by category with improved logic for proper categorization
     const categoryProducts = brandFiltered.filter((item) => {
@@ -309,9 +326,11 @@ module.exports = async (req, res) => {
       return itemCategories.includes(category.toString());
     });
 
-    console.log(
-      `Filtered from ${brandFiltered.length} to ${categoryProducts.length} products for category ${category}`,
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        `Filtered from ${brandFiltered.length} to ${categoryProducts.length} products for category ${category}`,
+      );
+    }
 
     // Sort products by brand name first, then by product name for consistent ordering
     const sortedProducts = categoryProducts.sort((a, b) => {
@@ -344,21 +363,23 @@ module.exports = async (req, res) => {
       baseCategory: item.baseCategory,
     }));
 
-    console.log(`Returning ${products.length} products to frontend`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Returning ${products.length} products to frontend`);
 
-    // Log brand distribution in the returned products
-    const returnedBrands = products.reduce((acc, item) => {
-      acc[item.brand] = (acc[item.brand] || 0) + 1;
-      return acc;
-    }, {});
-    console.log('Returned brand distribution:', returnedBrands);
+      // Log brand distribution in the returned products
+      const returnedBrands = products.reduce((acc, item) => {
+        acc[item.brand] = (acc[item.brand] || 0) + 1;
+        return acc;
+      }, {});
+      console.log('Returned brand distribution:', returnedBrands);
 
-    if (products.length > 0) {
-      console.log('Sample product:', {
-        name: products[0].name,
-        brand: products[0].brand,
-        categories: products[0].categories,
-      });
+      if (products.length > 0) {
+        console.log('Sample product:', {
+          name: products[0].name,
+          brand: products[0].brand,
+          categories: products[0].categories,
+        });
+      }
     }
 
     res.status(200).json({

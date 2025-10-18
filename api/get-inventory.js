@@ -1,5 +1,5 @@
 // Mock inventory API that provides color-specific stock numbers
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
   const { styleID, color } = event.queryStringParameters || {};
 
   if (!styleID) {

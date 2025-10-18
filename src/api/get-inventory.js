@@ -1,6 +1,5 @@
 import {
   calculateRetailPrice,
-  getSizeAdjustedRetailPrice,
   getSizeAdjustedWholesalePrice,
   sortSizesByOrder,
   getQuantityBasedPrice,
@@ -154,15 +153,8 @@ export default async function handler(req, res) {
           sizes: sortedSizes,
           colors: Object.values(colorsMap),
           selectedColor: color || null,
-          totalStock: Object.values(sortedSizes).reduce(
-            (sum, size) => sum + size.available,
-            0,
-          ),
-          lowStock:
-            Object.values(sortedSizes).reduce(
-              (sum, size) => sum + size.available,
-              0,
-            ) < 20,
+          totalStock: totalStock,
+          lowStock: totalStock < 20,
         };
 
         return res.status(200).json(inventory);

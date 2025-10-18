@@ -1,5 +1,5 @@
-// src/context/CartContext.js - FIXED: Standardized cart data format
-import { createContext, useState } from 'react';
+// src/context/CartContext.js - FIXED: Standardized cart data format + localStorage persistence
+import React, { createContext, useState, useEffect } from 'react';
 
 // ✅ Named export for context
 export const CartContext = createContext();
@@ -7,6 +7,27 @@ export const CartContext = createContext();
 // ✅ Named export for provider
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCart = localStorage.getItem('tagteam_cart');
+      if (savedCart) {
+        try {
+          setCartItems(JSON.parse(savedCart));
+        } catch (error) {
+          console.error('Error loading cart from localStorage:', error);
+        }
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage whenever cartItems change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tagteam_cart', JSON.stringify(cartItems));
+    }
+  }, [cartItems]);
 
   const addToCart = (product) => {
     setCartItems((prevItems) => {

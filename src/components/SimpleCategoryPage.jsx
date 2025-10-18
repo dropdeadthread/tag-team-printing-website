@@ -937,10 +937,6 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                     };
 
                     // Always try to load real images first, with graceful fallback
-                    const isLocalDev =
-                      typeof window !== 'undefined' &&
-                      window.location.hostname === 'localhost';
-
                     let imageUrl = getFallbackImage(categoryId); // Default fallback
                     let primaryImageUrl = null;
 

@@ -12,7 +12,7 @@ const client = new Client({
 });
 
 // Netlify Function Handler
-exports.handler = async function (event, context) {
+exports.handler = async function (event) {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {

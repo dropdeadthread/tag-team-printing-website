@@ -17,7 +17,7 @@ const SELECTED_BRANDS = [
 
 const EXCLUDED_BRANDS = ['American Apparel'];
 
-exports.handler = async function (event, context) {
+exports.handler = async function (event) {
   try {
     const {
       category,

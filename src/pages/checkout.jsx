@@ -1,7 +1,8 @@
 // src/pages/checkout.jsx - FIXED: Added inventory validation + React import fix
-import { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { loadSquareSdk } from '../utils/loadSquareSdk';
 import { CartContext } from '../context/CartContext';
+import Layout from '../components/Layout';
 import '../styles/checkout.css';
 
 const CheckoutPage = () => {
@@ -159,109 +160,109 @@ const CheckoutPage = () => {
   );
 
   return (
-    <div
-      className="checkout-container"
-      style={{ fontFamily: 'var(--font-luchita-rueda)' }}
-    >
-      <div className="checkout-box">
-        <h1>Checkout</h1>
-
-        {/* Cart Summary */}
-        <div
-          style={{
-            marginBottom: '2rem',
-            padding: '1rem',
-            background: '#f5f5f5',
-            borderRadius: '8px',
-          }}
-        >
-          <h3>Order Summary</h3>
-          {cartItems.map((item, index) => (
-            <div
-              key={index}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '0.5rem',
-              }}
-            >
-              <span>
-                {item.name} x {item.quantity}
-              </span>
-              <span>${(item.price * item.quantity).toFixed(2)}</span>
+    <Layout>
+      <div className="checkout-container">
+        <div className="checkout-content">
+          {/* Order Summary Section */}
+          <div className="checkout-summary-section">
+            <h2>Order Summary</h2>
+            <div className="order-summary">
+              {cartItems.map((item, index) => (
+                <div key={index} className="summary-item">
+                  <span>
+                    {item.name} x {item.quantity}
+                  </span>
+                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="summary-item">
+                <span>Total</span>
+                <span>${cartTotal.toFixed(2)}</span>
+              </div>
             </div>
-          ))}
-          <hr />
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontWeight: 'bold',
-              fontSize: '1.2rem',
-            }}
-          >
-            <span>Total:</span>
-            <span>${cartTotal.toFixed(2)}</span>
+          </div>
+
+          {/* Payment Form Section */}
+          <div className="checkout-form-section">
+            <h1>Payment & Shipping</h1>
+
+            <form onSubmit={handlePayment}>
+              <div className="form-group">
+                <label htmlFor="name">Full Name *</label>
+                <input
+                  id="name"
+                  name="name"
+                  value={fields.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">Email Address *</label>
+                <input
+                  id="email"
+                  name="email"
+                  value={fields.email}
+                  onChange={handleChange}
+                  type="email"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="phone">Phone Number</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  value={fields.phone}
+                  onChange={handleChange}
+                  type="tel"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="address">Shipping Address *</label>
+                <input
+                  id="address"
+                  name="address"
+                  value={fields.address}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Payment Information *</label>
+                <div id="card-container"></div>
+              </div>
+
+              <button
+                className="checkout-button"
+                type="submit"
+                disabled={!card || status.includes('Processing')}
+              >
+                {status.includes('Processing')
+                  ? 'Processing Payment...'
+                  : `Complete Order - $${cartTotal.toFixed(2)}`}
+              </button>
+            </form>
+
+            {status && (
+              <div
+                className={`payment-status ${
+                  status.includes('Failed') || status.includes('Error')
+                    ? 'error'
+                    : 'success'
+                }`}
+              >
+                {status}
+              </div>
+            )}
           </div>
         </div>
-
-        <form onSubmit={handlePayment}>
-          <input
-            name="name"
-            value={fields.name}
-            onChange={handleChange}
-            placeholder="Full Name"
-            required
-          />
-          <input
-            name="email"
-            value={fields.email}
-            onChange={handleChange}
-            placeholder="Email"
-            type="email"
-            required
-          />
-          <input
-            name="phone"
-            value={fields.phone}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            type="tel"
-          />
-          <input
-            name="address"
-            value={fields.address}
-            onChange={handleChange}
-            placeholder="Shipping Address"
-            required
-          />
-
-          <div id="card-container" style={{ marginBottom: '1rem' }}></div>
-
-          <button
-            className="checkout-button"
-            type="submit"
-            disabled={!card || status.includes('Processing')}
-          >
-            {status.includes('Processing')
-              ? 'Processing...'
-              : `Pay $${cartTotal.toFixed(2)}`}
-          </button>
-        </form>
-
-        {status && (
-          <div
-            className={`payment-status ${
-              status.includes('Failed') || status.includes('Error')
-                ? 'error'
-                : 'success'
-            }`}
-          >
-            {status}
-          </div>
-        )}
       </div>
-    </div>
+    </Layout>
   );
 };
 

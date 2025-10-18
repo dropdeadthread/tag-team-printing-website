@@ -1,35 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Layout from '../components/Layout';
-import { CartContext } from '../context/CartContext';
+import React, { useContext } from 'react';
 import { Link } from 'gatsby';
+import { CartContext } from '../context/CartContext';
+import Layout from '../components/Layout';
 import '../styles/cart.css';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateCartItemQuantity } =
     useContext(CartContext);
-  const [products, setProducts] = useState([]);
 
-  useEffect(() => {
-    fetch('/.netlify/functions/list-products')
-      .then((res) => res.json())
-      .then((data) => {
-        // Handle both array format (legacy) and object format (Netlify function)
-        const productsArray = Array.isArray(data) ? data : data.products || [];
-        setProducts(productsArray);
-      });
-  }, []);
-
-  // Merge cart items with product details - FIXED: Use standardized field names
-  const mergedCart = cartItems.map((item) => {
-    const product = products.find(
-      (p) => String(p.styleID) === String(item.styleID),
-    );
-    return {
-      ...item,
-      // Cart items now use standardized lowercase format, no need to merge different field names
-      quantity: item.quantity || 1,
-    };
-  });
+  // Cart items use standardized format - no need to merge with product data
+  const mergedCart = cartItems.map((item) => ({
+    ...item,
+    quantity: item.quantity || 1,
+  }));
 
   const handleQuantityChange = (index, delta) => {
     const item = cartItems[index];
@@ -45,55 +28,70 @@ const CartPage = () => {
   return (
     <Layout>
       <div className="cart-container">
-        <h1 className="cart-title">Your Cart</h1>
+        <div className="cart-content">
+          <h1 className="cart-title">Your Cart</h1>
 
-        {mergedCart.length === 0 ? (
-          <p className="empty-cart-message">Your cart is empty.</p>
-        ) : (
-          <>
-            <div className="cart-items-list">
-              {mergedCart.map((item, idx) => (
-                <div className="cart-item" key={item.styleID || idx}>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="cart-thumbnail"
-                  />
-                  <div className="cart-info">
-                    <h3>{item.name}</h3>
-                    <p>Brand: {item.brand}</p>
-                    <p>Size: {item.size}</p>
-                    <p>Color: {item.color}</p>
-                    <div className="cart-qty-controls">
-                      <button onClick={() => handleQuantityChange(idx, -1)}>
-                        -
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button onClick={() => handleQuantityChange(idx, 1)}>
-                        +
-                      </button>
+          {mergedCart.length === 0 ? (
+            <p className="empty-cart-message">Your cart is empty.</p>
+          ) : (
+            <>
+              <div className="cart-items-list">
+                {mergedCart.map((item, idx) => (
+                  <div className="cart-item" key={item.styleID || idx}>
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="cart-thumbnail"
+                    />
+                    <div className="cart-info">
+                      <h3>{item.name}</h3>
+                      <p>Brand: {item.brand}</p>
+                      <p>Size: {item.size}</p>
+                      <p>Color: {item.color}</p>
+                      <div className="cart-qty-controls">
+                        <button onClick={() => handleQuantityChange(idx, -1)}>
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button onClick={() => handleQuantityChange(idx, 1)}>
+                          +
+                        </button>
+                      </div>
+                      <p>${(item.price * item.quantity).toFixed(2)}</p>
                     </div>
-                    <p>${(item.price * item.quantity).toFixed(2)}</p>
+                    <button
+                      className="remove-button"
+                      onClick={() => removeFromCart(idx)}
+                    >
+                      Remove
+                    </button>
                   </div>
-                  <button
-                    className="remove-button"
-                    onClick={() => removeFromCart(idx)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="cart-summary">
-              <h2>Total: ${total.toFixed(2)}</h2>
-              <Link to="/checkout" className="checkout-button">
-                Proceed to Checkout
-              </Link>
-            </div>
-          </>
-        )}
-        <p>This page is under construction.</p>
+              <div className="cart-summary">
+                <div className="total">Total: ${total.toFixed(2)}</div>
+                <div className="checkout-options">
+                  <p
+                    style={{
+                      fontSize: '1.1rem',
+                      marginBottom: '1.5rem',
+                      color: '#fff5d1',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Ready to checkout? Use the floating cart button in the
+                    bottom right for our secure Square checkout, or continue
+                    with our custom form below.
+                  </p>
+                  <Link to="/checkout" className="checkout-button secondary">
+                    Continue with Custom Form
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </Layout>
   );

@@ -1,6 +1,15 @@
-require("dotenv").config({
-  path: `.env.${process.env.NODE_ENV}`,
+// Load environment variables with fallback strategy
+require('dotenv').config({
+  path: `.env.${process.env.NODE_ENV || 'development'}`,
 });
+
+// Fallback to .env.development if NODE_ENV specific file doesn't exist
+require('dotenv').config({
+  path: `.env.development`,
+});
+
+// And general .env as final fallback
+require('dotenv').config();
 
 module.exports = {
   plugins: [
@@ -39,7 +48,7 @@ module.exports = {
         pageTransitionDelay: 0,
         sampleRate: 5,
         siteSpeedSampleRate: 10,
-        cookieDomain: "tagteamprints.com",
+        cookieDomain: 'tagteamprints.com',
       },
     },
   ],

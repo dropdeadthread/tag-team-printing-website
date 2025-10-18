@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from '@reach/router';
+import { useEffect, useState } from 'react';
+import { useParams } from '@reach/router';
 import Layout from './Layout';
 import categoryIdSlugMap from '../helpers/categoryIdSlugMap';
 import { getProductImageUrl } from '../helpers/imageHelpers';
@@ -38,7 +38,7 @@ const CategoryPage = ({
         return res.json();
       })
       .then((data) => {
-        console.log('Products received:', data); // DEBUG: Check what products we got
+        // Products loaded successfully
         // Handle both array format (legacy) and object format (Netlify function)
         const productsArray = Array.isArray(data) ? data : data.products || [];
         setProducts(productsArray);
@@ -85,13 +85,7 @@ const CategoryPage = ({
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-+|-+$/g, '');
 
-              // DEBUG: Log what we're linking to
-              console.log('Creating link for:', {
-                name,
-                styleID,
-                styleName,
-                slug,
-              });
+              // Creating product link
 
               return (
                 <li
