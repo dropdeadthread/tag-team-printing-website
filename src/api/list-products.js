@@ -15,77 +15,59 @@ const SELECTED_BRANDS = [
 
 const EXCLUDED_BRANDS = ['American Apparel'];
 
+const fetch = require('node-fetch');
+
 module.exports = async (req, res) => {
   try {
     const { category, limit = 20, page = 1 } = req.query;
 
-    // Development logging only
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`list-products API called with query:`, req.query);
-    }
+    console.log(`list-products API called with query:`, req.query);
 
     if (!category) {
       return res.status(400).json({ error: 'Category parameter is required' });
     }
 
+    // Try to read from the public data file URL (works in both dev and production)
     let data;
-    const dataUrl = 'http://localhost:8000/data/all_styles_raw.json';
+    try {
+      // In production, fetch from the public URL
+      const dataUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://tagteamprints.com/data/all_styles_raw.json'
+          : 'http://localhost:8000/data/all_styles_raw.json';
 
-    // For development, read directly from file system to avoid Gatsby static file serving issues
-    if (process.env.NODE_ENV !== 'production') {
-      const fs = require('fs');
-      const path = require('path');
-      const dataPath = path.join(process.cwd(), 'data', 'all_styles_raw.json');
+      console.log(`Fetching data from: ${dataUrl}`);
 
+      const response = await fetch(dataUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data: ${response.status}`);
+      }
+
+      data = await response.json();
+    } catch (fetchError) {
+      console.error(
+        'Failed to fetch from URL, trying local file system:',
+        fetchError,
+      );
+
+      // Fallback: try to read from local file system (development only)
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`Reading from local file: ${dataPath}`);
-      }
-
-      try {
+        const fs = require('fs');
+        const path = require('path');
+        const dataPath = path.join(
+          process.cwd(),
+          'data',
+          'all_styles_raw.json',
+        );
         const rawData = fs.readFileSync(dataPath, 'utf8');
-        if (process.env.NODE_ENV !== 'production') {
-          console.log(`Raw data length: ${rawData.length}`);
-        }
         data = JSON.parse(rawData);
-        if (process.env.NODE_ENV !== 'production') {
-          console.log(
-            `Parsed data type: ${typeof data}, is array: ${Array.isArray(data)}`,
-          );
-        }
-      } catch (fileError) {
-        console.error('Error reading/parsing local file:', fileError);
-        throw fileError;
-      }
-    } else {
-      // For production, try to fetch data from the URL
-      try {
-        if (process.env.NODE_ENV !== 'production') {
-          console.log(`Fetching data from: ${dataUrl}`);
-        }
-        const response = await fetch(dataUrl);
-        if (response.ok) {
-          data = await response.json();
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-      } catch (fetchError) {
-        console.error('Failed to fetch from URL:', fetchError);
+      } else {
         throw new Error('Unable to load product data in production');
       }
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(
-        `Loaded ${data?.length || 'undefined'} total styles from local file`,
-      );
-    }
-
-    // Ensure data is an array before filtering
-    if (!Array.isArray(data)) {
-      throw new Error(
-        `Expected array, got ${typeof data}. Data: ${JSON.stringify(data?.slice?.(0, 2) || data)}`,
-      );
-    }
+    console.log(`Loaded ${data.length} total styles from local file`);
 
     // Filter by selected brands, exclude unwanted brands, and exclude noeRetailing products
     const brandFiltered = data.filter(
@@ -94,17 +76,14 @@ module.exports = async (req, res) => {
         !EXCLUDED_BRANDS.includes(item.brandName) &&
         item.noeRetailing !== true, // Exclude closeout/discontinued items
     );
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`After brand filtering: ${brandFiltered.length} products`);
-      console.log(
-        `Brand distribution:`,
-        brandFiltered.reduce((acc, item) => {
-          acc[item.brandName] = (acc[item.brandName] || 0) + 1;
-          return acc;
-        }, {}),
-      );
-    }
+    console.log(`After brand filtering: ${brandFiltered.length} products`);
+    console.log(
+      `Brand distribution:`,
+      brandFiltered.reduce((acc, item) => {
+        acc[item.brandName] = (acc[item.brandName] || 0) + 1;
+        return acc;
+      }, {}),
+    );
 
     // Filter by category with improved logic for proper categorization
     const categoryProducts = brandFiltered.filter((item) => {
@@ -263,6 +242,25 @@ module.exports = async (req, res) => {
         );
       }
 
+      // For crewnecks category (400), include fleece crewnecks and sweatshirts
+      if (category.toString() === '400') {
+        return (
+          itemCategories.includes('9') ||
+          (item.baseCategory &&
+            (item.baseCategory.includes('Fleece - Premium - Crew') ||
+              item.baseCategory.includes('Fleece - Core - Crew'))) ||
+          (item.title &&
+            (item.title.toLowerCase().includes('sweatshirt') ||
+              item.title.toLowerCase().includes('crewneck')) &&
+            // Exclude hooded items (those go in hoodies category)
+            !item.title.toLowerCase().includes('hoodie') &&
+            !item.title.toLowerCase().includes('hooded') &&
+            // Exclude tank tops
+            !item.title.toLowerCase().includes('tank') &&
+            !itemCategories.includes('64'))
+        );
+      }
+
       // For hoodies category (22 or 36), include ONLY fleece hooded sweatshirts, NOT hooded t-shirts
       if (category.toString() === '22' || category.toString() === '36') {
         return (
@@ -326,11 +324,9 @@ module.exports = async (req, res) => {
       return itemCategories.includes(category.toString());
     });
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(
-        `Filtered from ${brandFiltered.length} to ${categoryProducts.length} products for category ${category}`,
-      );
-    }
+    console.log(
+      `Filtered from ${brandFiltered.length} to ${categoryProducts.length} products for category ${category}`,
+    );
 
     // Sort products by brand name first, then by product name for consistent ordering
     const sortedProducts = categoryProducts.sort((a, b) => {
@@ -363,23 +359,21 @@ module.exports = async (req, res) => {
       baseCategory: item.baseCategory,
     }));
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Returning ${products.length} products to frontend`);
+    console.log(`Returning ${products.length} products to frontend`);
 
-      // Log brand distribution in the returned products
-      const returnedBrands = products.reduce((acc, item) => {
-        acc[item.brand] = (acc[item.brand] || 0) + 1;
-        return acc;
-      }, {});
-      console.log('Returned brand distribution:', returnedBrands);
+    // Log brand distribution in the returned products
+    const returnedBrands = products.reduce((acc, item) => {
+      acc[item.brand] = (acc[item.brand] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('Returned brand distribution:', returnedBrands);
 
-      if (products.length > 0) {
-        console.log('Sample product:', {
-          name: products[0].name,
-          brand: products[0].brand,
-          categories: products[0].categories,
-        });
-      }
+    if (products.length > 0) {
+      console.log('Sample product:', {
+        name: products[0].name,
+        brand: products[0].brand,
+        categories: products[0].categories,
+      });
     }
 
     res.status(200).json({

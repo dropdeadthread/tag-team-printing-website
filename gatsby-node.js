@@ -1,9 +1,5 @@
 const path = require('path');
-
-// Dynamic import for node-fetch v3+ (ESM-only)
-const fetch = (...args) =>
-  import('node-fetch').then((mod) => mod.default(...args));
-
+const fetch = require('node-fetch');
 exports.sourceNodes = async ({
   actions,
   createNodeId,
@@ -32,8 +28,9 @@ exports.sourceNodes = async ({
   console.log(
     '🔍 Debug - Basic Auth:',
     basicAuth ? basicAuth.substring(0, 20) + '...' : 'NOT CREATED',
-  ); // Validate environment variables
+  );
 
+  // Validate environment variables
   if (!username || !password) {
     console.warn(
       'Missing S&S API credentials. Using local fallback data from data/all_styles_raw.json',
@@ -109,6 +106,8 @@ exports.sourceNodes = async ({
       headers: {
         Accept: 'application/json',
         Authorization: `Basic ${basicAuth}`,
+        'User-Agent': 'TagTeamPrinting/1.0',
+        'Content-Type': 'application/json',
       },
     });
 
@@ -116,6 +115,16 @@ exports.sourceNodes = async ({
     console.log('- Response status:', response.status);
     console.log('- Response statusText:', response.statusText);
     console.log('- Response headers:', Object.fromEntries(response.headers));
+
+    // Check response status before parsing
+    if (!response.ok) {
+      console.error(`S&S API error: ${response.status} ${response.statusText}`);
+      console.error(
+        'Response headers:',
+        Object.fromEntries(response.headers.entries()),
+      );
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
     const data = await response.json();
     console.log('- Response data type:', typeof data);
