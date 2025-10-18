@@ -15,6 +15,8 @@ const SELECTED_BRANDS = [
 
 const EXCLUDED_BRANDS = ['American Apparel'];
 
+const fetch = require('node-fetch');
+
 module.exports = async (req, res) => {
   try {
     const { category, limit = 20, page = 1 } = req.query;
@@ -36,14 +38,7 @@ module.exports = async (req, res) => {
 
       console.log(`Fetching data from: ${dataUrl}`);
 
-      // Use global fetch if available (Node 18+) or import node-fetch
-      let fetchFn = globalThis.fetch;
-      if (!fetchFn) {
-        const nodeFetch = await import('node-fetch');
-        fetchFn = nodeFetch.default;
-      }
-
-      const response = await fetchFn(dataUrl);
+      const response = await fetch(dataUrl);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch data: ${response.status}`);
