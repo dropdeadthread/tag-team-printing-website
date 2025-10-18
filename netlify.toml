@@ -5,6 +5,8 @@
 
   [build.environment]
     NODE_VERSION = "18"
+    # Configure secrets scanning to ignore documentation files
+    SECRETS_SCAN_OMIT_PATHS = "*.md,docs/**,README*,**/README*"
 
 [[redirects]]
   from = "/ss-images/*"

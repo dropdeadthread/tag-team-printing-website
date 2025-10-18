@@ -11,12 +11,20 @@ export function useSpecs(styleNumber) {
   useEffect(() => {
     async function fetchSpecs() {
       try {
-        const username = '419372';
-        const apiKey = '5d49715b-56f6-433b-9b45-380862878174';
+        // Use environment variables for credentials
+        const username =
+          process.env.GATSBY_SNS_API_USERNAME || process.env.SNS_API_USERNAME;
+        const apiKey =
+          process.env.GATSBY_SNS_API_KEY || process.env.SNS_API_KEY;
+
+        if (!username || !apiKey) {
+          throw new Error('SNS API credentials not configured');
+        }
+
         const authHeader = 'Basic ' + btoa(`${username}:${apiKey}`);
 
         const response = await fetch(`${BASE_URL}/specs/${styleNumber}`, {
-          headers: { Authorization: authHeader }
+          headers: { Authorization: authHeader },
         });
 
         if (!response.ok) {
