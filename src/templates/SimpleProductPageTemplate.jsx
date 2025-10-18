@@ -258,18 +258,31 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
   // REMOVED: Old color mapping - now using real S&S API color image data
 
+  // FIXED: Helper function to generate image URLs based on environment
+  // Uses process.env.NODE_ENV which works during both build-time (SSR) and run-time
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+
+    // Check if we're in development using environment variable
+    // This works during both build-time (SSR) and run-time
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
+    if (isDevelopment) {
+      // Development: Access S&S images directly (no CORS issues on localhost)
+      return `https://www.ssactivewear.com/${imagePath}`;
+    } else {
+      // Production: Proxy through Netlify function
+      return `/ss-images/${imagePath}`;
+    }
+  };
+
   // Get color-aware product image using S&S API color images
   const getProductImageUrl = (product, selectedColor) => {
     if (!product?.styleID) return getProductFallbackImage(product);
 
-    // NEW: Use S&S API color-specific images if available
+    // Use S&S API color-specific images if available
     if (selectedColor && selectedColor.colorFrontImage) {
-      const colorImageUrl =
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-          ? `https://www.ssactivewear.com/${selectedColor.colorFrontImage}`
-          : `/ss-images/${selectedColor.colorFrontImage}`;
-
+      const colorImageUrl = getImageUrl(selectedColor.colorFrontImage);
       console.log(
         `Using S&S color front image for ${selectedColor.name}:`,
         colorImageUrl,
@@ -277,14 +290,9 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       return colorImageUrl;
     }
 
-    // NEW: Alternative - use colorSideImage if colorFrontImage not available
+    // Alternative - use colorSideImage if colorFrontImage not available
     if (selectedColor && selectedColor.colorSideImage) {
-      const colorImageUrl =
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-          ? `https://www.ssactivewear.com/${selectedColor.colorSideImage}`
-          : `/ss-images/${selectedColor.colorSideImage}`;
-
+      const colorImageUrl = getImageUrl(selectedColor.colorSideImage);
       console.log(
         `Using S&S color side image for ${selectedColor.name}:`,
         colorImageUrl,
@@ -294,48 +302,35 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
     // Fallback to main product image if no color-specific S&S image
     if (product.styleImage) {
-      const mainImageUrl =
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-          ? `https://www.ssactivewear.com/${product.styleImage}`
-          : `/ss-images/${product.styleImage}`;
-
+      const mainImageUrl = getImageUrl(product.styleImage);
       console.log('Using main product image:', mainImageUrl);
       return mainImageUrl;
     }
 
     // Final fallback to constructed URL using styleID
     const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
-    const fallbackImageUrl =
-      typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? `https://www.ssactivewear.com/${imagePath}`
-        : `/ss-images/${imagePath}`;
-
+    const fallbackImageUrl = getImageUrl(imagePath);
     console.log('Using constructed fallback image:', fallbackImageUrl);
     return fallbackImageUrl || getProductFallbackImage(product);
   };
 
   const imageUrl = getProductImageUrl(product, selectedColor);
 
-  // Handle image loading errors and provide fallback
+  // FIXED: Handle image loading errors and provide fallback
   const handleImageError = (event) => {
     console.log(
       'Color-specific image not found, falling back to main product image',
     );
 
-    // Try main product image first
-    if (
-      product?.styleImage &&
-      event.target.src !== `https://www.ssactivewear.com/${product.styleImage}`
-    ) {
-      const mainImageUrl =
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-          ? `https://www.ssactivewear.com/${product.styleImage}`
-          : `/ss-images/${product.styleImage}`;
+    // Try main product image first using our helper function
+    if (product?.styleImage) {
+      const mainImageUrl = getImageUrl(product.styleImage);
 
-      event.target.src = mainImageUrl;
-      return;
+      // Don't try the same URL twice
+      if (event.target.src !== mainImageUrl) {
+        event.target.src = mainImageUrl;
+        return;
+      }
     }
 
     // Ultimate fallback based on product type
