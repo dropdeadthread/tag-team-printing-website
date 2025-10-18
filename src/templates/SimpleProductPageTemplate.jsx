@@ -261,30 +261,48 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   // FIXED: Helper function to generate image URLs based on environment
   // Uses process.env.NODE_ENV which works during both build-time (SSR) and run-time
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
+    if (!imagePath) {
+      console.log('❌ No imagePath provided to getImageUrl');
+      return null;
+    }
 
     // Check if we're in development using environment variable
     // This works during both build-time (SSR) and run-time
     const isDevelopment = process.env.NODE_ENV === 'development';
 
+    let finalUrl;
     if (isDevelopment) {
       // Development: Access S&S images directly (no CORS issues on localhost)
-      return `https://www.ssactivewear.com/${imagePath}`;
+      finalUrl = `https://www.ssactivewear.com/${imagePath}`;
     } else {
       // Production: Proxy through Netlify function
-      return `/ss-images/${imagePath}`;
+      finalUrl = `/ss-images/${imagePath}`;
     }
+
+    console.log(`🖼️ Image URL (${isDevelopment ? 'dev' : 'prod'}):`, finalUrl);
+    return finalUrl;
   };
 
   // Get color-aware product image using S&S API color images
   const getProductImageUrl = (product, selectedColor) => {
-    if (!product?.styleID) return getProductFallbackImage(product);
+    console.log('🔍 Getting image URL for:', {
+      productStyleID: product?.styleID,
+      productStyleImage: product?.styleImage,
+      selectedColorName: selectedColor?.name,
+      selectedColorFrontImage: selectedColor?.colorFrontImage,
+      selectedColorSideImage: selectedColor?.colorSideImage,
+    });
+
+    if (!product?.styleID) {
+      console.log('❌ No styleID found, using fallback');
+      return getProductFallbackImage(product);
+    }
 
     // Use S&S API color-specific images if available
     if (selectedColor && selectedColor.colorFrontImage) {
       const colorImageUrl = getImageUrl(selectedColor.colorFrontImage);
       console.log(
-        `Using S&S color front image for ${selectedColor.name}:`,
+        `✅ Using S&S color front image for ${selectedColor.name}:`,
         colorImageUrl,
       );
       return colorImageUrl;
@@ -294,7 +312,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     if (selectedColor && selectedColor.colorSideImage) {
       const colorImageUrl = getImageUrl(selectedColor.colorSideImage);
       console.log(
-        `Using S&S color side image for ${selectedColor.name}:`,
+        `✅ Using S&S color side image for ${selectedColor.name}:`,
         colorImageUrl,
       );
       return colorImageUrl;
@@ -303,14 +321,14 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     // Fallback to main product image if no color-specific S&S image
     if (product.styleImage) {
       const mainImageUrl = getImageUrl(product.styleImage);
-      console.log('Using main product image:', mainImageUrl);
+      console.log('✅ Using main product image:', mainImageUrl);
       return mainImageUrl;
     }
 
     // Final fallback to constructed URL using styleID
     const imagePath = `Images/Style/${product.styleID}_fm.jpg`;
     const fallbackImageUrl = getImageUrl(imagePath);
-    console.log('Using constructed fallback image:', fallbackImageUrl);
+    console.log('✅ Using constructed fallback image:', fallbackImageUrl);
     return fallbackImageUrl || getProductFallbackImage(product);
   };
 
