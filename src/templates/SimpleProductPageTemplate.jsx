@@ -10,7 +10,6 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   const [selectedSize, setSelectedSize] = useState('M');
   const [inventoryData, setInventoryData] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [imageZoomed, setImageZoomed] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -333,14 +332,6 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     return fallbackImageUrl || getProductFallbackImage(product);
   };
 
-  // Update image URL when product loads or selectedColor changes
-  useEffect(() => {
-    if (product) {
-      const newImageUrl = getProductImageUrl(product, selectedColor);
-      setCurrentImageUrl(newImageUrl);
-    }
-  }, [product, selectedColor]);
-
   // FIXED: Handle image loading errors and provide fallback
   const handleImageError = (event) => {
     console.log(
@@ -393,7 +384,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       Title: product.title,
       Price: currentPrice,
       Size: selectedSize,
-      Image: currentImageUrl,
+      Image: product ? getProductImageUrl(product, selectedColor) : null,
       Color: selectedColor?.name || 'Standard',
       Quantity: quantity,
       StyleID: product.styleID,
@@ -679,63 +670,86 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                 aria-label="Click to zoom image"
               >
                 {/* Custom placeholder for non-t-shirt products */}
-                {currentImageUrl &&
-                currentImageUrl.includes('placeholder') &&
-                !product?.baseCategory?.toLowerCase().includes('shirt') ? (
-                  <div
-                    style={{
-                      width: '100%',
-                      maxWidth: '500px',
-                      height: '400px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '12px',
-                      border: '3px solid #fff',
-                      fontWeight: 'bold',
-                      fontSize: '24px',
-                      textAlign: 'center',
-                      boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
-                      cursor: 'zoom-in',
-                      transition: 'all 0.3s ease',
-                      transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
-                      zIndex: imageZoomed ? 1000 : 1,
-                      position: imageZoomed ? 'fixed' : 'relative',
-                      top: imageZoomed ? '50%' : 'auto',
-                      left: imageZoomed ? '50%' : 'auto',
-                      marginTop: imageZoomed ? '-250px' : '0',
-                      marginLeft: imageZoomed ? '-250px' : '0',
-                      ...getProductPlaceholderStyle(product),
-                    }}
-                  >
-                    {getProductLabel(product)}
-                  </div>
-                ) : (
-                  <img
-                    src={currentImageUrl}
-                    alt={product.title}
-                    onError={handleImageError}
-                    style={{
-                      width: '100%',
-                      maxWidth: '500px',
-                      height: 'auto',
-                      background: '#f8f8f8',
-                      border: '3px solid #fff',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
-                      cursor: 'zoom-in',
-                      transition: 'all 0.3s ease',
-                      transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
-                      zIndex: imageZoomed ? 1000 : 1,
-                      position: imageZoomed ? 'fixed' : 'relative',
-                      top: imageZoomed ? '50%' : 'auto',
-                      left: imageZoomed ? '50%' : 'auto',
-                      marginTop: imageZoomed ? '-250px' : '0',
-                      marginLeft: imageZoomed ? '-250px' : '0',
-                    }}
-                  />
-                )}
+                {(() => {
+                  const currentImageUrl = product
+                    ? getProductImageUrl(product, selectedColor)
+                    : null;
+                  return currentImageUrl &&
+                    currentImageUrl.includes('placeholder') &&
+                    !product?.baseCategory?.toLowerCase().includes('shirt') ? (
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '500px',
+                        height: '400px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '12px',
+                        border: '3px solid #fff',
+                        fontWeight: 'bold',
+                        fontSize: '24px',
+                        textAlign: 'center',
+                        boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
+                        cursor: 'zoom-in',
+                        transition: 'all 0.3s ease',
+                        transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
+                        zIndex: imageZoomed ? 1000 : 1,
+                        position: imageZoomed ? 'fixed' : 'relative',
+                        top: imageZoomed ? '50%' : 'auto',
+                        left: imageZoomed ? '50%' : 'auto',
+                        marginTop: imageZoomed ? '-250px' : '0',
+                        marginLeft: imageZoomed ? '-250px' : '0',
+                        ...getProductPlaceholderStyle(product),
+                      }}
+                    >
+                      {getProductLabel(product)}
+                    </div>
+                  ) : currentImageUrl ? (
+                    <img
+                      src={currentImageUrl}
+                      alt={product.title}
+                      onError={handleImageError}
+                      style={{
+                        width: '100%',
+                        maxWidth: '500px',
+                        height: 'auto',
+                        background: '#f8f8f8',
+                        border: '3px solid #fff',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
+                        cursor: 'zoom-in',
+                        transition: 'all 0.3s ease',
+                        transform: imageZoomed ? 'scale(1.5)' : 'scale(1)',
+                        zIndex: imageZoomed ? 1000 : 1,
+                        position: imageZoomed ? 'fixed' : 'relative',
+                        top: imageZoomed ? '50%' : 'auto',
+                        left: imageZoomed ? '50%' : 'auto',
+                        marginTop: imageZoomed ? '-250px' : '0',
+                        marginLeft: imageZoomed ? '-250px' : '0',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '500px',
+                        height: '300px',
+                        background: '#f8f8f8',
+                        border: '3px solid #fff',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#666',
+                        fontSize: '16px',
+                      }}
+                    >
+                      Loading image...
+                    </div>
+                  );
+                })()}
               </button>
               {imageZoomed && (
                 <div
