@@ -2,45 +2,52 @@ exports.handler = async (event) => {
   // Get the image path from query parameters (set by the redirect)
   const imagePath = event.queryStringParameters?.path || '';
 
-  // TEMPORARY DEBUG: Log what we received and return debug info
   console.log('🔍 ss-images function called with:');
   console.log('📂 Image path:', imagePath);
   console.log('🔍 Query params:', event.queryStringParameters);
   console.log('🔍 Event path:', event.path);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      debug: 'ss-images debug mode',
-      imagePath: imagePath,
-      hasPath: !!imagePath,
-      queryParams: event.queryStringParameters,
-      eventPath: event.path,
-      message: imagePath
-        ? `Would fetch: https://www.ssactivewear.com/${imagePath}`
-        : 'No path provided',
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-  };
+  // If no path provided, return error
+  if (!imagePath) {
+    console.log('❌ No image path provided');
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: 'No image path provided',
+        received: event.queryStringParameters,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+  }
 
-  /* COMMENTED OUT FOR DEBUG
-  // Construct the SSActivewear image URL (using correct domain)
+  // Construct the SSActivewear image URL
   const imageUrl = `https://www.ssactivewear.com/${imagePath}`;
 
   try {
-    console.log(`Proxying image request: ${imageUrl}`);
+    console.log(`🌐 Fetching image from: ${imageUrl}`);
 
-    // Fetch the image from SanMar
+    // Fetch the image from SSActivewear
     const response = await fetch(imageUrl);
 
+    console.log(
+      `📊 Response status: ${response.status} ${response.statusText}`,
+    );
+
     if (!response.ok) {
-      console.log(`Image not found: ${imageUrl} (${response.status})`);
+      console.log(`🚫 Image not found: ${imageUrl} (${response.status})`);
       return {
         statusCode: 404,
-        body: 'Image not found',
+        body: JSON.stringify({
+          error: 'Image not found',
+          requestedUrl: imageUrl,
+          ssStatus: response.status,
+          ssStatusText: response.statusText,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       };
     }
 
@@ -51,22 +58,32 @@ exports.handler = async (event) => {
     // Determine content type
     const contentType = response.headers.get('content-type') || 'image/jpeg';
 
+    console.log(
+      `✅ Successfully proxied image: ${imageUrl} (${contentType}, ${imageBuffer.byteLength} bytes)`,
+    );
+
     return {
       statusCode: 200,
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+        'Cache-Control': 'public, max-age=86400',
         'Access-Control-Allow-Origin': '*',
       },
       body: imageBase64,
       isBase64Encoded: true,
     };
   } catch (error) {
-    console.error('Error proxying image:', error);
+    console.error('💥 Error proxying image:', error);
     return {
       statusCode: 500,
-      body: 'Error fetching image',
+      body: JSON.stringify({
+        error: 'Error fetching image',
+        message: error.message,
+        requestedUrl: imageUrl,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
   }
-  */
 };
