@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../context/CartContext';
 import Layout from '../components/Layout';
 
@@ -10,6 +10,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   const [selectedSize, setSelectedSize] = useState('M');
   const [inventoryData, setInventoryData] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [imageZoomed, setImageZoomed] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -332,9 +333,12 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     return fallbackImageUrl || getProductFallbackImage(product);
   };
 
-  // Calculate image URL reactively when product or selectedColor changes
-  const imageUrl = useMemo(() => {
-    return getProductImageUrl(product, selectedColor);
+  // Update image URL when product or selectedColor changes
+  useEffect(() => {
+    if (product) {
+      const newImageUrl = getProductImageUrl(product, selectedColor);
+      setCurrentImageUrl(newImageUrl);
+    }
   }, [product, selectedColor]);
 
   // FIXED: Handle image loading errors and provide fallback
@@ -389,7 +393,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       Title: product.title,
       Price: currentPrice,
       Size: selectedSize,
-      Image: imageUrl,
+      Image: currentImageUrl,
       Color: selectedColor?.name || 'Standard',
       Quantity: quantity,
       StyleID: product.styleID,
@@ -675,7 +679,8 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                 aria-label="Click to zoom image"
               >
                 {/* Custom placeholder for non-t-shirt products */}
-                {imageUrl.includes('placeholder') &&
+                {currentImageUrl &&
+                currentImageUrl.includes('placeholder') &&
                 !product?.baseCategory?.toLowerCase().includes('shirt') ? (
                   <div
                     style={{
@@ -707,7 +712,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                   </div>
                 ) : (
                   <img
-                    src={imageUrl}
+                    src={currentImageUrl}
                     alt={product.title}
                     onError={handleImageError}
                     style={{
