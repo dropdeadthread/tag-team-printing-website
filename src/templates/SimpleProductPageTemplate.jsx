@@ -93,14 +93,6 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     loadProduct();
   }, [pageContext.styleCode]);
 
-  // Update image URL when product loads or selectedColor changes
-  useEffect(() => {
-    if (product) {
-      const newImageUrl = getProductImageUrl(product, selectedColor);
-      setCurrentImageUrl(newImageUrl);
-    }
-  }, [product, selectedColor]);
-
   if (loading) {
     return (
       <Layout>
@@ -340,6 +332,14 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     console.log('✅ Using constructed fallback image:', fallbackImageUrl);
     return fallbackImageUrl || getProductFallbackImage(product);
   };
+
+  // Update image URL when product loads or selectedColor changes
+  useEffect(() => {
+    if (product) {
+      const newImageUrl = getProductImageUrl(product, selectedColor);
+      setCurrentImageUrl(newImageUrl);
+    }
+  }, [product, selectedColor]);
 
   // FIXED: Handle image loading errors and provide fallback
   const handleImageError = (event) => {
