@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
 import { CartContext } from '../context/CartContext';
 import Layout from '../components/Layout';
 
@@ -332,7 +332,10 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     return fallbackImageUrl || getProductFallbackImage(product);
   };
 
-  const imageUrl = getProductImageUrl(product, selectedColor);
+  // Calculate image URL reactively when product or selectedColor changes
+  const imageUrl = useMemo(() => {
+    return getProductImageUrl(product, selectedColor);
+  }, [product, selectedColor]);
 
   // FIXED: Handle image loading errors and provide fallback
   const handleImageError = (event) => {
