@@ -58,7 +58,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <Link to={`/products/${productId}/${slug}`} className="wrestling-card-link">
+    <Link to={`/products/${productId}`} className="wrestling-card-link">
       <div className="wrestling-card">
         <div className="product-image-wrapper">
           <img
