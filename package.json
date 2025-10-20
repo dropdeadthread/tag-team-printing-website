@@ -16,7 +16,6 @@
     "format": "prettier --write \"**/*.{js,jsx,json,css,md,yml}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,json,css,md,yml}\"",
     "lint": "eslint \"src/**/*.{js,jsx}\"",
-    "prepare": "node -e \"try { require('husky').install() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\"",
     "plop": "plop",
     "test": "jest",
     "update:styles": "node scripts/updateSustainableStyle.js"
