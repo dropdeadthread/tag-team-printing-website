@@ -49,13 +49,10 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
         // Load inventory data
         if (foundProduct?.styleID) {
-          const apiEndpoint =
-            typeof window !== 'undefined' &&
-            window.location.hostname === 'localhost'
-              ? '/api/get-inventory'
-              : '/.netlify/functions/get-inventory';
+          // Always use the real Netlify function (not the mock API)
+          const apiEndpoint = '/.netlify/functions/get-inventory';
           const inventoryResponse = await fetch(
-            `${apiEndpoint}?styleID=${foundProduct.styleID}`,
+            `${apiEndpoint}?styleCode=${foundProduct.styleID}`,
           );
           const inventory = await inventoryResponse.json();
           setInventoryData(inventory);
@@ -410,13 +407,10 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     if (product?.styleID && color) {
       try {
         console.log(`Loading inventory for color: ${color.name}`);
-        const apiEndpoint =
-          typeof window !== 'undefined' &&
-          window.location.hostname === 'localhost'
-            ? '/api/get-inventory'
-            : '/.netlify/functions/get-inventory';
+        // Always use the real Netlify function (not the mock API)
+        const apiEndpoint = '/.netlify/functions/get-inventory';
         const inventoryResponse = await fetch(
-          `${apiEndpoint}?styleID=${product.styleID}&color=${encodeURIComponent(color.name)}`,
+          `${apiEndpoint}?styleCode=${product.styleID}&color=${encodeURIComponent(color.name)}`,
         );
         const colorInventory = await inventoryResponse.json();
 
