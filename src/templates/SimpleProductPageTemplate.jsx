@@ -402,6 +402,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   };
 
   const handleColorChange = async (color) => {
+    console.log('🎨 Color changed to:', color.name, 'Color data:', color);
     setSelectedColor(color);
     setColorInventoryLoading(true);
 
@@ -707,6 +708,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                     </div>
                   ) : currentImageUrl ? (
                     <img
+                      key={`${product?.styleID}-${selectedColor?.name || 'default'}`}
                       src={currentImageUrl}
                       alt={product.title}
                       onError={handleImageError}
