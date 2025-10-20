@@ -1,5 +1,5 @@
 // Professional S&S API inventory function - mirrors gatsby-node.js pattern
-const fetch = require('node-fetch');
+// Using built-in fetch (Node.js 18+)
 
 exports.handler = async (event) => {
   const { styleID, color } = event.queryStringParameters || {};
@@ -17,9 +17,13 @@ exports.handler = async (event) => {
 
   try {
     const username = process.env.SNS_API_USERNAME;
-    const apiKey = process.env.SNS_API_KEY;
+    const password = process.env.SNS_API_KEY;
+    const basicAuth =
+      username && password
+        ? Buffer.from(`${username}:${password}`).toString('base64')
+        : null;
 
-    if (!username || !apiKey) {
+    if (!username || !password || !basicAuth) {
       console.error('S&S API credentials not found');
       return {
         statusCode: 500,
@@ -31,8 +35,6 @@ exports.handler = async (event) => {
       };
     }
 
-    const authHeader =
-      'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
     const BASE_URL = 'https://api-ca.ssactivewear.com/v2/styles/';
 
     console.log(
@@ -43,7 +45,7 @@ exports.handler = async (event) => {
     const response = await fetch(BASE_URL, {
       headers: {
         Accept: 'application/json',
-        Authorization: `Basic ${authHeader}`,
+        Authorization: `Basic ${basicAuth}`,
         'User-Agent': 'TagTeamPrinting/1.0',
         'Content-Type': 'application/json',
       },

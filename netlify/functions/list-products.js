@@ -1,5 +1,4 @@
-// Fixed version - CommonJS syntax for Netlify Functions
-const fetch = require('node-fetch');
+// Fixed version - using built-in fetch (Node.js 18+)
 
 const SELECTED_BRANDS = [
   'Gildan',
@@ -42,9 +41,13 @@ exports.handler = async function (event) {
     let data;
     try {
       const username = process.env.SNS_API_USERNAME;
-      const apiKey = process.env.SNS_API_KEY;
+      const password = process.env.SNS_API_KEY;
+      const basicAuth =
+        username && password
+          ? Buffer.from(`${username}:${password}`).toString('base64')
+          : null;
 
-      if (!username || !apiKey) {
+      if (!username || !password || !basicAuth) {
         console.warn(
           'S&S API credentials not found, falling back to cached data',
         );
@@ -58,14 +61,12 @@ exports.handler = async function (event) {
       } else {
         // Use real-time S&S API
         console.log('Fetching real-time data from S&S ActiveWear API');
-        const authHeader =
-          'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
 
         const response = await fetch(
           'https://api-ca.ssactivewear.com/v2/styles/',
           {
             headers: {
-              Authorization: authHeader,
+              Authorization: `Basic ${basicAuth}`,
               Accept: 'application/json',
             },
           },
