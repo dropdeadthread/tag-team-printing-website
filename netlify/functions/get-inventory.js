@@ -1,85 +1,220 @@
-﻿// Mock inventory API that provides color-specific stock numbers
+﻿// Professional S&S API inventory function - optimized for performance
+const fetch = require('node-fetch');
+
 exports.handler = async (event) => {
   const { styleID, color } = event.queryStringParameters || {};
 
   if (!styleID) {
     return {
       statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({ error: 'styleID is required' }),
     };
   }
 
-  // Base sizes with mock inventory numbers
-  const baseSizes = {
-    XS: { price: 14.61, wholesalePrice: 9.13 },
-    S: { price: 14.61, wholesalePrice: 9.13 },
-    M: { price: 14.61, wholesalePrice: 9.13 },
-    L: { price: 14.61, wholesalePrice: 9.13 },
-    XL: { price: 14.61, wholesalePrice: 9.13 },
-    '2XL': { price: 17.57, wholesalePrice: 10.98 },
-    '3XL': { price: 20.61, wholesalePrice: 12.88 },
-  };
+  try {
+    const username = process.env.SNS_API_USERNAME;
+    const apiKey = process.env.SNS_API_KEY;
 
-  // Generate different stock numbers based on color to simulate real inventory
-  const getStockForColor = (baseStock, colorName) => {
-    if (!colorName) return baseStock;
+    if (!username || !apiKey) {
+      console.error('S&S API credentials not found');
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({ error: 'API credentials not configured' }),
+      };
+    }
 
-    // Use color name to create consistent but different numbers
-    const colorSeed = colorName.toLowerCase().charCodeAt(0) + colorName.length;
-    const multiplier = 0.3 + (colorSeed % 100) / 100; // Between 0.3 and 1.3
+    const authHeader =
+      'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
 
-    return Math.floor(baseStock * multiplier);
-  };
+    // Use products endpoint for specific style - much faster than fetching all styles
+    const PRODUCTS_URL = `https://api-ca.ssactivewear.com/v2/products/?styleid=${styleID}`;
 
-  // Base stock numbers
-  const baseStocks = {
-    XS: 1413,
-    S: 866,
-    M: 731,
-    L: 933,
-    XL: 850,
-    '2XL': 1269,
-    '3XL': 1445,
-  };
+    console.log(
+      `[get-inventory] Fetching inventory for styleID: ${styleID}, color: ${color || 'all'}`,
+    );
 
-  // Create color-specific inventory
-  const sizes = {};
-  Object.keys(baseSizes).forEach((size) => {
-    const baseStock = baseStocks[size] || 100;
-    const colorStock = getStockForColor(baseStock, color);
+    // Fetch specific style products (faster than all styles)
+    const response = await fetch(PRODUCTS_URL, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: authHeader,
+        'User-Agent': 'TagTeamPrinting/1.0',
+        'Content-Type': 'application/json',
+      },
+    });
 
-    sizes[size] = {
-      ...baseSizes[size],
-      available: Math.max(0, colorStock), // Ensure no negative stock
+    if (!response.ok) {
+      console.error(
+        `[get-inventory] S&S API error: ${response.status} ${response.statusText}`,
+      );
+      return {
+        statusCode: response.status,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: `S&S API error: ${response.status}`,
+          details: response.statusText,
+        }),
+      };
+    }
+
+    const allProducts = await response.json();
+
+    if (!Array.isArray(allProducts)) {
+      console.error('[get-inventory] Unexpected API response format');
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({ error: 'Unexpected API response format' }),
+      };
+    }
+
+    if (allProducts.length === 0) {
+      console.error(`[get-inventory] No products found for styleID ${styleID}`);
+      return {
+        statusCode: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({ error: 'Style not found' }),
+      };
+    }
+
+    // Get style info from first product
+    const firstProduct = allProducts[0];
+    const styleName = firstProduct.styleName || styleID;
+
+    console.log(
+      `[get-inventory] Found ${allProducts.length} products for style: ${styleName}`,
+    );
+
+    // Process products to build inventory
+    const sizes = {};
+    const colorMap = new Map();
+
+    allProducts.forEach((product) => {
+      // Extract size and color info
+      const sizeName = product.size;
+      const colorName = product.colorName;
+      const colorHex = product.color1 || '#CCCCCC';
+
+      // Calculate total inventory across warehouses
+      const totalQty =
+        (parseInt(product.warehouse1Qty) || 0) +
+        (parseInt(product.warehouse2Qty) || 0) +
+        (parseInt(product.warehouse3Qty) || 0);
+
+      // If filtering by specific color, only process that color''s products
+      if (color && colorName !== color) {
+        return; // Skip this product
+      }
+
+      // Build sizes inventory
+      if (!sizes[sizeName]) {
+        sizes[sizeName] = {
+          price: parseFloat(product.customerPrice) || 14.61,
+          wholesalePrice: parseFloat(product.wholesalePrice) || 9.13,
+          available: 0,
+        };
+      }
+      sizes[sizeName].available += totalQty;
+
+      // Build colors array with images - THIS IS THE KEY PART!
+      if (!colorMap.has(colorName)) {
+        colorMap.set(colorName, {
+          name: colorName,
+          hex: colorHex,
+          available: totalQty > 0,
+          colorFrontImage: product.colorFrontImage || null,
+          colorSideImage: product.colorSideImage || null,
+          colorBackImage: product.colorBackImage || null,
+        });
+      } else {
+        // Update existing color data
+        const existingColor = colorMap.get(colorName);
+        if (totalQty > 0) {
+          existingColor.available = true;
+        }
+        // Prefer images from products that have stock
+        if (
+          totalQty > 0 &&
+          !existingColor.colorFrontImage &&
+          product.colorFrontImage
+        ) {
+          existingColor.colorFrontImage = product.colorFrontImage;
+          existingColor.colorSideImage = product.colorSideImage;
+          existingColor.colorBackImage = product.colorBackImage;
+        }
+      }
+    });
+
+    // Convert color map to array
+    const colors = Array.from(colorMap.values());
+
+    // Sort sizes in standard order
+    const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+    const sortedSizes = {};
+
+    sizeOrder.forEach((size) => {
+      if (sizes[size]) {
+        sortedSizes[size] = sizes[size];
+      }
+    });
+
+    // Add any remaining sizes not in standard order
+    Object.keys(sizes).forEach((size) => {
+      if (!sortedSizes[size]) {
+        sortedSizes[size] = sizes[size];
+      }
+    });
+
+    const responseData = {
+      styleID: parseInt(styleID),
+      styleName: styleName,
+      currentColor: color || null,
+      sizes: sortedSizes,
+      colors: colors,
+      lastUpdated: new Date().toISOString(),
     };
-  });
 
-  // Mock color data - this would normally come from your product database
-  const availableColors = [
-    { name: 'Black', hex: '#000000', available: true },
-    { name: 'White', hex: '#FFFFFF', available: true },
-    { name: 'Navy', hex: '#000080', available: true },
-    { name: 'Red', hex: '#FF0000', available: true },
-    { name: 'Royal Blue', hex: '#4169E1', available: true },
-    { name: 'Forest Green', hex: '#228B22', available: true },
-    { name: 'Maroon', hex: '#800000', available: true },
-    { name: 'Purple', hex: '#800080', available: true },
-  ];
+    console.log(
+      `[get-inventory] Returning ${colors.length} colors, ${Object.keys(sortedSizes).length} sizes`,
+    );
 
-  const response = {
-    styleID: parseInt(styleID),
-    currentColor: color || null,
-    sizes,
-    colors: availableColors,
-    lastUpdated: new Date().toISOString(),
-  };
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-    body: JSON.stringify(response),
-  };
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify(responseData),
+    };
+  } catch (error) {
+    console.error('[get-inventory] Error:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({
+        error: 'Failed to fetch inventory',
+        details: error.message,
+      }),
+    };
+  }
 };
