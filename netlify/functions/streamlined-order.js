@@ -1,5 +1,4 @@
-// Fixed version - CommonJS with CORRECT API key header
-const fetch = require('node-fetch');
+// Fixed version - CommonJS with built-in fetch (Node.js 18+)
 
 /**
  * Sends order data to Control Hub after successful order creation
@@ -89,7 +88,7 @@ async function sendToControlHub(orderData, orderId) {
 }
 
 // Netlify Function Handler - Using CommonJS exports
-exports.handler = async function (event, context) {
+exports.handler = async function (event) {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {

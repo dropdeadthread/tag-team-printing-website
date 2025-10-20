@@ -1,4 +1,4 @@
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
   console.log(
     'ss-images function called with event:',
     JSON.stringify(event, null, 2),

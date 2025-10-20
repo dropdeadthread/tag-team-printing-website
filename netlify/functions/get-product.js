@@ -1,7 +1,6 @@
-// Fixed version - CommonJS syntax for Netlify Functions
-const fetch = require('node-fetch');
+// Fixed version - using built-in fetch (Node.js 18+)
 
-exports.handler = async function (event, context) {
+exports.handler = async function (event) {
   try {
     const { styleID } = event.queryStringParameters || {};
 
