@@ -2,16 +2,19 @@
 // Uses built-in fetch (Node.js 18+) for better Netlify compatibility
 
 exports.handler = async (event) => {
-  const { styleID, color } = event.queryStringParameters || {};
+  const { styleCode, styleID, color } = event.queryStringParameters || {};
 
-  if (!styleID) {
+  // Accept both styleCode and styleID for compatibility
+  const productStyleID = styleCode || styleID;
+
+  if (!productStyleID) {
     return {
       statusCode: 400,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ error: 'styleID is required' }),
+      body: JSON.stringify({ error: 'styleCode or styleID is required' }),
     };
   }
 
@@ -35,10 +38,10 @@ exports.handler = async (event) => {
       'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
 
     // Use products endpoint for specific style - much faster than fetching all styles
-    const PRODUCTS_URL = `https://api-ca.ssactivewear.com/v2/products/?styleid=${styleID}`;
+    const PRODUCTS_URL = `https://api-ca.ssactivewear.com/v2/products/?styleid=${productStyleID}`;
 
     console.log(
-      `[get-inventory] Fetching inventory for styleID: ${styleID}, color: ${color || 'all'}`,
+      `[get-inventory] Fetching inventory for styleID: ${productStyleID}, color: ${color || 'all'}`,
     );
 
     // Fetch specific style products (faster than all styles)
@@ -83,7 +86,9 @@ exports.handler = async (event) => {
     }
 
     if (allProducts.length === 0) {
-      console.error(`[get-inventory] No products found for styleID ${styleID}`);
+      console.error(
+        `[get-inventory] No products found for styleID ${productStyleID}`,
+      );
       return {
         statusCode: 404,
         headers: {
@@ -96,7 +101,7 @@ exports.handler = async (event) => {
 
     // Get style info from first product
     const firstProduct = allProducts[0];
-    const styleName = firstProduct.styleName || styleID;
+    const styleName = firstProduct.styleName || productStyleID;
 
     console.log(
       `[get-inventory] Found ${allProducts.length} products for style: ${styleName}`,
@@ -183,7 +188,7 @@ exports.handler = async (event) => {
     });
 
     const responseData = {
-      styleID: parseInt(styleID),
+      styleID: parseInt(productStyleID),
       styleName: styleName,
       currentColor: color || null,
       sizes: sortedSizes,
