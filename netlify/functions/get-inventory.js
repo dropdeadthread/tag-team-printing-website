@@ -1,5 +1,5 @@
 ﻿// Professional S&S API inventory function - optimized for performance
-const fetch = require('node-fetch');
+// Uses built-in fetch (Node.js 18+) for better Netlify compatibility
 
 exports.handler = async (event) => {
   const { styleID, color } = event.queryStringParameters || {};
