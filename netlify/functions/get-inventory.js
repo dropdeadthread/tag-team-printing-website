@@ -132,7 +132,7 @@ export const handler = async (event) => {
       const entry = colorMap.get(colorName);
       entry.sizes[sizeName] = {
         available: totalQty,
-        price: retailPrice,
+        price: parseFloat(retailPrice) || 25.0,
       };
     }
 

@@ -85,7 +85,8 @@ const ProductPageTemplate = ({ data, pageContext }) => {
 
   const imageUrl = getStyleImageUrl(product.styleID || product.styleName);
   const productName = product?.title || product?.Name || 'Product';
-  const productPrice = selectedColor?.sizes?.[selectedSize]?.price || 25.0;
+  const rawPrice = selectedColor?.sizes?.[selectedSize]?.price || 25.0;
+  const productPrice = parseFloat(rawPrice) || 25.0;
 
   const availableSizes = selectedColor?.sizes
     ? Object.keys(selectedColor.sizes).filter(
