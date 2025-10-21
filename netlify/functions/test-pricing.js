@@ -1,11 +1,11 @@
 // Simple test function to check if pricing imports work
-import {
+const {
   sortSizesByOrder,
   getSizeAdjustedWholesalePrice,
   calculateRetailPrice,
-} from '../../src/config/pricing.js';
+} = require('../../src/config/pricing.js');
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
   try {
     // Test the pricing functions
     const testWholesale = 5.5;
