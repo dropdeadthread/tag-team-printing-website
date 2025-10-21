@@ -1,11 +1,40 @@
 ﻿// Tag Team Printing: get-inventory.js
 // Live S&S inventory + retail markup logic + in-memory cache
 
-const {
-  sortSizesByOrder,
-  getSizeAdjustedWholesalePrice,
-  calculateRetailPrice,
-} = require('../../src/config/pricing.js');
+// Pricing functions directly embedded to avoid require path issues
+const sizeOrder = {
+  XS: 1,
+  S: 2,
+  M: 3,
+  L: 4,
+  XL: 5,
+  '2XL': 6,
+  '3XL': 7,
+  '4XL': 8,
+  '5XL': 9,
+};
+
+function sortSizesByOrder(sizesObj) {
+  const entries = Object.entries(sizesObj);
+  entries.sort((a, b) => (sizeOrder[a[0]] || 99) - (sizeOrder[b[0]] || 99));
+  return Object.fromEntries(entries);
+}
+
+function getSizeAdjustedWholesalePrice(wholesalePrice, sizeName) {
+  const price = parseFloat(wholesalePrice);
+  if (sizeName === '2XL') return price + 2;
+  if (['3XL', '4XL', '5XL'].includes(sizeName)) return price + 3;
+  return price;
+}
+
+function calculateRetailPrice(adjustedWholesale) {
+  const price = parseFloat(adjustedWholesale);
+  let multiplier;
+  if (price < 4.25) multiplier = 2.5;
+  else if (price <= 6.99) multiplier = 2.0;
+  else multiplier = 1.6;
+  return (price * multiplier).toFixed(2);
+}
 
 // 🧠 Simple in-memory cache (clears on cold start)
 const cache = new Map();
