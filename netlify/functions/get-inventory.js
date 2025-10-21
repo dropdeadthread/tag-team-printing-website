@@ -2,8 +2,9 @@
 // Live S&S inventory + retail markup logic + in-memory cache
 
 import {
-  getSizeAdjustedRetailPrice,
   sortSizesByOrder,
+  getSizeAdjustedWholesalePrice,
+  calculateRetailPrice,
 } from '../../src/config/pricing.js';
 
 // 🧠 Simple in-memory cache (clears on cold start)
@@ -108,12 +109,12 @@ export const handler = async (event) => {
       if (color && colorName !== color) continue;
 
       const totalQty = inventoryMap[sku] || 0;
-      const retailPrice = getSizeAdjustedRetailPrice(
+      // Use markup pricing for individual product display instead of quantity tiers
+      const adjustedWholesale = getSizeAdjustedWholesalePrice(
         wholesalePrice,
         sizeName,
-        1,
-        brandName,
       );
+      const retailPrice = calculateRetailPrice(adjustedWholesale);
 
       if (!colorMap.has(colorName)) {
         colorMap.set(colorName, {
