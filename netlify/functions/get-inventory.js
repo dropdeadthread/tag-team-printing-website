@@ -1,27 +1,44 @@
-﻿// Tag Team Printing - get-inventory.js
-// Pulls real-time S&S inventory, applies Tag Team's markup logic, and returns retail-ready data.
+﻿// Tag Team Printing: get-inventory.js
+// Live S&S inventory + retail markup logic + in-memory cache
 
 import {
   getSizeAdjustedRetailPrice,
   sortSizesByOrder,
-} from '../../src/config/pricing.js'; // ✅ corrected path
+} from '../../src/config/pricing.js';
+
+// 🧠 Simple in-memory cache (clears on cold start)
+const cache = new Map();
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
+function getCached(styleID) {
+  const entry = cache.get(styleID);
+  if (entry && Date.now() < entry.expires) {
+    console.log(`[get-inventory] Serving cached data for styleID: ${styleID}`);
+    return entry.data;
+  }
+  return null;
+}
+
+function setCache(styleID, data) {
+  cache.set(styleID, { data, expires: Date.now() + CACHE_TTL });
+}
 
 export const handler = async (event) => {
   const { styleCode, styleID, color } = event.queryStringParameters || {};
   const productStyleID = styleCode || styleID;
 
-  if (!productStyleID) {
+  if (!productStyleID)
     return errorResponse(400, 'styleCode or styleID is required');
-  }
+
+  // 🪣 Check cache first
+  const cached = getCached(productStyleID);
+  if (cached) return successResponse(cached);
 
   try {
     const username = process.env.SNS_API_USERNAME;
     const apiKey = process.env.SNS_API_KEY;
-
-    if (!username || !apiKey) {
-      console.error('[get-inventory] Missing API credentials');
-      return errorResponse(500, 'API credentials not configured');
-    }
+    if (!username || !apiKey)
+      return errorResponse(500, 'S&S API credentials not configured');
 
     const authHeader =
       'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
@@ -33,8 +50,7 @@ export const handler = async (event) => {
 
     console.log(`[get-inventory] Fetching styleID: ${productStyleID}`);
 
-    // ⚡ Fetch both datasets in parallel for efficiency
-    const [productRes, inventoryRes] = await Promise.all([
+    const [prodRes, invRes] = await Promise.all([
       fetch(
         `https://api-ca.ssactivewear.com/v2/products/?styleid=${productStyleID}`,
         { headers },
@@ -45,42 +61,24 @@ export const handler = async (event) => {
       ),
     ]);
 
-    if (!productRes.ok || !inventoryRes.ok) {
-      console.error(
-        '[get-inventory] S&S API error:',
-        productRes.status,
-        inventoryRes.status,
-      );
-      return errorResponse(
-        productRes.status || inventoryRes.status,
-        'S&S API request failed',
-      );
-    }
+    if (!prodRes.ok || !invRes.ok)
+      return errorResponse(502, 'S&S API request failed');
 
     const [products, inventory] = await Promise.all([
-      productRes.json(),
-      inventoryRes.json(),
+      prodRes.json(),
+      invRes.json(),
     ]);
 
-    // ✅ Validate responses
-    if (!Array.isArray(products) || products.length === 0) {
-      console.error(
-        `[get-inventory] No products found for styleID ${productStyleID}`,
-      );
+    if (!Array.isArray(products) || products.length === 0)
       return errorResponse(404, 'Style not found');
-    }
-
-    if (!Array.isArray(inventory)) {
-      console.error('[get-inventory] Unexpected inventory response format');
-      return errorResponse(500, 'Unexpected inventory format');
-    }
 
     const styleName = products[0]?.styleName || `Style ${productStyleID}`;
+    const brandName = products[0]?.brandName || 'Unknown Brand';
     console.log(
-      `[get-inventory] Found ${products.length} variants for ${styleName}`,
+      `[get-inventory] Found ${products.length} variants for ${brandName} ${styleName}`,
     );
 
-    // 🧮 Map SKU → total quantity from the inventory API
+    // 🧮 Map SKU → totalQty
     const inventoryMap = {};
     inventory.forEach((item) => {
       if (Array.isArray(item.warehouses)) {
@@ -92,17 +90,16 @@ export const handler = async (event) => {
       }
     });
 
-    // 🧱 Build structured data
-    const sizes = {};
+    // 🧱 Build color structure
     const colorMap = new Map();
 
     for (const product of products) {
       const {
+        sku,
         sizeName,
         colorName,
         brandName,
         wholesalePrice,
-        sku,
         color1,
         colorSwatchImage,
         colorFrontImage,
@@ -118,52 +115,52 @@ export const handler = async (event) => {
         brandName,
       );
 
-      // Aggregate inventory per size
-      if (!sizes[sizeName]) {
-        sizes[sizeName] = { price: retailPrice, available: 0 };
-      }
-      sizes[sizeName].available += totalQty;
-
-      // Build color info
       if (!colorMap.has(colorName)) {
         colorMap.set(colorName, {
           name: colorName,
           hex: color1 || '#CCCCCC',
-          swatch: colorSwatchImage
+          swatchImg: colorSwatchImage
             ? `https://www.ssactivewear.com/${colorSwatchImage}`
             : null,
-          image: colorFrontImage
+          colorFrontImage: colorFrontImage
             ? `https://www.ssactivewear.com/${colorFrontImage}`
             : null,
-          available: totalQty > 0,
+          sizes: {},
         });
-      } else if (totalQty > 0) {
-        colorMap.get(colorName).available = true;
       }
+
+      const entry = colorMap.get(colorName);
+      entry.sizes[sizeName] = {
+        available: totalQty,
+        price: retailPrice,
+      };
     }
 
-    // 🧩 Sort sizes using your predefined order
-    const sortedSizes = sortSizesByOrder(sizes);
     const colors = Array.from(colorMap.values());
+    colors.forEach((c) => (c.sizes = sortSizesByOrder(c.sizes)));
 
-    console.log(
-      `[get-inventory] Returning ${colors.length} colors, ${Object.keys(sortedSizes).length} sizes for ${styleName}`,
-    );
-
-    return successResponse({
+    const responseData = {
       styleID: parseInt(productStyleID),
       styleName,
-      sizes: sortedSizes,
+      brandName,
       colors,
       lastUpdated: new Date().toISOString(),
-    });
+    };
+
+    // 🧠 Cache result
+    setCache(productStyleID, responseData);
+
+    console.log(
+      `[get-inventory] Returning ${colors.length} colors for ${brandName} ${styleName}`,
+    );
+    return successResponse(responseData);
   } catch (err) {
     console.error('[get-inventory] Error:', err);
     return errorResponse(500, err.message || 'Failed to fetch inventory');
   }
 };
 
-// ✅ Helper utilities
+// 🌐 Utility helpers
 function successResponse(body) {
   return {
     statusCode: 200,
@@ -171,7 +168,6 @@ function successResponse(body) {
     body: JSON.stringify(body),
   };
 }
-
 function errorResponse(code, message) {
   return {
     statusCode: code,
@@ -179,7 +175,6 @@ function errorResponse(code, message) {
     body: JSON.stringify({ error: message }),
   };
 }
-
 function corsHeaders() {
   return {
     'Content-Type': 'application/json',

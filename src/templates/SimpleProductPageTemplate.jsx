@@ -57,19 +57,21 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           const inventory = await inventoryResponse.json();
           setInventoryData(inventory);
 
-          // Set default selected size to first available
-          const sizesWithStock = Object.keys(inventory.sizes || {}).filter(
-            (size) => inventory.sizes[size].available > 0,
-          );
-          if (sizesWithStock.length > 0) {
-            setSelectedSize(sizesWithStock[0]);
-          }
-
           // Set default color if available
           if (inventory.colors && inventory.colors.length > 0) {
-            const availableColor = inventory.colors.find((c) => c.available);
+            const availableColor = inventory.colors.find((c) =>
+              Object.values(c.sizes || {}).some((size) => size.available > 0),
+            );
             if (availableColor) {
               setSelectedColor(availableColor);
+
+              // Set default selected size to first available for this color
+              const sizesWithStock = Object.keys(
+                availableColor.sizes || {},
+              ).filter((size) => availableColor.sizes[size].available > 0);
+              if (sizesWithStock.length > 0) {
+                setSelectedSize(sizesWithStock[0]);
+              }
             }
           }
         }
@@ -372,9 +374,9 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
   const brandLogoUrl = null; // Disable brand logos for now due to CORS issues
 
-  // Get pricing from inventory
-  const currentPrice = inventoryData?.sizes?.[selectedSize]?.price || 25.0;
-  const stockAmount = inventoryData?.sizes?.[selectedSize]?.available || 0;
+  // Get pricing from selected color and size
+  const currentPrice = selectedColor?.sizes?.[selectedSize]?.price || 25.0;
+  const stockAmount = selectedColor?.sizes?.[selectedSize]?.available || 0;
 
   const handleAddToCart = () => {
     addToCart({
@@ -403,41 +405,16 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
     setSelectedColor(color);
     setColorInventoryLoading(true);
 
-    // Reload inventory for the selected color
-    if (product?.styleID && color) {
-      try {
-        console.log(`Loading inventory for color: ${color.name}`);
-        // Always use the real Netlify function (not the mock API)
-        const apiEndpoint = '/.netlify/functions/get-inventory';
-        const inventoryResponse = await fetch(
-          `${apiEndpoint}?styleCode=${product.styleID}&color=${encodeURIComponent(color.name)}`,
-        );
-        const colorInventory = await inventoryResponse.json();
-
-        // Update inventory data with color-specific information
-        setInventoryData((prev) => ({
-          ...prev,
-          sizes: colorInventory.sizes || prev?.sizes || {},
-          currentColor: color.name,
-        }));
-
-        // Reset selected size to first available size for this color
-        const availableSizes = Object.keys(colorInventory.sizes || {}).filter(
-          (size) => colorInventory.sizes[size].available > 0,
-        );
-        if (availableSizes.length > 0) {
-          setSelectedSize(availableSizes[0]);
-        }
-
-        console.log(`Updated inventory for ${color.name}:`, colorInventory);
-      } catch (error) {
-        console.error('Error loading color-specific inventory:', error);
-      } finally {
-        setColorInventoryLoading(false);
-      }
-    } else {
-      setColorInventoryLoading(false);
+    // No need to reload inventory - we already have all color data
+    // Just update selected size to first available size for this color
+    const availableSizes = Object.keys(color.sizes || {}).filter(
+      (size) => color.sizes[size].available > 0,
+    );
+    if (availableSizes.length > 0) {
+      setSelectedSize(availableSizes[0]);
     }
+
+    setColorInventoryLoading(false);
   };
 
   return (
@@ -1282,9 +1259,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                     preSelectedGarment={{
                       title: product.title,
                       price: currentPrice,
-                      wholesalePrice:
-                        inventoryData?.sizes?.[selectedSize]?.wholesalePrice ||
-                        null,
+                      wholesalePrice: null, // Not available in new API structure
                       color: selectedColor?.name || null,
                       size: selectedSize,
                       baseCategory: product.baseCategory,
@@ -1492,8 +1467,8 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {inventoryData?.sizes &&
-                          Object.keys(inventoryData.sizes).map((size) => {
+                        {selectedColor?.sizes &&
+                          Object.keys(selectedColor.sizes).map((size) => {
                             // Standard t-shirt measurements (approximate)
                             const measurements = {
                               XS: {
@@ -1700,7 +1675,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
               )}
 
               {/* Size Selection */}
-              {inventoryData?.sizes && (
+              {selectedColor?.sizes && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <label
                     style={{
@@ -1722,47 +1697,50 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                       flexWrap: 'wrap',
                     }}
                   >
-                    {Object.entries(inventoryData.sizes).map(([size, data]) => (
-                      <button
-                        key={size}
-                        onClick={() => handleSizeChange(size)}
-                        style={{
-                          padding: '0.75rem 1rem',
-                          fontSize: '1rem',
-                          borderRadius: '8px',
-                          border:
-                            selectedSize === size
-                              ? '2px solid #ff5050'
-                              : '2px solid #ddd',
-                          background:
-                            data.available === 0
-                              ? '#f8f9fa'
-                              : selectedSize === size
-                                ? '#ff5050'
-                                : '#fff',
-                          color:
-                            data.available === 0
-                              ? '#999'
-                              : selectedSize === size
-                                ? '#fff'
-                                : '#333',
-                          cursor:
-                            data.available === 0 ? 'not-allowed' : 'pointer',
-                          fontWeight: selectedSize === size ? 'bold' : 'normal',
-                          opacity: data.available === 0 ? 0.6 : 1,
-                          transition: 'all 0.2s ease',
-                        }}
-                        disabled={data.available === 0}
-                      >
-                        {size}
-                        <br />
-                        <small style={{ fontSize: '0.8rem' }}>
-                          {data.available === 0
-                            ? 'Out'
-                            : `${data.available} left`}
-                        </small>
-                      </button>
-                    ))}
+                    {Object.entries(selectedColor?.sizes || {}).map(
+                      ([size, data]) => (
+                        <button
+                          key={size}
+                          onClick={() => handleSizeChange(size)}
+                          style={{
+                            padding: '0.75rem 1rem',
+                            fontSize: '1rem',
+                            borderRadius: '8px',
+                            border:
+                              selectedSize === size
+                                ? '2px solid #ff5050'
+                                : '2px solid #ddd',
+                            background:
+                              data.available === 0
+                                ? '#f8f9fa'
+                                : selectedSize === size
+                                  ? '#ff5050'
+                                  : '#fff',
+                            color:
+                              data.available === 0
+                                ? '#999'
+                                : selectedSize === size
+                                  ? '#fff'
+                                  : '#333',
+                            cursor:
+                              data.available === 0 ? 'not-allowed' : 'pointer',
+                            fontWeight:
+                              selectedSize === size ? 'bold' : 'normal',
+                            opacity: data.available === 0 ? 0.6 : 1,
+                            transition: 'all 0.2s ease',
+                          }}
+                          disabled={data.available === 0}
+                        >
+                          {size}
+                          <br />
+                          <small style={{ fontSize: '0.8rem' }}>
+                            {data.available === 0
+                              ? 'Out'
+                              : `${data.available} left`}
+                          </small>
+                        </button>
+                      ),
+                    )}
                   </div>
                   <div
                     style={{
@@ -1963,28 +1941,27 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                     }}
                   >
                     {inventoryData.colors.map((color, index) => {
-                      // Calculate total stock for this color
-                      const colorStock =
-                        selectedColor?.name === color.name &&
-                        inventoryData?.sizes
-                          ? Object.values(inventoryData.sizes).reduce(
-                              (total, size) => total + (size.available || 0),
-                              0,
-                            )
-                          : null;
+                      // Calculate total stock for this color from its sizes
+                      const colorStock = Object.values(
+                        color.sizes || {},
+                      ).reduce(
+                        (total, size) => total + (size.available || 0),
+                        0,
+                      );
+                      const colorAvailable = colorStock > 0;
 
                       return (
                         <div
                           key={index}
                           onClick={() =>
-                            color.available &&
+                            colorAvailable &&
                             !colorInventoryLoading &&
                             handleColorChange(color)
                           }
                           onKeyDown={(e) => {
                             if (
                               (e.key === 'Enter' || e.key === ' ') &&
-                              color.available &&
+                              colorAvailable &&
                               !colorInventoryLoading
                             ) {
                               e.preventDefault();
@@ -1992,7 +1969,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                             }
                           }}
                           tabIndex={
-                            color.available && !colorInventoryLoading ? 0 : -1
+                            colorAvailable && !colorInventoryLoading ? 0 : -1
                           }
                           role="button"
                           aria-label={`Select ${color.name} color`}

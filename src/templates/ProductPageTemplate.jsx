@@ -34,22 +34,28 @@ const ProductPageTemplate = ({ data, pageContext }) => {
         price: product.prices?.at48 || 0,
       });
 
-      fetch(`/api/get-inventory?styleID=${product.styleID}`)
+      fetch(`/.netlify/functions/get-inventory?styleID=${product.styleID}`)
         .then((res) => res.json())
         .then((data) => {
           setInventoryData(data);
-          const sizesWithStock = Object.keys(data.sizes || {}).filter(
-            (size) => data.sizes[size].available > 0,
-          );
-          if (sizesWithStock.length > 0) {
-            setSelectedSize(sizesWithStock[0]);
-          }
 
           // Set default color if available
           if (data.colors && data.colors.length > 0) {
-            const availableColor = data.colors.find((c) => c.available);
+            const availableColor = data.colors.find((color) =>
+              Object.values(color.sizes || {}).some(
+                (size) => size.available > 0,
+              ),
+            );
             if (availableColor) {
               setSelectedColor(availableColor);
+
+              // Set default size for this color
+              const sizesWithStock = Object.keys(
+                availableColor.sizes || {},
+              ).filter((size) => availableColor.sizes[size].available > 0);
+              if (sizesWithStock.length > 0) {
+                setSelectedSize(sizesWithStock[0]);
+              }
             }
           }
         })
@@ -79,11 +85,11 @@ const ProductPageTemplate = ({ data, pageContext }) => {
 
   const imageUrl = getStyleImageUrl(product.styleID || product.styleName);
   const productName = product?.title || product?.Name || 'Product';
-  const productPrice = inventoryData?.sizes?.[selectedSize]?.price || 25.0;
+  const productPrice = selectedColor?.sizes?.[selectedSize]?.price || 25.0;
 
-  const availableSizes = inventoryData?.sizes
-    ? Object.keys(inventoryData.sizes).filter(
-        (size) => inventoryData.sizes[size].available > 0,
+  const availableSizes = selectedColor?.sizes
+    ? Object.keys(selectedColor.sizes).filter(
+        (size) => selectedColor.sizes[size].available > 0,
       )
     : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
@@ -430,15 +436,7 @@ const ProductPageTemplate = ({ data, pageContext }) => {
           onClose={() => setShowSpecsModal(false)}
           product={product}
           inventoryData={inventoryData}
-        />
-      )}
-
-      {showSpecsModal && (
-        <ProductSpecsModal
-          isOpen={showSpecsModal}
-          onClose={() => setShowSpecsModal(false)}
-          product={product}
-          inventoryData={inventoryData}
+          selectedColor={selectedColor}
         />
       )}
     </div>

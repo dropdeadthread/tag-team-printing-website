@@ -54,7 +54,11 @@ const CheckoutPage = () => {
 
           if (inventoryResponse.ok) {
             const inventory = await inventoryResponse.json();
-            const sizeInventory = inventory.sizes && inventory.sizes[item.size];
+            // Find the color that matches the item
+            const colorData = inventory.colors?.find(
+              (c) => c.name === item.color,
+            );
+            const sizeInventory = colorData?.sizes?.[item.size];
 
             if (!sizeInventory || sizeInventory.available < item.quantity) {
               setStatus(

@@ -1,7 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import '../styles/productspecsmodal.css';
 
-const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
+const ProductSpecsModal = ({
+  isOpen,
+  onClose,
+  product,
+  inventoryData,
+  selectedColor,
+}) => {
   const modalRef = useRef(null);
   const closeBtnRef = useRef(null);
 
@@ -12,16 +18,16 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
     closeBtnRef.current?.focus();
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-      
+      if (e.key === 'Escape') onClose();
+
       // Focus trap
-      if (e.key === "Tab" && modalRef.current) {
+      if (e.key === 'Tab' && modalRef.current) {
         const focusableEls = modalRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         const firstEl = focusableEls[0];
         const lastEl = focusableEls[focusableEls.length - 1];
-        
+
         if (e.shiftKey) {
           if (document.activeElement === firstEl) {
             e.preventDefault();
@@ -36,8 +42,8 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -45,12 +51,14 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
   // Parse HTML description to extract key specifications
   const extractSpecs = (description) => {
     if (!description) return [];
-    
+
     // Remove HTML tags and extract bullet points
     const textOnly = description.replace(/<[^>]*>/g, '');
-    const bullets = textOnly.split('•').filter(item => item.trim().length > 0);
-    
-    return bullets.map(item => item.trim()).slice(0, 8); // Limit to 8 specs
+    const bullets = textOnly
+      .split('•')
+      .filter((item) => item.trim().length > 0);
+
+    return bullets.map((item) => item.trim()).slice(0, 8); // Limit to 8 specs
   };
 
   const specs = extractSpecs(product?.description);
@@ -59,7 +67,7 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
     <div
       className="specs-modal-backdrop"
       onClick={onClose}
-      onKeyDown={(e) => e.key === "Enter" && onClose()}
+      onKeyDown={(e) => e.key === 'Enter' && onClose()}
       role="button"
       tabIndex={0}
       aria-modal="true"
@@ -67,7 +75,7 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
     >
       <div
         className="specs-modal-card"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
         ref={modalRef}
         role="dialog"
@@ -120,7 +128,9 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
                   <span className="spec-label">Stock:</span>
                   <span className="spec-value">
                     {inventoryData.totalStock} available
-                    {inventoryData.lowStock && <span className="low-stock-indicator"> (Low Stock)</span>}
+                    {inventoryData.lowStock && (
+                      <span className="low-stock-indicator"> (Low Stock)</span>
+                    )}
                   </span>
                 </div>
               )}
@@ -133,7 +143,9 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
               <h3>Material & Construction</h3>
               <ul className="specs-list">
                 {specs.map((spec, index) => (
-                  <li key={index} className="spec-list-item">{spec}</li>
+                  <li key={index} className="spec-list-item">
+                    {spec}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -149,28 +161,33 @@ const ProductSpecsModal = ({ isOpen, onClose, product, inventoryData }) => {
                   <span>Stock</span>
                   <span>Price</span>
                 </div>
-                {Object.entries(inventoryData.sizes).map(([size, data]) => (
-                  <div 
-                    key={size} 
-                    className={`sizing-row ${data.available === 0 ? 'out-of-stock' : ''}`}
-                  >
-                    <span className="size-name">{size}</span>
-                    <span className="size-stock">
-                      {data.available > 0 ? data.available : 'Out'}
-                    </span>
-                    <span className="size-price">${data.price?.toFixed(2)}</span>
+                {selectedColor?.sizes ? (
+                  Object.entries(selectedColor.sizes).map(([size, data]) => (
+                    <div
+                      key={size}
+                      className={`sizing-row ${data.available === 0 ? 'out-of-stock' : ''}`}
+                    >
+                      <span className="size-name">{size}</span>
+                      <span className="size-stock">
+                        {data.available > 0 ? data.available : 'Out'}
+                      </span>
+                      <span className="size-price">
+                        ${data.price?.toFixed(2)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="sizing-row">
+                    <span>Select a color to see size availability</span>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
         </div>
 
         <div className="specs-modal-footer">
-          <button 
-            className="specs-close-btn"
-            onClick={onClose}
-          >
+          <button className="specs-close-btn" onClick={onClose}>
             Close Specifications
           </button>
         </div>
