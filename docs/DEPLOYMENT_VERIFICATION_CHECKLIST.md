@@ -287,8 +287,8 @@ Open Console (F12) on homepage:
 
 ## 📝 **DEPLOYMENT LOG**
 
-**Date:** ******\_\_\_\_******  
-**Deploy ID:** ******\_\_\_\_******  
+**Date:** **\*\***\_\_\_\_**\*\***  
+**Deploy ID:** **\*\***\_\_\_\_**\*\***  
 **Status:** ☐ Success ☐ Partial ☐ Failed
 
 **Issues Found:**

@@ -1,3 +1,6 @@
+// Image proxy for S&S Activewear images
+// Node 18+ has built-in fetch, but we'll be explicit for clarity
+
 exports.handler = async (event) => {
   console.log(
     'ss-images function called with event:',
@@ -51,7 +54,7 @@ exports.handler = async (event) => {
   console.log('Fetching from SSActivewear URL:', ssUrl);
 
   try {
-    // Fetch the image from SSActivewear
+    // Fetch the image from SSActivewear (using Node 18+ built-in fetch)
     const response = await fetch(ssUrl);
     console.log('SSActivewear response status:', response.status);
     console.log(
@@ -121,6 +124,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         error: 'Internal server error',
         message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
         url: ssUrl,
         imagePath: imagePath,
       }),
