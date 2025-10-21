@@ -1,11 +1,11 @@
 ﻿// Tag Team Printing: get-inventory.js
 // Live S&S inventory + retail markup logic + in-memory cache
 
-import {
+const {
   sortSizesByOrder,
   getSizeAdjustedWholesalePrice,
   calculateRetailPrice,
-} from '../../src/config/pricing.js';
+} = require('../../src/config/pricing.js');
 
 // 🧠 Simple in-memory cache (clears on cold start)
 const cache = new Map();
@@ -24,7 +24,7 @@ function setCache(styleID, data) {
   cache.set(styleID, { data, expires: Date.now() + CACHE_TTL });
 }
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
   const { styleCode, styleID, color, clearCache } =
     event.queryStringParameters || {};
   const productStyleID = styleCode || styleID;
