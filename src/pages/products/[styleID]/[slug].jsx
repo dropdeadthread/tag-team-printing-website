@@ -59,7 +59,7 @@ const ProductPage = () => {
 
     const apiEndpoint =
       typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? '/api/get-product'
+        ? '/.netlify/functions/get-product'
         : '/.netlify/functions/get-product';
 
     fetch(`${apiEndpoint}?styleID=${styleID}`)

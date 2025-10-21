@@ -119,7 +119,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
     // First, get all products in category for brand filtering (without pagination)
     const apiEndpoint =
       typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? '/api/list-products'
+        ? '/.netlify/functions/list-products'
         : '/.netlify/functions/list-products';
 
     fetch(`${apiEndpoint}?category=${categoryId}&limit=1000`) // Get all products

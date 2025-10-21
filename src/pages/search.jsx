@@ -1,15 +1,17 @@
-import React, { useState } from "react";
-import ProductCard from "../components/ProductCard";
+import React, { useState } from 'react';
+import ProductCard from '../components/ProductCard';
 
 const SearchPage = () => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async e => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch(`/api/search-products?q=${encodeURIComponent(query)}`);
+    const res = await fetch(
+      `/.netlify/functions/search-products?q=${encodeURIComponent(query)}`,
+    );
     const data = await res.json();
     setResults(data);
     setLoading(false);
@@ -21,14 +23,14 @@ const SearchPage = () => {
       <form onSubmit={handleSearch}>
         <input
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by keyword, style, etc."
         />
         <button type="submit">Search</button>
       </form>
       {loading && <div>Loading...</div>}
       <div className="product-grid">
-        {results.map(product => (
+        {results.map((product) => (
           <ProductCard key={product.styleID} product={product} />
         ))}
       </div>

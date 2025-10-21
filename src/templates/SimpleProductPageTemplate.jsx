@@ -2013,9 +2013,9 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                                   ? '0 4px 12px rgba(255, 80, 80, 0.5)'
                                   : '0 2px 4px rgba(0,0,0,0.3)',
                             }}
-                            title={`${color.name} ${!color.available ? '(Unavailable)' : colorStock ? `(${colorStock} in stock)` : ''}`}
+                            title={`${color.name} ${!colorAvailable ? '(Unavailable)' : colorStock ? `(${colorStock} in stock)` : ''}`}
                           >
-                            {!color.available && (
+                            {!colorAvailable && (
                               <span
                                 style={{
                                   color: 'red',

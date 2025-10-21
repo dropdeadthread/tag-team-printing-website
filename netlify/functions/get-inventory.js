@@ -25,11 +25,18 @@ function setCache(styleID, data) {
 }
 
 export const handler = async (event) => {
-  const { styleCode, styleID, color } = event.queryStringParameters || {};
+  const { styleCode, styleID, color, clearCache } =
+    event.queryStringParameters || {};
   const productStyleID = styleCode || styleID;
 
   if (!productStyleID)
     return errorResponse(400, 'styleCode or styleID is required');
+
+  // 🧹 Clear cache if requested
+  if (clearCache === 'true') {
+    cache.delete(productStyleID);
+    console.log(`[get-inventory] Cache cleared for styleID: ${productStyleID}`);
+  }
 
   // 🪣 Check cache first
   const cached = getCached(productStyleID);
