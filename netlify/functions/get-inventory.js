@@ -1,21 +1,17 @@
-﻿// Professional S&S API inventory function - optimized for performance
-// Uses built-in fetch (Node.js 18+) for better Netlify compatibility
+﻿// Tag Team Printing - get-inventory.js
+// Pulls real-time S&S inventory, applies Tag Team's markup logic, and returns retail-ready data.
 
-exports.handler = async (event) => {
+import {
+  getSizeAdjustedRetailPrice,
+  sortSizesByOrder,
+} from '../../src/config/pricing.js'; // ✅ corrected path
+
+export const handler = async (event) => {
   const { styleCode, styleID, color } = event.queryStringParameters || {};
-
-  // Accept both styleCode and styleID for compatibility
   const productStyleID = styleCode || styleID;
 
   if (!productStyleID) {
-    return {
-      statusCode: 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'styleCode or styleID is required' }),
-    };
+    return errorResponse(400, 'styleCode or styleID is required');
   }
 
   try {
@@ -23,203 +19,170 @@ exports.handler = async (event) => {
     const apiKey = process.env.SNS_API_KEY;
 
     if (!username || !apiKey) {
-      console.error('S&S API credentials not found');
-      return {
-        statusCode: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'API credentials not configured' }),
-      };
+      console.error('[get-inventory] Missing API credentials');
+      return errorResponse(500, 'API credentials not configured');
     }
 
     const authHeader =
       'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
+    const headers = {
+      Accept: 'application/json',
+      Authorization: authHeader,
+      'User-Agent': 'TagTeamPrinting/1.0',
+    };
 
-    // Use products endpoint for specific style - much faster than fetching all styles
-    const PRODUCTS_URL = `https://api-ca.ssactivewear.com/v2/products/?styleid=${productStyleID}`;
+    console.log(`[get-inventory] Fetching styleID: ${productStyleID}`);
 
-    console.log(
-      `[get-inventory] Fetching inventory for styleID: ${productStyleID}, color: ${color || 'all'}`,
-    );
+    // ⚡ Fetch both datasets in parallel for efficiency
+    const [productRes, inventoryRes] = await Promise.all([
+      fetch(
+        `https://api-ca.ssactivewear.com/v2/products/?styleid=${productStyleID}`,
+        { headers },
+      ),
+      fetch(
+        `https://api-ca.ssactivewear.com/v2/inventory/?styleid=${productStyleID}`,
+        { headers },
+      ),
+    ]);
 
-    // Fetch specific style products (faster than all styles)
-    const response = await fetch(PRODUCTS_URL, {
-      headers: {
-        Accept: 'application/json',
-        Authorization: authHeader,
-        'User-Agent': 'TagTeamPrinting/1.0',
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
+    if (!productRes.ok || !inventoryRes.ok) {
       console.error(
-        `[get-inventory] S&S API error: ${response.status} ${response.statusText}`,
+        '[get-inventory] S&S API error:',
+        productRes.status,
+        inventoryRes.status,
       );
-      return {
-        statusCode: response.status,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          error: `S&S API error: ${response.status}`,
-          details: response.statusText,
-        }),
-      };
+      return errorResponse(
+        productRes.status || inventoryRes.status,
+        'S&S API request failed',
+      );
     }
 
-    const allProducts = await response.json();
+    const [products, inventory] = await Promise.all([
+      productRes.json(),
+      inventoryRes.json(),
+    ]);
 
-    if (!Array.isArray(allProducts)) {
-      console.error('[get-inventory] Unexpected API response format');
-      return {
-        statusCode: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Unexpected API response format' }),
-      };
-    }
-
-    if (allProducts.length === 0) {
+    // ✅ Validate responses
+    if (!Array.isArray(products) || products.length === 0) {
       console.error(
         `[get-inventory] No products found for styleID ${productStyleID}`,
       );
-      return {
-        statusCode: 404,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Style not found' }),
-      };
+      return errorResponse(404, 'Style not found');
     }
 
-    // Get style info from first product
-    const firstProduct = allProducts[0];
-    const styleName = firstProduct.styleName || productStyleID;
+    if (!Array.isArray(inventory)) {
+      console.error('[get-inventory] Unexpected inventory response format');
+      return errorResponse(500, 'Unexpected inventory format');
+    }
 
+    const styleName = products[0]?.styleName || `Style ${productStyleID}`;
     console.log(
-      `[get-inventory] Found ${allProducts.length} products for style: ${styleName}`,
+      `[get-inventory] Found ${products.length} variants for ${styleName}`,
     );
 
-    // Process products to build inventory
+    // 🧮 Map SKU → total quantity from the inventory API
+    const inventoryMap = {};
+    inventory.forEach((item) => {
+      if (Array.isArray(item.warehouses)) {
+        const totalQty = item.warehouses.reduce(
+          (sum, w) => sum + (parseInt(w.qty) || 0),
+          0,
+        );
+        inventoryMap[item.sku] = totalQty;
+      }
+    });
+
+    // 🧱 Build structured data
     const sizes = {};
     const colorMap = new Map();
 
-    allProducts.forEach((product) => {
-      // Extract size and color info
-      const sizeName = product.size;
-      const colorName = product.colorName;
-      const colorHex = product.color1 || '#CCCCCC';
+    for (const product of products) {
+      const {
+        sizeName,
+        colorName,
+        brandName,
+        wholesalePrice,
+        sku,
+        color1,
+        colorSwatchImage,
+        colorFrontImage,
+      } = product;
 
-      // Calculate total inventory across warehouses
-      const totalQty =
-        (parseInt(product.warehouse1Qty) || 0) +
-        (parseInt(product.warehouse2Qty) || 0) +
-        (parseInt(product.warehouse3Qty) || 0);
+      if (color && colorName !== color) continue;
 
-      // If filtering by specific color, only process that color''s products
-      if (color && colorName !== color) {
-        return; // Skip this product
-      }
+      const totalQty = inventoryMap[sku] || 0;
+      const retailPrice = getSizeAdjustedRetailPrice(
+        wholesalePrice,
+        sizeName,
+        1,
+        brandName,
+      );
 
-      // Build sizes inventory
+      // Aggregate inventory per size
       if (!sizes[sizeName]) {
-        sizes[sizeName] = {
-          price: parseFloat(product.customerPrice) || 14.61,
-          wholesalePrice: parseFloat(product.wholesalePrice) || 9.13,
-          available: 0,
-        };
+        sizes[sizeName] = { price: retailPrice, available: 0 };
       }
       sizes[sizeName].available += totalQty;
 
-      // Build colors array with images - THIS IS THE KEY PART!
+      // Build color info
       if (!colorMap.has(colorName)) {
         colorMap.set(colorName, {
           name: colorName,
-          hex: colorHex,
+          hex: color1 || '#CCCCCC',
+          swatch: colorSwatchImage
+            ? `https://www.ssactivewear.com/${colorSwatchImage}`
+            : null,
+          image: colorFrontImage
+            ? `https://www.ssactivewear.com/${colorFrontImage}`
+            : null,
           available: totalQty > 0,
-          colorFrontImage: product.colorFrontImage || null,
-          colorSideImage: product.colorSideImage || null,
-          colorBackImage: product.colorBackImage || null,
         });
-      } else {
-        // Update existing color data
-        const existingColor = colorMap.get(colorName);
-        if (totalQty > 0) {
-          existingColor.available = true;
-        }
-        // Prefer images from products that have stock
-        if (
-          totalQty > 0 &&
-          !existingColor.colorFrontImage &&
-          product.colorFrontImage
-        ) {
-          existingColor.colorFrontImage = product.colorFrontImage;
-          existingColor.colorSideImage = product.colorSideImage;
-          existingColor.colorBackImage = product.colorBackImage;
-        }
+      } else if (totalQty > 0) {
+        colorMap.get(colorName).available = true;
       }
-    });
+    }
 
-    // Convert color map to array
+    // 🧩 Sort sizes using your predefined order
+    const sortedSizes = sortSizesByOrder(sizes);
     const colors = Array.from(colorMap.values());
 
-    // Sort sizes in standard order
-    const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
-    const sortedSizes = {};
-
-    sizeOrder.forEach((size) => {
-      if (sizes[size]) {
-        sortedSizes[size] = sizes[size];
-      }
-    });
-
-    // Add any remaining sizes not in standard order
-    Object.keys(sizes).forEach((size) => {
-      if (!sortedSizes[size]) {
-        sortedSizes[size] = sizes[size];
-      }
-    });
-
-    const responseData = {
-      styleID: parseInt(productStyleID),
-      styleName: styleName,
-      currentColor: color || null,
-      sizes: sortedSizes,
-      colors: colors,
-      lastUpdated: new Date().toISOString(),
-    };
-
     console.log(
-      `[get-inventory] Returning ${colors.length} colors, ${Object.keys(sortedSizes).length} sizes`,
+      `[get-inventory] Returning ${colors.length} colors, ${Object.keys(sortedSizes).length} sizes for ${styleName}`,
     );
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify(responseData),
-    };
-  } catch (error) {
-    console.error('[get-inventory] Error:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({
-        error: 'Failed to fetch inventory',
-        details: error.message,
-      }),
-    };
+    return successResponse({
+      styleID: parseInt(productStyleID),
+      styleName,
+      sizes: sortedSizes,
+      colors,
+      lastUpdated: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('[get-inventory] Error:', err);
+    return errorResponse(500, err.message || 'Failed to fetch inventory');
   }
 };
+
+// ✅ Helper utilities
+function successResponse(body) {
+  return {
+    statusCode: 200,
+    headers: corsHeaders(),
+    body: JSON.stringify(body),
+  };
+}
+
+function errorResponse(code, message) {
+  return {
+    statusCode: code,
+    headers: corsHeaders(),
+    body: JSON.stringify({ error: message }),
+  };
+}
+
+function corsHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  };
+}
