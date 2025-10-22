@@ -87,36 +87,37 @@ exports.handler = async (event) => {
 
     console.log(`[get-inventory] Fetching styleID: ${productStyleID}`);
 
-    // Fetch specific style by ID to get SKU-level data with all image URLs
-    const [styleRes, invRes] = await Promise.all([
-      fetch(`https://api-ca.ssactivewear.com/v2/styles/${productStyleID}`, {
-        headers,
-      }),
+    // Fetch products by styleID - this returns array of SKUs with full details
+    const [prodRes, invRes] = await Promise.all([
+      fetch(
+        `https://api-ca.ssactivewear.com/v2/products/?styleid=${productStyleID}`,
+        { headers },
+      ),
       fetch(
         `https://api-ca.ssactivewear.com/v2/inventory/?styleid=${productStyleID}`,
         { headers },
       ),
     ]);
 
-    if (!styleRes.ok || !invRes.ok) {
+    if (!prodRes.ok || !invRes.ok) {
       console.error(
-        `[get-inventory] API error - Style: ${styleRes.status}, Inventory: ${invRes.status}`,
+        `[get-inventory] API error - Products: ${prodRes.status}, Inventory: ${invRes.status}`,
       );
       return errorResponse(502, 'S&S API request failed');
     }
 
-    const [style, inventory] = await Promise.all([
-      styleRes.json(),
+    const [products, inventory] = await Promise.all([
+      prodRes.json(),
       invRes.json(),
     ]);
 
-    if (!style || !Array.isArray(style.skus) || style.skus.length === 0)
+    if (!Array.isArray(products) || products.length === 0)
       return errorResponse(404, 'Style not found');
 
-    const styleName = style.styleName || `Style ${productStyleID}`;
-    const brandName = style.brandName || 'Unknown Brand';
+    const styleName = products[0]?.styleName || `Style ${productStyleID}`;
+    const brandName = products[0]?.brandName || 'Unknown Brand';
     console.log(
-      `[get-inventory] Found ${style.skus.length} SKUs for ${brandName} ${styleName}`,
+      `[get-inventory] Found ${products.length} SKUs for ${brandName} ${styleName}`,
     );
 
     // 🧮 Map SKU → totalQty
@@ -131,29 +132,29 @@ exports.handler = async (event) => {
       }
     });
 
-    // 🧱 Build color structure from SKUs
+    // 🧱 Build color structure from products (each product is a SKU variant)
     const colorMap = new Map();
 
-    for (const skuData of style.skus) {
+    for (const product of products) {
       const {
         sku,
-        size,
+        sizeName,
         colorName,
-        customerPrice,
+        wholesalePrice,
         color1,
         colorSwatchImage,
         colorFrontImage,
         colorSideImage,
         colorBackImage,
-      } = skuData;
+      } = product;
 
       if (color && colorName !== color) continue;
 
       const totalQty = inventoryMap[sku] || 0;
       // Use markup pricing for individual product display instead of quantity tiers
       const adjustedWholesale = getSizeAdjustedWholesalePrice(
-        customerPrice,
-        size,
+        wholesalePrice,
+        sizeName,
       );
       const retailPrice = calculateRetailPrice(adjustedWholesale);
 
@@ -178,7 +179,7 @@ exports.handler = async (event) => {
       }
 
       const entry = colorMap.get(colorName);
-      entry.sizes[size] = {
+      entry.sizes[sizeName] = {
         available: totalQty,
         price: parseFloat(retailPrice) || 25.0,
       };
