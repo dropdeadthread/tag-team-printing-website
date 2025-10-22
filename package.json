@@ -22,7 +22,6 @@
     "update:styles": "node scripts/updateSustainableStyle.js"
   },
   "dependencies": {
-    "@reach/router": "^1.3.4",
     "@types/styled-components": "^5.1.34",
     "cloudinary": "^2.7.0",
     "co-body": "^6.2.0",
