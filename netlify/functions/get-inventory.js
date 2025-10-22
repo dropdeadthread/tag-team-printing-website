@@ -87,32 +87,28 @@ exports.handler = async (event) => {
 
     console.log(`[get-inventory] Fetching styleID: ${productStyleID}`);
 
-    // Fetch all styles to get SKU-level data with all image URLs
-    const [stylesRes, invRes] = await Promise.all([
-      fetch('https://api-ca.ssactivewear.com/v2/styles/', { headers }),
+    // Fetch specific style by ID to get SKU-level data with all image URLs
+    const [styleRes, invRes] = await Promise.all([
+      fetch(`https://api-ca.ssactivewear.com/v2/styles/${productStyleID}`, {
+        headers,
+      }),
       fetch(
         `https://api-ca.ssactivewear.com/v2/inventory/?styleid=${productStyleID}`,
         { headers },
       ),
     ]);
 
-    if (!stylesRes.ok || !invRes.ok)
+    if (!styleRes.ok || !invRes.ok) {
+      console.error(
+        `[get-inventory] API error - Style: ${styleRes.status}, Inventory: ${invRes.status}`,
+      );
       return errorResponse(502, 'S&S API request failed');
+    }
 
-    const [allStyles, inventory] = await Promise.all([
-      stylesRes.json(),
+    const [style, inventory] = await Promise.all([
+      styleRes.json(),
       invRes.json(),
     ]);
-
-    if (!Array.isArray(allStyles))
-      return errorResponse(502, 'Invalid S&S API response');
-
-    // Find the specific style we need
-    const style = allStyles.find(
-      (s) =>
-        s.styleID === parseInt(productStyleID) ||
-        s.styleName === productStyleID,
-    );
 
     if (!style || !Array.isArray(style.skus) || style.skus.length === 0)
       return errorResponse(404, 'Style not found');
