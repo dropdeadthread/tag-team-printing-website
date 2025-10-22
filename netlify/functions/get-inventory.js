@@ -87,32 +87,40 @@ exports.handler = async (event) => {
 
     console.log(`[get-inventory] Fetching styleID: ${productStyleID}`);
 
-    const [prodRes, invRes] = await Promise.all([
-      fetch(
-        `https://api-ca.ssactivewear.com/v2/products/?styleid=${productStyleID}`,
-        { headers },
-      ),
+    // Fetch all styles to get SKU-level data with all image URLs
+    const [stylesRes, invRes] = await Promise.all([
+      fetch('https://api-ca.ssactivewear.com/v2/styles/', { headers }),
       fetch(
         `https://api-ca.ssactivewear.com/v2/inventory/?styleid=${productStyleID}`,
         { headers },
       ),
     ]);
 
-    if (!prodRes.ok || !invRes.ok)
+    if (!stylesRes.ok || !invRes.ok)
       return errorResponse(502, 'S&S API request failed');
 
-    const [products, inventory] = await Promise.all([
-      prodRes.json(),
+    const [allStyles, inventory] = await Promise.all([
+      stylesRes.json(),
       invRes.json(),
     ]);
 
-    if (!Array.isArray(products) || products.length === 0)
+    if (!Array.isArray(allStyles))
+      return errorResponse(502, 'Invalid S&S API response');
+
+    // Find the specific style we need
+    const style = allStyles.find(
+      (s) =>
+        s.styleID === parseInt(productStyleID) ||
+        s.styleName === productStyleID,
+    );
+
+    if (!style || !Array.isArray(style.skus) || style.skus.length === 0)
       return errorResponse(404, 'Style not found');
 
-    const styleName = products[0]?.styleName || `Style ${productStyleID}`;
-    const brandName = products[0]?.brandName || 'Unknown Brand';
+    const styleName = style.styleName || `Style ${productStyleID}`;
+    const brandName = style.brandName || 'Unknown Brand';
     console.log(
-      `[get-inventory] Found ${products.length} variants for ${brandName} ${styleName}`,
+      `[get-inventory] Found ${style.skus.length} SKUs for ${brandName} ${styleName}`,
     );
 
     // 🧮 Map SKU → totalQty
@@ -127,28 +135,29 @@ exports.handler = async (event) => {
       }
     });
 
-    // 🧱 Build color structure
+    // 🧱 Build color structure from SKUs
     const colorMap = new Map();
 
-    for (const product of products) {
+    for (const skuData of style.skus) {
       const {
         sku,
-        sizeName,
+        size,
         colorName,
-        brandName,
-        wholesalePrice,
+        customerPrice,
         color1,
         colorSwatchImage,
         colorFrontImage,
-      } = product;
+        colorSideImage,
+        colorBackImage,
+      } = skuData;
 
       if (color && colorName !== color) continue;
 
       const totalQty = inventoryMap[sku] || 0;
       // Use markup pricing for individual product display instead of quantity tiers
       const adjustedWholesale = getSizeAdjustedWholesalePrice(
-        wholesalePrice,
-        sizeName,
+        customerPrice,
+        size,
       );
       const retailPrice = calculateRetailPrice(adjustedWholesale);
 
@@ -162,12 +171,18 @@ exports.handler = async (event) => {
           colorFrontImage: colorFrontImage
             ? `https://www.ssactivewear.com/${colorFrontImage}`
             : null,
+          colorSideImage: colorSideImage
+            ? `https://www.ssactivewear.com/${colorSideImage}`
+            : null,
+          colorBackImage: colorBackImage
+            ? `https://www.ssactivewear.com/${colorBackImage}`
+            : null,
           sizes: {},
         });
       }
 
       const entry = colorMap.get(colorName);
-      entry.sizes[sizeName] = {
+      entry.sizes[size] = {
         available: totalQty,
         price: parseFloat(retailPrice) || 25.0,
       };
