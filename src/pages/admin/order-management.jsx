@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 
-const ADMIN_PASSWORD = "2StaceyS>@ne"; // Change this to your real password
+// SECURITY: Admin password should be verified server-side only
+// This client-side check is temporary and not secure
+const ADMIN_PASSWORD = process.env.GATSBY_ADMIN_PASSWORD || "changeMe";
 
 const OrderManagementAdmin = () => {
   const [orders, setOrders] = useState([]);
@@ -23,9 +25,11 @@ const OrderManagementAdmin = () => {
   ];
 
   useEffect(() => {
-    // Simple localStorage token check
-    const token = window.localStorage.getItem("adminToken");
-    if (token === ADMIN_PASSWORD) setIsAdmin(true);
+    // SSR guard: only access localStorage in browser
+    if (typeof window !== 'undefined') {
+      const token = window.localStorage.getItem("adminToken");
+      if (token === ADMIN_PASSWORD) setIsAdmin(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -36,7 +40,10 @@ const OrderManagementAdmin = () => {
   const handleLogin = () => {
     if (passwordInput === ADMIN_PASSWORD) {
       setIsAdmin(true);
-      window.localStorage.setItem("adminToken", passwordInput);
+      // SSR guard: only access localStorage in browser
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem("adminToken", passwordInput);
+      }
     } else {
       alert("Incorrect password");
     }

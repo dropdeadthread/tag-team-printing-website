@@ -6,16 +6,22 @@ const SavedItems = () => {
   const [savedProducts, setSavedProducts] = useState([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("savedItems");
-    if (saved) {
-      setSavedProducts(JSON.parse(saved));
+    // SSR guard: only access localStorage in browser
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem("savedItems");
+      if (saved) {
+        setSavedProducts(JSON.parse(saved));
+      }
     }
   }, []);
 
   const handleRemove = (productId) => {
     const updatedItems = savedProducts.filter((item) => item.id !== productId);
     setSavedProducts(updatedItems);
-    localStorage.setItem("savedItems", JSON.stringify(updatedItems));
+    // SSR guard: only access localStorage in browser
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("savedItems", JSON.stringify(updatedItems));
+    }
   };
 
   return (

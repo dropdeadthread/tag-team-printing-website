@@ -44,6 +44,7 @@ module.exports = {
         pure: true,
       },
     },
+    `gatsby-plugin-react-helmet`,
     `gatsby-plugin-postcss`,
     `gatsby-plugin-image`,
     `gatsby-plugin-sharp`,

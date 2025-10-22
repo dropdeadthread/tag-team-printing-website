@@ -1,4 +1,4 @@
-﻿// Tag Team Printing: get-inventory.js
+// Tag Team Printing: get-inventory.js
 // Live S&S inventory + retail markup logic + in-memory cache
 
 // Pricing functions directly embedded to avoid require path issues
