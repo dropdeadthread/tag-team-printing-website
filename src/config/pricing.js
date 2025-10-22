@@ -197,16 +197,3 @@ export function shouldShowWholesale(userRole = null) {
   // Only show wholesale to admin users
   return userRole === 'admin' || userRole === 'staff';
 }
-
-// CommonJS exports for Netlify functions
-module.exports = {
-  PRICING_CONFIG,
-  getQuantityBasedPrice,
-  getMarkupMultiplier,
-  calculateRetailPrice,
-  getSizeAdjustedWholesalePrice,
-  getSizeAdjustedRetailPrice,
-  sortSizesByOrder,
-  getMinimumQuantity,
-  shouldShowWholesale,
-};

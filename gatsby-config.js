@@ -33,7 +33,17 @@ module.exports = {
         icon: `static/images/logo.png`,
       },
     },
-
+    {
+      resolve: `gatsby-plugin-styled-components`,
+      options: {
+        displayName: true,
+        fileName: true,
+        ssr: true,
+        minify: false,
+        transpileTemplateLiterals: true,
+        pure: true,
+      },
+    },
     `gatsby-plugin-postcss`,
     `gatsby-plugin-image`,
     `gatsby-plugin-sharp`,
