@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { calculatePrintQuote } from '../helpers/calculatePrintQuote';
-import { getQuantityBasedPrice } from '../config/pricing';
 import { useOrder } from '../context/OrderContext';
 import { trackOrderSubmission } from '../utils/analytics';
 import FileUpload from './FileUpload';
@@ -98,6 +97,51 @@ const RUSH_ORDER_OPTIONS = [
     description: '+50% total',
   },
 ];
+
+// Inline pricing function to avoid ES module SSR issues
+const getQuantityBasedPrice = (wholesalePrice, quantity, brandName = '') => {
+  const price = parseFloat(wholesalePrice);
+  const qty = parseInt(quantity) || 1;
+
+  const isPremiumBlank =
+    price >= 7.0 ||
+    brandName.toLowerCase().includes('bella') ||
+    brandName.toLowerCase().includes('canvas') ||
+    brandName.toLowerCase().includes('as colour') ||
+    brandName.toLowerCase().includes('next level');
+
+  const isQualityBlank = price >= 4.3 && price < 7.0;
+
+  let tiers;
+  if (isPremiumBlank) {
+    tiers = [
+      { minQty: 1, maxQty: 11, price: 20.95 },
+      { minQty: 12, maxQty: 23, price: 16.95 },
+      { minQty: 24, maxQty: 47, price: 15.33 },
+      { minQty: 48, maxQty: 71, price: 14.45 },
+      { minQty: 72, maxQty: 143, price: 13.58 },
+      { minQty: 144, maxQty: 287, price: 12.95 },
+      { minQty: 288, maxQty: Infinity, price: 12.33 },
+    ];
+  } else if (isQualityBlank) {
+    tiers = [
+      { minQty: 1, maxQty: 11, price: 16.95 },
+      { minQty: 12, maxQty: 23, price: 14.95 },
+      { minQty: 24, maxQty: 47, price: 13.33 },
+      { minQty: 48, maxQty: 71, price: 12.45 },
+      { minQty: 72, maxQty: 143, price: 11.58 },
+      { minQty: 144, maxQty: 287, price: 10.95 },
+      { minQty: 288, maxQty: Infinity, price: 10.33 },
+    ];
+  } else {
+    // Legacy markup for basic blanks
+    const multiplier = price <= 4.25 ? 2.5 : price <= 6.99 ? 2.0 : 1.6;
+    return (price * multiplier).toFixed(2);
+  }
+
+  const tier = tiers.find((t) => qty >= t.minQty && qty <= t.maxQty);
+  return tier ? tier.price.toFixed(2) : (price * 1.6).toFixed(2);
+};
 
 const SectionHeader = styled.h3`
   font-family: 'HawlersEightRough', 'Impact', sans-serif;
@@ -344,14 +388,14 @@ const QuoteDisplay = styled.div`
   }
 `;
 
-const QuoteTotal = styled.div`
+const _QuoteTotal = styled.div`
   font-size: 2.5rem;
   font-weight: 900;
   font-family: 'HawlersEightRough', sans-serif;
   margin-bottom: 1rem;
 `;
 
-const QuoteBreakdown = styled.div`
+const _QuoteBreakdown = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
@@ -1084,7 +1128,7 @@ Error: ${error.message}`);
                       fontStyle: 'italic',
                     }}
                   >
-                    Select "Pantone/Custom" for special colors
+                    Select &quot;Pantone/Custom&quot; for special colors
                   </p>
                 </div>
               )}
@@ -1447,7 +1491,7 @@ Error: ${error.message}`);
                 marginTop: '4px',
               }}
             >
-              We'll send your order confirmation here
+              We&apos;ll send your order confirmation here
             </span>
           </label>
           <input
@@ -1512,7 +1556,7 @@ Error: ${error.message}`);
       </InputGroup>
 
       <InputGroup style={{ marginBottom: '2rem' }}>
-        <label
+        <div
           style={{
             fontSize: '1rem',
             fontWeight: '600',
@@ -1522,7 +1566,7 @@ Error: ${error.message}`);
           }}
         >
           📁 Upload Artwork Files
-        </label>
+        </div>
         <div
           style={{
             fontSize: '0.8rem',

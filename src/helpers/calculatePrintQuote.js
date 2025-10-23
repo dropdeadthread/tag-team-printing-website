@@ -1,4 +1,32 @@
-import { PRICING_CONFIG, getMinimumQuantity } from '../config/pricing';
+// Inline config to avoid ES module SSR issues
+const PRICING_CONFIG = {
+  PRINT_SETUP_FEE_PER_COLOR: 30.0,
+  PRINT_FIRST_COLOR_WITH_UNDERBASE: 2.0,
+  PRINT_FIRST_COLOR_NO_UNDERBASE: 1.0,
+  PRINT_ADDITIONAL_COLOR_STANDARD: 1.5,
+  PRINT_ADDITIONAL_COLOR_PREMIUM: 1.75,
+  TAX_RATE: 0.13,
+  FALLBACK_GARMENT_PRICE: 25.0,
+};
+
+const getMinimumQuantity = (colorCount) => {
+  switch (colorCount) {
+    case 1:
+      return 15;
+    case 2:
+      return 20;
+    case 3:
+      return 30;
+    case 4:
+      return 40;
+    case 5:
+      return 50;
+    case 6:
+      return 60;
+    default:
+      return 15;
+  }
+};
 
 export function calculatePrintQuote({
   garmentQty,
@@ -11,8 +39,8 @@ export function calculatePrintQuote({
   garmentWholesalePrice = null, // NEW: actual garment cost from API
   needsUnderbase = null, // NEW: allow override of underbase calculation
   rushOrder = null, // NEW: rush order option (5day, 4day, 3day, 2day, or null)
-  garmentBrand = '', // NEW: for premium pricing detection
-  garmentStyle = '', // NEW: for premium pricing detection
+  garmentBrand = '', // eslint-disable-line no-unused-vars -- for premium pricing detection (reserved for future use)
+  garmentStyle = '', // eslint-disable-line no-unused-vars -- for premium pricing detection (reserved for future use)
 }) {
   if (garmentQty < 1 || colorCount < 1) {
     return {

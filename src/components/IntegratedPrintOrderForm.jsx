@@ -1,7 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/printorderform.css';
 import { calculatePrintQuote } from '../helpers/calculatePrintQuote';
-import { getMinimumQuantity } from '../config/pricing';
+
+// Inline pricing function to avoid ES module SSR issues
+const getMinimumQuantity = (colorCount) => {
+  switch (colorCount) {
+    case 1:
+      return 15;
+    case 2:
+      return 20;
+    case 3:
+      return 30;
+    case 4:
+      return 40;
+    case 5:
+      return 50;
+    case 6:
+      return 60;
+    default:
+      return 15;
+  }
+};
 
 // Helper function to determine if a garment color is dark (needs underbase)
 const isDarkGarment = (colorValue) => {
@@ -327,7 +346,7 @@ const IntegratedPrintOrderForm = ({
                 checked={garmentSource === 'own'}
                 onChange={() => handleGarmentSourceChange('own')}
               />
-              <span>I'll choose my own blanks from your catalog</span>
+              <span>I&apos;ll choose my own blanks from your catalog</span>
             </label>
           </div>
 
