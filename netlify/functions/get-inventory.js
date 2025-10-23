@@ -158,6 +158,10 @@ exports.handler = async (event) => {
         colorFrontImage,
         colorSideImage,
         colorBackImage,
+        // Try alternative image fields that might be SKU-specific
+        image,
+        frontImage,
+        productImage,
       } = product;
 
       if (color && colorName !== color) continue;
@@ -180,13 +184,20 @@ exports.handler = async (event) => {
           return `https://www.ssactivewear.com/${url}`;
         };
 
+        // IMPORTANT: Prefer SKU-specific images (image, frontImage, productImage) over generic color images
+        // SKU-specific images show the correct style+color, while colorFrontImage is generic across styles
+        const priorityFrontImage =
+          image || frontImage || productImage || colorFrontImage;
+        const prioritySideImage = colorSideImage; // Usually no SKU-specific side image
+        const priorityBackImage = colorBackImage; // Usually no SKU-specific back image
+
         colorMap.set(colorName, {
           name: colorName,
           hex: color1 || '#CCCCCC',
           swatchImg: ensureFullUrl(colorSwatchImage),
-          colorFrontImage: ensureFullUrl(colorFrontImage),
-          colorSideImage: ensureFullUrl(colorSideImage),
-          colorBackImage: ensureFullUrl(colorBackImage),
+          colorFrontImage: ensureFullUrl(priorityFrontImage),
+          colorSideImage: ensureFullUrl(prioritySideImage),
+          colorBackImage: ensureFullUrl(priorityBackImage),
           sizes: {},
         });
       }
