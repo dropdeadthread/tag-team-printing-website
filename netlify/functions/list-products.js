@@ -93,14 +93,50 @@ exports.handler = async function (event) {
 
     console.log(`Loaded ${data.length} total styles`);
 
-    // Filter by selected brands
-    const brandFiltered = data.filter(
-      (item) =>
+    // Filter by selected brands and exclude baby/youth products
+    const brandFiltered = data.filter((item) => {
+      // Brand filtering
+      const brandMatch =
         SELECTED_BRANDS.includes(item.brandName) &&
         !EXCLUDED_BRANDS.includes(item.brandName) &&
-        item.noeRetailing !== true,
+        item.noeRetailing !== true;
+
+      if (!brandMatch) return false;
+
+      // Filter out youth/baby products by title
+      const title = (item.title || '').toLowerCase();
+      const isYouthOrBaby =
+        title.includes('youth') ||
+        title.includes('toddler') ||
+        title.includes('infant') ||
+        title.includes('baby') ||
+        title.includes('onesie');
+
+      if (isYouthOrBaby) return false;
+
+      // Category-based filtering
+      const itemCategories = item.categories ? item.categories.split(',') : [];
+
+      // Exclude category 9 (Youth) and 64 (Baby/Infant)
+      if (itemCategories.includes('9') || itemCategories.includes('64')) {
+        return false;
+      }
+
+      // For headwear (category 56), only keep 5-panel hats
+      const isHeadwear = itemCategories.includes('56');
+      if (isHeadwear) {
+        const is5PanelHat =
+          title.includes('5-panel') ||
+          title.includes('five panel') ||
+          title.includes('5 panel');
+        return is5PanelHat;
+      }
+
+      return true;
+    });
+    console.log(
+      `After brand and product filtering: ${brandFiltered.length} products`,
     );
-    console.log(`After brand filtering: ${brandFiltered.length} products`);
 
     // Filter by category
     const categoryProducts = brandFiltered.filter((item) => {
