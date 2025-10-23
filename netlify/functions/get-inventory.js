@@ -135,6 +135,18 @@ exports.handler = async (event) => {
     // 🧱 Build color structure from products (each product is a SKU variant)
     const colorMap = new Map();
 
+    // Log first product to see all available fields (for debugging)
+    if (products.length > 0) {
+      console.log(
+        '[get-inventory] Sample product fields:',
+        Object.keys(products[0]),
+      );
+      console.log(
+        '[get-inventory] Sample product data:',
+        JSON.stringify(products[0], null, 2),
+      );
+    }
+
     for (const product of products) {
       const {
         sku,
