@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../context/CartContext';
 import Layout from '../components/Layout';
+import IntegratedPrintOrderForm from '../components/IntegratedPrintOrderForm';
 
 // Simple working product template that loads data directly
 const SimpleProductPageTemplate = ({ pageContext }) => {
@@ -139,7 +140,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
         >
           <h1 style={{ color: '#333' }}>Product not found</h1>
           <p style={{ color: '#666' }}>
-            The product you're looking for doesn't exist.
+            The product you&apos;re looking for doesn&apos;t exist.
           </p>
           <p style={{ color: '#666' }}>
             Looking for style code: {pageContext.styleCode}
@@ -594,7 +595,9 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
             {/* Back to Category Button */}
             {product && (
               <button
-                onClick={() => typeof window !== 'undefined' && window.history.back()}
+                onClick={() =>
+                  typeof window !== 'undefined' && window.history.back()
+                }
                 style={{
                   padding: '0.5rem 1rem',
                   backgroundColor: 'rgba(255,255,255,0.1)',
@@ -1980,7 +1983,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                             alignItems: 'center',
                             gap: '0.25rem',
                             cursor:
-                              color.available && !colorInventoryLoading
+                              colorAvailable && !colorInventoryLoading
                                 ? 'pointer'
                                 : 'not-allowed',
                           }}
@@ -1996,7 +1999,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                                   ? '4px solid #ff5050'
                                   : '3px solid #ddd',
                               opacity:
-                                color.available && !colorInventoryLoading
+                                colorAvailable && !colorInventoryLoading
                                   ? 1
                                   : 0.5,
                               transition: 'all 0.2s ease',

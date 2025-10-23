@@ -159,21 +159,22 @@ exports.handler = async (event) => {
       const retailPrice = calculateRetailPrice(adjustedWholesale);
 
       if (!colorMap.has(colorName)) {
+        // Helper to ensure URL has protocol (S&S API sometimes returns full URLs, sometimes relative)
+        const ensureFullUrl = (url) => {
+          if (!url) return null;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url; // Already a full URL
+          }
+          return `https://www.ssactivewear.com/${url}`;
+        };
+
         colorMap.set(colorName, {
           name: colorName,
           hex: color1 || '#CCCCCC',
-          swatchImg: colorSwatchImage
-            ? `https://www.ssactivewear.com/${colorSwatchImage}`
-            : null,
-          colorFrontImage: colorFrontImage
-            ? `https://www.ssactivewear.com/${colorFrontImage}`
-            : null,
-          colorSideImage: colorSideImage
-            ? `https://www.ssactivewear.com/${colorSideImage}`
-            : null,
-          colorBackImage: colorBackImage
-            ? `https://www.ssactivewear.com/${colorBackImage}`
-            : null,
+          swatchImg: ensureFullUrl(colorSwatchImage),
+          colorFrontImage: ensureFullUrl(colorFrontImage),
+          colorSideImage: ensureFullUrl(colorSideImage),
+          colorBackImage: ensureFullUrl(colorBackImage),
           sizes: {},
         });
       }
