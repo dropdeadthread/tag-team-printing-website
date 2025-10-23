@@ -58,7 +58,9 @@ exports.sourceNodes = async ({
         'YP Classics',
         'Valucap',
       ];
-      const selectedCategories = ['21', '36', '38', '56', '9', '64', '11'];
+      // Category IDs: 21=T-Shirts, 36=Hoodies, 38=Long Sleeve, 56=Headwear, 11=Tank Tops
+      // Removed: 9=Youth, 64=Baby/Infant/Onesies
+      const selectedCategories = ['21', '36', '38', '56', '11'];
 
       const filteredData = data
         .filter((item) => {
@@ -73,7 +75,29 @@ exports.sourceNodes = async ({
                 .map((id) => id.trim())
                 .includes(catId),
             );
-          return brandMatch && categoryMatch;
+
+          // Filter out youth/baby products by title
+          const title = (item.title || '').toLowerCase();
+          const isYouthOrBaby =
+            title.includes('youth') ||
+            title.includes('toddler') ||
+            title.includes('infant') ||
+            title.includes('baby') ||
+            title.includes('onesie');
+
+          // For headwear (category 56), only keep 5-panel hats
+          const isHeadwear = item.categories && item.categories.includes('56');
+          const is5PanelHat =
+            title.includes('5-panel') ||
+            title.includes('five panel') ||
+            title.includes('5 panel');
+
+          // If it's headwear, must be 5-panel; otherwise just check brand and category
+          if (isHeadwear) {
+            return brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
+          }
+
+          return brandMatch && categoryMatch && !isYouthOrBaby;
         })
         .slice(0, 500);
 
@@ -153,7 +177,9 @@ exports.sourceNodes = async ({
       'YP Classics',
       'Valucap',
     ]; // Popular, reliable brands with correct names
-    const selectedCategories = ['21', '36', '38', '56', '9', '64', '11']; // Our 7 categories: T-Shirts, Hoodies, Full-Zips, Long Sleeves, Fleece, Tank Tops, Headwear
+    // Category IDs: 21=T-Shirts, 36=Hoodies, 38=Long Sleeve, 56=Headwear, 11=Tank Tops
+    // Removed: 9=Youth, 64=Baby/Infant/Onesies
+    const selectedCategories = ['21', '36', '38', '56', '11'];
 
     const filteredData = data
       .filter((item) => {
@@ -168,7 +194,29 @@ exports.sourceNodes = async ({
               .map((id) => id.trim())
               .includes(catId),
           );
-        return brandMatch && categoryMatch;
+
+        // Filter out youth/baby products by title
+        const title = (item.title || '').toLowerCase();
+        const isYouthOrBaby =
+          title.includes('youth') ||
+          title.includes('toddler') ||
+          title.includes('infant') ||
+          title.includes('baby') ||
+          title.includes('onesie');
+
+        // For headwear (category 56), only keep 5-panel hats
+        const isHeadwear = item.categories && item.categories.includes('56');
+        const is5PanelHat =
+          title.includes('5-panel') ||
+          title.includes('five panel') ||
+          title.includes('5 panel');
+
+        // If it's headwear, must be 5-panel; otherwise just check brand and category
+        if (isHeadwear) {
+          return brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
+        }
+
+        return brandMatch && categoryMatch && !isYouthOrBaby;
       })
       .slice(0, 500); // Increased limit for more products
 
