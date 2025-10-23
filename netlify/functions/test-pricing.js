@@ -3,7 +3,7 @@ const {
   sortSizesByOrder,
   getSizeAdjustedWholesalePrice,
   calculateRetailPrice,
-} = require('../../src/config/pricing.js');
+} = require('./pricing-utils.cjs');
 
 exports.handler = async (event) => {
   try {
