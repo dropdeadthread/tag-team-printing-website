@@ -50,12 +50,28 @@ exports.handler = async (event) => {
   console.log('Extracted image path:', imagePath);
 
   // Construct the SSActivewear URL
-  const ssUrl = `https://www.ssactivewear.com/${imagePath}`;
+  // If imagePath already has protocol, use it as-is, otherwise prepend domain
+  let ssUrl;
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    ssUrl = imagePath;
+  } else {
+    ssUrl = `https://www.ssactivewear.com/${imagePath}`;
+  }
   console.log('Fetching from SSActivewear URL:', ssUrl);
 
   try {
     // Fetch the image from SSActivewear (using Node 18+ built-in fetch)
-    const response = await fetch(ssUrl);
+    // Add headers to appear as a legitimate browser request
+    const response = await fetch(ssUrl, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Referer: 'https://www.ssactivewear.com/',
+        Accept:
+          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    });
     console.log('SSActivewear response status:', response.status);
     console.log(
       'SSActivewear response headers:',
