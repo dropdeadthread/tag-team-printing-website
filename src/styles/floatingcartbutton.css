@@ -18,12 +18,12 @@
   animation: pulse 2s infinite !important;
 }
 
-/* Mobile: move cart button below header */
+/* Mobile: cart button on RIGHT (hamburger on LEFT) */
 @media (max-width: 768px) {
   .floating-cart-button {
-    top: 80px !important; /* Move below hamburger menu (header is ~70px) */
-    right: 10px !important;
-    width: 56px !important; /* Smaller on mobile but still 44px+ touch target */
+    top: 20px !important; /* Top right corner, aligned with header */
+    right: 15px !important; /* Right side of screen */
+    width: 56px !important; /* Good touch target */
     height: 56px !important;
     font-size: 22px !important;
   }

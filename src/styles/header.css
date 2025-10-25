@@ -64,31 +64,45 @@
 /* Mobile responsive */
 @media (max-width: 768px) {
   .site-header {
-    height: 70px; /* Reduced header height on mobile */
-    padding: 0.5rem 4vw; /* Reduced padding */
+    height: 90px; /* Increased to accommodate logo properly */
+    padding: 0.5rem 4vw;
+    justify-content: space-between; /* Logo left, hamburger right */
   }
 
   .logo {
-    font-size: 1.6rem; /* Smaller logo text on mobile */
+    font-size: 1.6rem;
+    z-index: 1002; /* Above everything */
+  }
+
+  .logo img {
+    height: 70px !important; /* Smaller logo on mobile */
+    width: auto !important;
   }
 
   .hamburger {
     display: block;
+    position: absolute;
+    left: 20px; /* Move hamburger to LEFT side */
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 1001; /* Above cart button */
+    font-size: 2.5rem; /* Larger for easier tapping */
   }
 
   .nav-links {
     position: absolute;
-    top: 70px;
-    right: 0;
+    top: 90px; /* Match new header height */
+    left: 0; /* Align to left since hamburger is on left */
+    right: auto;
     flex-direction: column;
-    align-items: flex-end;
-    background: #000;
+    align-items: center; /* Center the links */
+    background: rgba(0, 0, 0, 0.98); /* Slightly transparent black */
     width: 100%;
-    padding: 1rem 2rem;
+    padding: 1.5rem 2rem;
     display: none;
     border-top: 2px solid #fff5d1;
-    z-index: 998; /* Below cart button but above content */
+    border-bottom: 2px solid #fff5d1;
+    z-index: 998; /* Below hamburger/cart but above content */
   }
 
   .nav-links.show {
@@ -96,7 +110,10 @@
   }
 
   .nav-links a {
-    margin: 0.5rem 0;
-    font-size: 1.4rem; /* Slightly smaller on mobile */
+    margin: 0.75rem 0;
+    font-size: 1.3rem; /* Slightly smaller, more readable */
+    text-align: center;
+    width: 100%;
+    padding: 0.5rem 0;
   }
 }

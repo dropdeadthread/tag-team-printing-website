@@ -71,43 +71,50 @@ body {
 /* === RESPONSIVE MOBILE TWEAKS === */
 @media (max-width: 768px) {
   .homepage-wrapper {
-    min-height: auto; /* Allow natural height on mobile */
+    min-height: 100vh; /* Full viewport height */
+    padding-bottom: 60px; /* Space for footer scroll */
   }
 
   .banner-container {
     height: auto; /* Auto height to fit scaled image */
-    min-height: 200px; /* Minimum height */
-    max-height: 350px; /* Maximum height to prevent too tall */
-    margin-top: 60px; /* Space for header (reduced) */
-    margin-bottom: 10px; /* Small gap before buttons */
-    padding: 0 10px; /* Side padding */
+    min-height: 250px; /* Minimum height */
+    max-height: 380px; /* Maximum height to prevent too tall */
+    margin-top: 100px; /* More space below header to prevent overlap with logo */
+    margin-bottom: 20px; /* Gap before buttons */
+    padding: 0 15px; /* Side padding */
   }
 
   .banner-image {
     object-fit: contain; /* Show full image without cropping */
-    object-position: center top; /* Align to top so "TAG TEAM PRINTING" shows first */
+    object-position: center; /* Center the image */
     width: 100%; /* Full width */
     height: auto; /* Auto height maintains aspect ratio */
-    max-height: 350px; /* Match container max-height */
+    max-height: 380px; /* Match container max-height */
   }
 
   .home-action-buttons {
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 10px; /* Small positive margin */
-    margin-bottom: 60px; /* Extra bottom space for scrolling */
-    padding: 0 20px; /* Horizontal padding */
-    align-items: center; /* Center buttons */
+    flex-direction: row; /* Side by side on mobile */
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 40px; /* Space before footer */
+    padding: 0 15px;
+    justify-content: center; /* Center the buttons */
   }
 
   .action-button {
-    font-size: 1.3rem;
-    padding: 14px 28px; /* Good touch target */
-    min-height: 50px; /* Ensure 44px+ minimum touch target with border */
+    font-size: 1.15rem; /* Smaller font to fit side-by-side */
+    font-weight: bold; /* Make text stand out more */
+    padding: 16px 20px; /* Balanced padding */
+    min-height: 52px; /* Good touch target (44px+) */
     border-width: 2px;
     box-shadow: 3px 3px 0 #000;
-    width: 100%; /* Full width */
-    max-width: 280px; /* Reasonable max width */
+    width: auto; /* Auto width */
+    flex: 1; /* Equal width for both buttons */
+    max-width: 180px; /* Limit max width so they fit side-by-side */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
