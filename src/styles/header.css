@@ -63,8 +63,18 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
+  .site-header {
+    height: 70px; /* Reduced header height on mobile */
+    padding: 0.5rem 4vw; /* Reduced padding */
+  }
+
+  .logo {
+    font-size: 1.6rem; /* Smaller logo text on mobile */
+  }
+
   .hamburger {
     display: block;
+    z-index: 1001; /* Above cart button */
   }
 
   .nav-links {
@@ -78,7 +88,7 @@
     padding: 1rem 2rem;
     display: none;
     border-top: 2px solid #fff5d1;
-    z-index: 999;
+    z-index: 998; /* Below cart button but above content */
   }
 
   .nav-links.show {
@@ -87,5 +97,6 @@
 
   .nav-links a {
     margin: 0.5rem 0;
+    font-size: 1.4rem; /* Slightly smaller on mobile */
   }
 }

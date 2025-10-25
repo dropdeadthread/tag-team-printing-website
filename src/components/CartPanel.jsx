@@ -1,15 +1,37 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { CartContext } from '../context/CartContext';
-import '../styles/globals.css';
+import '../styles/cartpanel.css';
 
-const CartPanel = ({ onClose }) => {
-  const { cartItems, removeFromCart, clearCart } = useContext(CartContext);
+const CartPanel = ({ onClose, isOpen }) => {
+  const { cartItems, removeFromCart, clearCart, updateCartItemQuantity } =
+    useContext(CartContext);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const handleQuantityChange = (index, delta) => {
+    const item = cartItems[index];
+    const newQty = Math.max(1, (item.quantity || 1) + delta);
+    updateCartItemQuantity(index, newQty);
+  };
+
+  const handleClearCart = () => {
+    if (window.confirm('Are you sure you want to clear your cart?')) {
+      clearCart();
+    }
+  };
+
+  const handleRemove = (index) => {
+    if (window.confirm('Remove this item from cart?')) {
+      removeFromCart(index);
+    }
+  };
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert('Your cart is empty!');
       return;
     }
+
+    setIsCheckingOut(true);
 
     try {
       const response = await fetch('/api/create-checkout', {
@@ -34,143 +56,91 @@ const CartPanel = ({ onClose }) => {
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Checkout Error:', error);
-        // Silently redirect to custom checkout form in development
+        // Redirect to custom checkout form in development
         window.location.href = '/checkout';
       } else {
         alert(
           'There was a problem creating your checkout session. Please try again.',
         );
       }
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
+  const total = cartItems.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+    0,
+  );
+
   return (
-    <div
-      className="cart-panel"
-      style={{
-        position: 'fixed',
-        top: '120px',
-        right: 0,
-        width: '320px',
-        height: 'calc(100% - 120px)',
-        backgroundColor: '#111',
-        color: '#fff',
-        padding: '20px',
-        zIndex: 1001,
-        overflowY: 'auto',
-        boxShadow: '-3px 0 10px rgba(0,0,0,0.5)',
-      }}
-    >
-      {/* ✕ Close Button */}
+    <div className={`cart-panel ${isOpen ? 'open' : ''}`}>
+      {/* Close Button */}
       <button
         onClick={onClose}
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          background: '#ff0000',
-          border: '2px solid #fff',
-          borderRadius: '50%',
-          padding: '8px 12px',
-          cursor: 'pointer',
-          color: '#fff',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          zIndex: 9999,
-        }}
+        className="cart-panel-close"
+        aria-label="Close cart"
       >
         ✕
       </button>
 
       <h2>Your Cart</h2>
 
-      {/* 🛒 Cart Contents */}
+      {/* Cart Contents */}
       {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <p className="cart-panel-empty">Your cart is empty.</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {cartItems.map((item, index) => (
-            <li key={index} style={{ marginBottom: '10px' }}>
-              <p>
+        <>
+          <ul className="cart-panel-items">
+            {cartItems.map((item, index) => (
+              <li key={index} className="cart-panel-item">
                 <strong>{item.name || item.styleName}</strong>
-              </p>
-              <p>
-                {item.color} - {item.size}
-              </p>
-              <p>Qty: {item.quantity || 1}</p>
-              <p>${(item.price || 0).toFixed(2)}</p>
-              <button
-                onClick={() => removeFromCart(index)}
-                style={{
-                  backgroundColor: '#ff5050',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '5px 10px',
-                  cursor: 'pointer',
-                  marginTop: '5px',
-                }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <p>
+                  {item.color} - {item.size}
+                </p>
+                <div className="cart-panel-qty-controls">
+                  <button
+                    onClick={() => handleQuantityChange(index, -1)}
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <span>{item.quantity || 1}</span>
+                  <button
+                    onClick={() => handleQuantityChange(index, 1)}
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+                <p>${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</p>
+                <button
+                  onClick={() => handleRemove(index)}
+                  className="cart-panel-remove"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
 
-      {/* 🔘 Cart Actions */}
-      {cartItems.length > 0 && (
-        <div style={{ marginTop: '20px' }}>
-          <div
-            style={{
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-              marginBottom: '15px',
-              color: '#fff',
-            }}
-          >
-            Total: $
-            {cartItems
-              .reduce(
-                (total, item) =>
-                  total + (item.price || 0) * (item.quantity || 1),
-                0,
-              )
-              .toFixed(2)}
+          {/* Total and Actions */}
+          <div className="cart-panel-total">Total: ${total.toFixed(2)}</div>
+
+          <div className="cart-panel-actions">
+            <button onClick={handleClearCart} className="cart-panel-clear">
+              Clear Cart
+            </button>
+
+            <button
+              onClick={handleCheckout}
+              className="cart-panel-checkout"
+              disabled={isCheckingOut}
+            >
+              {isCheckingOut ? 'Processing...' : '🔒 Checkout'}
+            </button>
           </div>
-
-          <button
-            onClick={clearCart}
-            style={{
-              backgroundColor: '#444',
-              color: '#fff',
-              padding: '10px 20px',
-              border: 'none',
-              cursor: 'pointer',
-              marginRight: '10px',
-            }}
-          >
-            Clear Cart
-          </button>
-
-          <button
-            onClick={handleCheckout}
-            style={{
-              backgroundColor: '#00cc66',
-              color: '#fff',
-              padding: '15px 25px',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              marginBottom: '15px',
-              width: '100%',
-              fontSize: '1.1rem',
-              borderRadius: '8px',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-            🔒 Checkout
-          </button>
-        </div>
+        </>
       )}
     </div>
   );

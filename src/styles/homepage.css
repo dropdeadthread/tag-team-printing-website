@@ -40,9 +40,9 @@ body {
 /* === HOME ACTION BUTTONS === */
 .home-action-buttons {
   display: flex;
-  flex-direction: row;         /* Side by side */
-  justify-content: center;     /* Centered horizontally */
-  gap: 30px;                   /* Space between buttons */
+  flex-direction: row; /* Side by side */
+  justify-content: center; /* Centered horizontally */
+  gap: 30px; /* Space between buttons */
   margin-top: -130px; /* Adjust as needed to move buttons below the banner */
   margin-bottom: 0;
   position: relative;
@@ -70,21 +70,46 @@ body {
 
 /* === RESPONSIVE MOBILE TWEAKS === */
 @media (max-width: 768px) {
+  .homepage-wrapper {
+    min-height: auto; /* Allow natural height on mobile */
+  }
+
+  .banner-container {
+    height: auto; /* Auto height to fit scaled image */
+    min-height: 200px; /* Minimum height */
+    max-height: 350px; /* Maximum height to prevent too tall */
+    margin-top: 60px; /* Space for header (reduced) */
+    margin-bottom: 10px; /* Small gap before buttons */
+    padding: 0 10px; /* Side padding */
+  }
+
+  .banner-image {
+    object-fit: contain; /* Show full image without cropping */
+    object-position: center top; /* Align to top so "TAG TEAM PRINTING" shows first */
+    width: 100%; /* Full width */
+    height: auto; /* Auto height maintains aspect ratio */
+    max-height: 350px; /* Match container max-height */
+  }
+
   .home-action-buttons {
     flex-direction: column;
     gap: 15px;
-    margin-top: 1.5rem;
+    margin-top: 10px; /* Small positive margin */
+    margin-bottom: 60px; /* Extra bottom space for scrolling */
+    padding: 0 20px; /* Horizontal padding */
+    align-items: center; /* Center buttons */
   }
 
   .action-button {
-    font-size: 1.5rem;
-    padding: 12px 24px;
+    font-size: 1.3rem;
+    padding: 14px 28px; /* Good touch target */
+    min-height: 50px; /* Ensure 44px+ minimum touch target with border */
     border-width: 2px;
     box-shadow: 3px 3px 0 #000;
+    width: 100%; /* Full width */
+    max-width: 280px; /* Reasonable max width */
   }
 }
-
-
 
 /* === HOMEPAGE MAIN === */
 .homepage-main {

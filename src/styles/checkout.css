@@ -94,7 +94,7 @@
   border: 2px solid #fff5d1;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.95);
-  font-size: 1rem;
+  font-size: 16px; /* CRITICAL: Explicit 16px to prevent iOS zoom */
   color: #333;
   transition: all 0.3s ease;
 }
@@ -186,36 +186,41 @@
   color: #f44336;
 }
 
-.checkout-button:hover {
-  background-color: #ff5050;
-  color: #fff;
-  transform: translateY(-2px) scale(1.03);
-}
-
-.payment-status {
-  margin-top: 1.5rem;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-.payment-status.success {
-  color: lime;
-}
-
-.payment-status.error {
-  color: red;
+/* iOS Safe Area Support */
+@supports (padding: max(0px)) {
+  .checkout-container {
+    padding-top: max(10rem, calc(10rem + env(safe-area-inset-top)));
+    padding-bottom: max(6rem, calc(6rem + env(safe-area-inset-bottom)));
+  }
 }
 
 @media (max-width: 768px) {
-  .checkout-box {
-    padding: 1.5rem;
+  .checkout-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 10rem 1rem 6rem 1rem;
   }
 
-  .checkout-box h1 {
-    font-size: 1.6rem;
+  .checkout-form-section,
+  .checkout-summary-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .checkout-form-section h1 {
+    font-size: 1.8rem;
+  }
+
+  .checkout-summary-section h2 {
+    font-size: 1.5rem;
   }
 
   .checkout-button {
     width: 100%;
+    font-size: 1.2rem;
+  }
+
+  /* Ensure submit button visible above keyboard */
+  .form-group:last-of-type {
+    margin-bottom: 4rem;
   }
 }

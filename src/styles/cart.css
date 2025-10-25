@@ -11,6 +11,19 @@
   background-attachment: fixed;
 }
 
+/* iOS Safe Area Support */
+@supports (padding: max(0px)) {
+  .cart-container {
+    padding-top: max(0rem, env(safe-area-inset-top));
+    padding-bottom: max(0rem, env(safe-area-inset-bottom));
+  }
+
+  .cart-content {
+    padding-top: max(8rem, calc(8rem + env(safe-area-inset-top)));
+    padding-bottom: max(3rem, calc(3rem + env(safe-area-inset-bottom)));
+  }
+}
+
 .cart-content {
   padding: 8rem 2rem 3rem 2rem;
   max-width: 1200px;
@@ -193,4 +206,54 @@
   background: #fff5d1;
   color: #000;
   transform: scale(1.02);
+}
+
+/* === MOBILE RESPONSIVE === */
+@media (max-width: 768px) {
+  .cart-content {
+    padding: 8rem 1rem 3rem 1rem;
+  }
+
+  /* CRITICAL: Increase touch targets to 44x44px */
+  .cart-qty-controls button {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+
+  .remove-button {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  .cart-title {
+    font-size: 1.6rem;
+  }
+
+  .checkout-button {
+    font-size: 1rem;
+    padding: 0.9rem 1.5rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .cart-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .cart-thumbnail {
+    width: 150px;
+    margin-bottom: 1rem;
+  }
+
+  .remove-button {
+    position: static;
+    margin-top: 1rem;
+    width: 100%;
+  }
 }

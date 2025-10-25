@@ -113,9 +113,11 @@
 /* === MODALS === */
 .modal-backdrop {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,6 +158,44 @@
     width: 100%;
     max-width: 90vw;
   }
+
+  /* CRITICAL: Increase touch targets to 44x44px minimum */
+  .color-swatch {
+    width: 44px;
+    height: 44px;
+    margin: 4px; /* More spacing for easier tapping */
+  }
+
+  /* Size selector minimum height for touch */
+  .fit-size-selectors select {
+    min-height: 48px;
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: 0.75rem;
+  }
+
+  /* Make action buttons full-width and larger */
+  .action-buttons button {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1.1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  /* Make product title smaller on mobile */
+  .product-title {
+    font-size: 1.6rem;
+  }
+
+  /* Reduce card padding on mobile */
+  .product-card {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Modal adjustments */
+  .modal-box {
+    width: 95%;
+    padding: 1.5rem;
+  }
 }
 
 /* === PRODUCT DESCRIPTION === */
@@ -186,7 +226,7 @@
 }
 
 .product-description li:before {
-  content: "•";
+  content: '•';
   color: #fff5d1;
   position: absolute;
   left: 0;
@@ -225,8 +265,8 @@
 }
 
 .color-swatch {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid #fff5d1;
   cursor: pointer;
@@ -237,6 +277,10 @@
   transform: scale(1.1);
 }
 
+.color-swatch:active {
+  transform: scale(0.95); /* Touch feedback */
+}
+
 .color-swatch.unavailable {
   opacity: 0.5;
   cursor: not-allowed;
@@ -244,7 +288,7 @@
 }
 
 .color-swatch.unavailable:after {
-  content: "✕";
+  content: '✕';
   position: absolute;
   top: 50%;
   left: 50%;
