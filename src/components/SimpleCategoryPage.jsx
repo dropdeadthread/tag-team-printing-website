@@ -608,7 +608,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                           onChange={(e) => setShowWomensOnly(e.target.checked)}
                           style={{ margin: 0 }}
                         />
-                        Women's Only ({womensCount})
+                        Women&apos;s Only ({womensCount})
                       </label>
                     </div>
                   )}
@@ -730,7 +730,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                               gap: '0.25rem',
                             }}
                           >
-                            Women's Only
+                            Women&apos;s Only
                             <button
                               onClick={() => setShowWomensOnly(false)}
                               style={{
@@ -891,10 +891,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                       prod.brandName || prod.brand || 'Unknown Brand';
                     const styleID = prod.styleID || '';
                     const styleName =
-                      prod.styleName ||
-                      prod.styleCode ||
-                      prod.styleID ||
-                      'unknown';
+                      prod.styleName || prod.styleCode || 'unknown';
 
                     // Get fallback image and styling based on category
                     const getFallbackImage = (categoryId) => {
