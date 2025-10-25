@@ -1,4 +1,8 @@
-// Fixed version - using built-in fetch (Node.js 18+)
+// Ensure fetch is available (Node 18+ has it). If not, create a lazy polyfill that dynamically imports node-fetch.
+if (typeof globalThis.fetch !== 'function') {
+  globalThis.fetch = (...args) =>
+    import('node-fetch').then((m) => (m.default || m)(...args));
+}
 
 exports.handler = async function (event) {
   try {

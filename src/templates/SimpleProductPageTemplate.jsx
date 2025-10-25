@@ -25,7 +25,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       try {
         setLoading(true);
 
-        const response = await fetch('/all_styles_raw.json');
+        const response = await fetch('/data/all_styles_raw.json');
         const data = await response.json();
 
         // Ensure data is an array
