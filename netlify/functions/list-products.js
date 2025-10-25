@@ -1,4 +1,8 @@
-// Fixed version - using built-in fetch (Node.js 18+)
+// Ensure fetch is available (Node 18+ has it). If not, create a lazy polyfill that dynamically imports node-fetch.
+if (typeof globalThis.fetch !== 'function') {
+  globalThis.fetch = (...args) =>
+    import('node-fetch').then((m) => (m.default || m)(...args));
+}
 
 const SELECTED_BRANDS = [
   'Gildan',
@@ -49,15 +53,26 @@ exports.handler = async function (event) {
 
       if (!username || !password || !basicAuth) {
         console.warn(
-          'S&S API credentials not found, falling back to cached data',
+          'S&S API credentials not found, falling back to local cached data file',
         );
-        // Fallback to cached data if credentials not available
-        const dataUrl = 'https://tagteamprints.com/data/all_styles_raw.json';
-        const response = await fetch(dataUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch fallback data: ${response.status}`);
+        // Fallback to local cached data file
+        const fs = require('fs');
+        const path = require('path');
+        const dataPath = path.resolve(
+          __dirname,
+          '../../public/data/all_styles_raw.json',
+        );
+
+        try {
+          const rawData = fs.readFileSync(dataPath, 'utf8');
+          data = JSON.parse(rawData);
+          console.log(`Loaded ${data.length} products from local cache file`);
+        } catch (fileError) {
+          console.error('Failed to read local data file:', fileError);
+          throw new Error(
+            'Product data not available - API credentials missing and local cache unavailable',
+          );
         }
-        data = await response.json();
       } else {
         // Use real-time S&S API
         console.log('Fetching real-time data from S&S ActiveWear API');
