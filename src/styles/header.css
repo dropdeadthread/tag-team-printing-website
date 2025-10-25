@@ -83,7 +83,7 @@
     display: block;
     position: absolute; /* Position relative to header */
     left: auto; /* Reset left */
-    right: 80px; /* To the right of logo, leaving space for cart button */
+    right: 20px; /* Further right, aligned with hero image 'T' */
     top: 50%; /* Vertically center in header */
     transform: translateY(-50%);
     z-index: 1001; /* Above cart button */
