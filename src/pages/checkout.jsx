@@ -237,7 +237,7 @@ const CheckoutPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Payment Information *</label>
+                <label htmlFor="card-container">Payment Information *</label>
                 <div id="card-container"></div>
               </div>
 

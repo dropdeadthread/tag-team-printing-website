@@ -3,15 +3,19 @@ import Layout from '../../components/Layout';
 
 // SECURITY: Admin password should be verified server-side only
 // This client-side check is temporary and not secure
-const ADMIN_PASSWORD = process.env.GATSBY_ADMIN_PASSWORD || "changeMe";
+const ADMIN_PASSWORD = process.env.GATSBY_ADMIN_PASSWORD || 'changeMe';
 
 const OrderManagementAdmin = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState('');
   const [updatingOrder, setUpdatingOrder] = useState(null);
-  const [statusUpdate, setStatusUpdate] = useState({ status: '', notes: '', trackingNumber: '' });
+  const [statusUpdate, setStatusUpdate] = useState({
+    status: '',
+    notes: '',
+    trackingNumber: '',
+  });
 
   const statusOptions = [
     { value: 'pending', label: 'Order Received', color: '#f59e0b' },
@@ -21,13 +25,13 @@ const OrderManagementAdmin = () => {
     { value: 'completed', label: 'Production Complete', color: '#059669' },
     { value: 'shipped', label: 'Shipped', color: '#0891b2' },
     { value: 'delivered', label: 'Delivered', color: '#065f46' },
-    { value: 'cancelled', label: 'Cancelled', color: '#dc2626' }
+    { value: 'cancelled', label: 'Cancelled', color: '#dc2626' },
   ];
 
   useEffect(() => {
     // SSR guard: only access localStorage in browser
     if (typeof window !== 'undefined') {
-      const token = window.localStorage.getItem("adminToken");
+      const token = window.localStorage.getItem('adminToken');
       if (token === ADMIN_PASSWORD) setIsAdmin(true);
     }
   }, []);
@@ -42,10 +46,10 @@ const OrderManagementAdmin = () => {
       setIsAdmin(true);
       // SSR guard: only access localStorage in browser
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem("adminToken", passwordInput);
+        window.localStorage.setItem('adminToken', passwordInput);
       }
     } else {
-      alert("Incorrect password");
+      alert('Incorrect password');
     }
   };
 
@@ -74,7 +78,7 @@ const OrderManagementAdmin = () => {
 
     try {
       setUpdatingOrder(orderId);
-      
+
       const response = await fetch('/api/update-order-status', {
         method: 'POST',
         headers: {
@@ -84,8 +88,8 @@ const OrderManagementAdmin = () => {
           orderId,
           newStatus: statusUpdate.status,
           notes: statusUpdate.notes,
-          trackingNumber: statusUpdate.trackingNumber
-        })
+          trackingNumber: statusUpdate.trackingNumber,
+        }),
       });
 
       if (response.ok) {
@@ -107,15 +111,19 @@ const OrderManagementAdmin = () => {
   if (!isAdmin) {
     return (
       <Layout>
-        <div style={{ 
-          maxWidth: '400px', 
-          margin: '4rem auto', 
-          padding: '2rem',
-          background: '#f9f9f9',
-          borderRadius: '8px',
-          border: '2px solid #000'
-        }}>
-          <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Admin Login</h1>
+        <div
+          style={{
+            maxWidth: '400px',
+            margin: '4rem auto',
+            padding: '2rem',
+            background: '#f9f9f9',
+            borderRadius: '8px',
+            border: '2px solid #000',
+          }}
+        >
+          <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            Admin Login
+          </h1>
           <div style={{ marginBottom: '1rem' }}>
             <input
               type="password"
@@ -128,7 +136,7 @@ const OrderManagementAdmin = () => {
                 padding: '0.75rem',
                 border: '2px solid #000',
                 borderRadius: '4px',
-                fontSize: '16px'
+                fontSize: '16px',
               }}
             />
           </div>
@@ -142,7 +150,7 @@ const OrderManagementAdmin = () => {
               border: '2px solid #000',
               borderRadius: '4px',
               fontSize: '16px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             Login
@@ -155,12 +163,19 @@ const OrderManagementAdmin = () => {
   return (
     <Layout>
       <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '2rem',
+          }}
+        >
           <h1>Order Management</h1>
           <button
             onClick={() => {
               setIsAdmin(false);
-              localStorage.removeItem("adminToken");
+              localStorage.removeItem('adminToken');
             }}
             style={{
               padding: '0.5rem 1rem',
@@ -168,7 +183,7 @@ const OrderManagementAdmin = () => {
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             Logout
@@ -177,21 +192,25 @@ const OrderManagementAdmin = () => {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <div style={{ 
-              display: 'inline-block',
-              width: '40px',
-              height: '40px',
-              border: '4px solid #f3f3f3',
-              borderTop: '4px solid #c32b14',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }}></div>
+            <div
+              style={{
+                display: 'inline-block',
+                width: '40px',
+                height: '40px',
+                border: '4px solid #f3f3f3',
+                borderTop: '4px solid #c32b14',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            ></div>
             <p>Loading orders...</p>
           </div>
         ) : (
           <>
             <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-              <p><strong>Total Orders:</strong> {orders.length}</p>
+              <p>
+                <strong>Total Orders:</strong> {orders.length}
+              </p>
               <button
                 onClick={fetchOrders}
                 style={{
@@ -201,7 +220,7 @@ const OrderManagementAdmin = () => {
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  marginLeft: '1rem'
+                  marginLeft: '1rem',
                 }}
               >
                 Refresh
@@ -214,117 +233,176 @@ const OrderManagementAdmin = () => {
               </div>
             ) : (
               <div style={{ display: 'grid', gap: '1rem' }}>
-                {orders.map(order => {
-                  const currentStatusOption = statusOptions.find(s => s.value === order.status);
-                  
+                {orders.map((order) => {
+                  const currentStatusOption = statusOptions.find(
+                    (s) => s.value === order.status,
+                  );
+
                   return (
-                    <div key={order.id} style={{
-                      background: 'white',
-                      border: '2px solid #000',
-                      borderRadius: '8px',
-                      padding: '1.5rem'
-                    }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <div
+                      key={order.id}
+                      style={{
+                        background: 'white',
+                        border: '2px solid #000',
+                        borderRadius: '8px',
+                        padding: '1.5rem',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr 1fr',
+                          gap: '1rem',
+                          marginBottom: '1rem',
+                        }}
+                      >
                         <div>
-                          <h3 style={{ margin: '0 0 0.5rem 0', color: '#c32b14' }}>{order.id}</h3>
-                          <p><strong>Customer:</strong> {order.customerName || order.customer?.name}</p>
-                          <p><strong>Email:</strong> {order.customerEmail || order.customer?.email}</p>
-                          <p><strong>Date:</strong> {new Date(order.timestamp).toLocaleDateString()}</p>
+                          <h3
+                            style={{ margin: '0 0 0.5rem 0', color: '#c32b14' }}
+                          >
+                            {order.id}
+                          </h3>
+                          <p>
+                            <strong>Customer:</strong>{' '}
+                            {order.customerName || order.customer?.name}
+                          </p>
+                          <p>
+                            <strong>Email:</strong>{' '}
+                            {order.customerEmail || order.customer?.email}
+                          </p>
+                          <p>
+                            <strong>Date:</strong>{' '}
+                            {new Date(order.timestamp).toLocaleDateString()}
+                          </p>
                         </div>
-                        
+
                         <div>
-                          <p><strong>Current Status:</strong></p>
-                          <span style={{
-                            background: currentStatusOption?.color || '#6b7280',
-                            color: 'white',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.875rem',
-                            fontWeight: 'bold'
-                          }}>
+                          <p>
+                            <strong>Current Status:</strong>
+                          </p>
+                          <span
+                            style={{
+                              background:
+                                currentStatusOption?.color || '#6b7280',
+                              color: 'white',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '4px',
+                              fontSize: '0.875rem',
+                              fontWeight: 'bold',
+                            }}
+                          >
                             {currentStatusOption?.label || order.status}
                           </span>
                           <p style={{ marginTop: '0.5rem' }}>
                             <strong>Total:</strong> ${order.total || 'TBD'}
                           </p>
                         </div>
-                        
+
                         <div>
-                          <p><strong>Update Status:</strong></p>
+                          <p>
+                            <strong>Update Status:</strong>
+                          </p>
                           <select
                             value={statusUpdate.status}
-                            onChange={(e) => setStatusUpdate({...statusUpdate, status: e.target.value})}
+                            onChange={(e) =>
+                              setStatusUpdate({
+                                ...statusUpdate,
+                                status: e.target.value,
+                              })
+                            }
                             style={{
                               width: '100%',
                               padding: '0.5rem',
                               border: '1px solid #ccc',
                               borderRadius: '4px',
-                              marginBottom: '0.5rem'
+                              marginBottom: '0.5rem',
                             }}
                           >
                             <option value="">Select new status...</option>
-                            {statusOptions.map(option => (
+                            {statusOptions.map((option) => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
                             ))}
                           </select>
-                          
+
                           <input
                             type="text"
                             placeholder="Notes (optional)"
                             value={statusUpdate.notes}
-                            onChange={(e) => setStatusUpdate({...statusUpdate, notes: e.target.value})}
+                            onChange={(e) =>
+                              setStatusUpdate({
+                                ...statusUpdate,
+                                notes: e.target.value,
+                              })
+                            }
                             style={{
                               width: '100%',
                               padding: '0.5rem',
                               border: '1px solid #ccc',
                               borderRadius: '4px',
-                              marginBottom: '0.5rem'
+                              marginBottom: '0.5rem',
                             }}
                           />
-                          
+
                           {statusUpdate.status === 'shipped' && (
                             <input
                               type="text"
                               placeholder="Tracking number"
                               value={statusUpdate.trackingNumber}
-                              onChange={(e) => setStatusUpdate({...statusUpdate, trackingNumber: e.target.value})}
+                              onChange={(e) =>
+                                setStatusUpdate({
+                                  ...statusUpdate,
+                                  trackingNumber: e.target.value,
+                                })
+                              }
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
                                 border: '1px solid #ccc',
                                 borderRadius: '4px',
-                                marginBottom: '0.5rem'
+                                marginBottom: '0.5rem',
                               }}
                             />
                           )}
-                          
+
                           <button
                             onClick={() => handleStatusUpdate(order.id)}
-                            disabled={updatingOrder === order.id || !statusUpdate.status}
+                            disabled={
+                              updatingOrder === order.id || !statusUpdate.status
+                            }
                             style={{
                               width: '100%',
                               padding: '0.5rem',
-                              background: updatingOrder === order.id ? '#6b7280' : '#c32b14',
+                              background:
+                                updatingOrder === order.id
+                                  ? '#6b7280'
+                                  : '#c32b14',
                               color: 'white',
                               border: 'none',
                               borderRadius: '4px',
-                              cursor: updatingOrder === order.id ? 'not-allowed' : 'pointer'
+                              cursor:
+                                updatingOrder === order.id
+                                  ? 'not-allowed'
+                                  : 'pointer',
                             }}
                           >
-                            {updatingOrder === order.id ? 'Updating...' : 'Update Status'}
+                            {updatingOrder === order.id
+                              ? 'Updating...'
+                              : 'Update Status'}
                           </button>
                         </div>
                       </div>
-                      
+
                       {order.notes && (
-                        <div style={{ 
-                          background: '#f9f9f9', 
-                          padding: '1rem', 
-                          borderRadius: '4px',
-                          marginTop: '1rem'
-                        }}>
+                        <div
+                          style={{
+                            background: '#f9f9f9',
+                            padding: '1rem',
+                            borderRadius: '4px',
+                            marginTop: '1rem',
+                          }}
+                        >
                           <strong>Notes:</strong> {order.notes}
                         </div>
                       )}
@@ -336,8 +414,8 @@ const OrderManagementAdmin = () => {
           </>
         )}
       </div>
-      
-      <style jsx>{`
+
+      <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }

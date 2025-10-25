@@ -78,7 +78,7 @@ const ProductPageTemplate = ({ data, pageContext }) => {
         }}
       >
         <h1>Product not found</h1>
-        <p>The product you're looking for doesn't exist.</p>
+        <p>The product you&apos;re looking for doesn&apos;t exist.</p>
       </div>
     );
   }
@@ -202,6 +202,7 @@ const ProductPageTemplate = ({ data, pageContext }) => {
 
             <div style={{ marginBottom: '2rem' }}>
               <label
+                htmlFor="size-select"
                 style={{
                   display: 'block',
                   fontSize: '1.2rem',
@@ -213,6 +214,7 @@ const ProductPageTemplate = ({ data, pageContext }) => {
                 Size:
               </label>
               <select
+                id="size-select"
                 value={selectedSize}
                 onChange={(e) => setSelectedSize(e.target.value)}
                 style={{
@@ -296,6 +298,7 @@ const ProductPageTemplate = ({ data, pageContext }) => {
             {/* Quantity Selector */}
             <div style={{ marginBottom: '2rem' }}>
               <label
+                htmlFor="quantity-controls"
                 style={{
                   display: 'block',
                   fontSize: '1.2rem',
@@ -307,6 +310,9 @@ const ProductPageTemplate = ({ data, pageContext }) => {
                 Quantity:
               </label>
               <div
+                id="quantity-controls"
+                role="group"
+                aria-label="Quantity selector"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 <button

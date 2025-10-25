@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from '@reach/router';
+import { Link } from 'gatsby';
 import Layout from './Layout';
 import categoryIdSlugMap from '../helpers/categoryIdSlugMap';
 import { getProductImageUrl } from '../helpers/imageHelpers';

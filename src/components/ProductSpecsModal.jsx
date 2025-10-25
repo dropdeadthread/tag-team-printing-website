@@ -64,12 +64,13 @@ const ProductSpecsModal = ({
   const specs = extractSpecs(product?.description);
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       className="specs-modal-backdrop"
       onClick={onClose}
-      onKeyDown={(e) => e.key === 'Enter' && onClose()}
-      role="button"
-      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
+      role="dialog"
+      tabIndex={-1}
       aria-modal="true"
       aria-labelledby="specs-modal-title"
     >
@@ -78,7 +79,6 @@ const ProductSpecsModal = ({
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
         ref={modalRef}
-        role="dialog"
       >
         <div className="specs-modal-header">
           <h2 id="specs-modal-title">Product Specifications</h2>

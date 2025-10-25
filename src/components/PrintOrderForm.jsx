@@ -29,23 +29,24 @@ const PrintOrderForm = () => {
 
   // Recalculate quote anytime inputs change
   useEffect(() => {
-    const garmentData = garmentSource === 'recommend' 
-      ? { 
-          garmentColor: recommendedColor,
-          garmentWholesalePrice: 2.50 // Gildan 5000 wholesale price
-        }
-      : {
-          // For own blanks, use a neutral default - customer will specify details in notes
-          garmentColor: 'unknown',
-          garmentWholesalePrice: null
-        };
+    const garmentData =
+      garmentSource === 'recommend'
+        ? {
+            garmentColor: recommendedColor,
+            garmentWholesalePrice: 2.5, // Gildan 5000 wholesale price
+          }
+        : {
+            // For own blanks, use a neutral default - customer will specify details in notes
+            garmentColor: 'unknown',
+            garmentWholesalePrice: null,
+          };
 
     const result = calculatePrintQuote({
       garmentQty: shirtCount,
       colorCount: numColors,
       needsUnderbase: hasUnderbase,
       inkColors: [], // We don't collect specific ink colors in this form yet
-      ...garmentData
+      ...garmentData,
     });
 
     if (result.valid) {
@@ -60,26 +61,29 @@ const PrintOrderForm = () => {
     e.preventDefault();
 
     if (warning) {
-      setError('Please resolve garment compatibility issues before submitting.');
+      setError(
+        'Please resolve garment compatibility issues before submitting.',
+      );
       return;
     }
 
-    const garmentData = garmentSource === 'recommend' 
-      ? { 
-          garmentColor: recommendedColor,
-          garmentWholesalePrice: 2.50 // Gildan 5000 wholesale price
-        }
-      : {
-          garmentColor: 'unknown',
-          garmentWholesalePrice: null
-        };
+    const garmentData =
+      garmentSource === 'recommend'
+        ? {
+            garmentColor: recommendedColor,
+            garmentWholesalePrice: 2.5, // Gildan 5000 wholesale price
+          }
+        : {
+            garmentColor: 'unknown',
+            garmentWholesalePrice: null,
+          };
 
     const result = calculatePrintQuote({
       garmentQty: shirtCount,
       colorCount: numColors,
       needsUnderbase: hasUnderbase,
       inkColors: [],
-      ...garmentData
+      ...garmentData,
     });
 
     if (!result.valid) {
@@ -152,7 +156,7 @@ const PrintOrderForm = () => {
               checked={garmentSource === 'own'}
               onChange={() => handleGarmentSourceChange('own')}
             />
-            <span>I'll choose my own blanks from your catalog</span>
+            <span>I&apos;ll choose my own blanks from your catalog</span>
           </label>
         </div>
 
@@ -165,8 +169,8 @@ const PrintOrderForm = () => {
             </p>
             <label>
               Choose Color:
-              <select 
-                value={recommendedColor} 
+              <select
+                value={recommendedColor}
                 onChange={(e) => setRecommendedColor(e.target.value)}
                 className="color-selector"
               >
@@ -183,21 +187,28 @@ const PrintOrderForm = () => {
         {/* Own Blanks Notice */}
         {garmentSource === 'own' && (
           <div className="own-blanks-notice">
-            <p>✨ Browse our <a href="/categories">catalog</a> to select your garments first.</p>
-            <p>Then return here to get your print quote. Garment costs will be calculated separately.</p>
+            <p>
+              ✨ Browse our <a href="/categories">catalog</a> to select your
+              garments first.
+            </p>
+            <p>
+              Then return here to get your print quote. Garment costs will be
+              calculated separately.
+            </p>
           </div>
         )}
       </div>
 
-      {warning && (
-        <div className="warning-box">
-          {warning}
-        </div>
-      )}
+      {warning && <div className="warning-box">{warning}</div>}
 
       <label>
         Total Shirts Ordered
-        <span className="info-tooltip" title="Minimum 15 shirts for 1 color, 30 for 2+ colors.">ℹ️</span>
+        <span
+          className="info-tooltip"
+          title="Minimum 15 shirts for 1 color, 30 for 2+ colors."
+        >
+          ℹ️
+        </span>
         <input
           type="number"
           min="1"
@@ -208,10 +219,20 @@ const PrintOrderForm = () => {
 
       <label>
         How many print colors?
-        <span className="info-tooltip" title="Each ink counts as a color. Underbase adds 1 if needed.">ℹ️</span>
-        <select value={numColors} onChange={(e) => setNumColors(parseInt(e.target.value))}>
+        <span
+          className="info-tooltip"
+          title="Each ink counts as a color. Underbase adds 1 if needed."
+        >
+          ℹ️
+        </span>
+        <select
+          value={numColors}
+          onChange={(e) => setNumColors(parseInt(e.target.value))}
+        >
           {[1, 2, 3, 4, 5, 6].map((n) => (
-            <option key={n} value={n}>{n}</option>
+            <option key={n} value={n}>
+              {n}
+            </option>
           ))}
         </select>
       </label>
@@ -223,7 +244,12 @@ const PrintOrderForm = () => {
           onChange={() => setHasUnderbase(!hasUnderbase)}
         />
         Include White Underbase
-        <span className="info-tooltip" title="Usually required on dark garments, and white-on-black prints.">ℹ️</span>
+        <span
+          className="info-tooltip"
+          title="Usually required on dark garments, and white-on-black prints."
+        >
+          ℹ️
+        </span>
       </label>
 
       <label>
@@ -249,9 +275,24 @@ const PrintOrderForm = () => {
       {quote && (
         <div className="quote-box">
           <h3>Estimated Quote</h3>
-          <p>Garments ({quote.garmentQty} × ${quote.garmentCostPerShirt}): ${(quote.garmentQty * quote.garmentCostPerShirt).toFixed(2)}</p>
-          <p>Printing ({quote.garmentQty} × ${(quote.printingCostPerShirt - quote.garmentCostPerShirt).toFixed(2)}): ${(quote.garmentQty * (quote.printingCostPerShirt - quote.garmentCostPerShirt)).toFixed(2)}</p>
-          <p>Set-up Fees ({quote.screenBreakdown}): ${quote.setupTotal}</p>
+          <p>
+            Garments ({quote.garmentQty} × ${quote.garmentCostPerShirt}): $
+            {(quote.garmentQty * quote.garmentCostPerShirt).toFixed(2)}
+          </p>
+          <p>
+            Printing ({quote.garmentQty} × $
+            {(quote.printingCostPerShirt - quote.garmentCostPerShirt).toFixed(
+              2,
+            )}
+            ): $
+            {(
+              quote.garmentQty *
+              (quote.printingCostPerShirt - quote.garmentCostPerShirt)
+            ).toFixed(2)}
+          </p>
+          <p>
+            Set-up Fees ({quote.screenBreakdown}): ${quote.setupTotal}
+          </p>
           <p>Subtotal: ${quote.subtotal}</p>
           <p>Tax (HST): ${(quote.totalWithTax - quote.subtotal).toFixed(2)}</p>
           <p className="grand-total">Total: ${quote.totalWithTax}</p>
@@ -259,8 +300,8 @@ const PrintOrderForm = () => {
       )}
 
       <label className="confirm-box">
-        <input type="checkbox" required />
-        I confirm the above details and understand minimums apply.
+        <input type="checkbox" required />I confirm the above details and
+        understand minimums apply.
       </label>
 
       <button type="submit">Submit Print Order</button>

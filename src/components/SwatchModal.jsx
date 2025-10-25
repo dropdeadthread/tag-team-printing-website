@@ -9,10 +9,10 @@ const SwatchModal = ({ isOpen, onClose, swatches = [] }) => {
     if (!isOpen) return;
     closeBtnRef.current?.focus();
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "Tab" && modalRef.current) {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'Tab' && modalRef.current) {
         const focusableEls = modalRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         const firstEl = focusableEls[0];
         const lastEl = focusableEls[focusableEls.length - 1];
@@ -29,13 +29,14 @@ const SwatchModal = ({ isOpen, onClose, swatches = [] }) => {
         }
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <div
       className="modal-backdrop modal-fade-in"
       onClick={onClose}
@@ -45,35 +46,49 @@ const SwatchModal = ({ isOpen, onClose, swatches = [] }) => {
     >
       <div
         className="modal-box modal-animate-in"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         ref={modalRef}
       >
         <h2 id="swatch-modal-title">🎨 Colour Options</h2>
         {swatches.length > 0 ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", justifyContent: "center" }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.5em',
+              justifyContent: 'center',
+            }}
+          >
             {swatches.map((swatch, i) => (
-              <div key={i} style={{ textAlign: "center" }}>
+              <div key={i} style={{ textAlign: 'center' }}>
                 {swatch.swatchImg ? (
                   <img
                     src={swatch.swatchImg}
                     alt={swatch.name}
-                    style={{ width: 32, height: 32, borderRadius: "50%", border: "1px solid #ccc" }}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      border: '1px solid #ccc',
+                    }}
                   />
                 ) : (
                   <div
                     style={{
                       width: 32,
                       height: 32,
-                      borderRadius: "50%",
-                      background: swatch.hex || "#eee",
-                      border: "1px solid #ccc",
-                      margin: "0 auto"
+                      borderRadius: '50%',
+                      background: swatch.hex || '#eee',
+                      border: '1px solid #ccc',
+                      margin: '0 auto',
                     }}
                     title={swatch.name}
                     aria-label={swatch.name}
                   />
                 )}
-                <div style={{ fontSize: "0.85em", marginTop: 2 }}>{swatch.name}</div>
+                <div style={{ fontSize: '0.85em', marginTop: 2 }}>
+                  {swatch.name}
+                </div>
               </div>
             ))}
           </div>
