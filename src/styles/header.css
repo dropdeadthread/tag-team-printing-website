@@ -81,19 +81,16 @@
 
   .hamburger {
     display: block;
-    position: fixed; /* Fixed positioning so it doesn't overlap logo */
-    left: 20px; /* LEFT side */
-    top: 95px; /* Below the 90px header (logo area) */
+    position: absolute; /* Position relative to header */
+    left: auto; /* Reset left */
+    right: 80px; /* To the right of logo, leaving space for cart button */
+    top: 50%; /* Vertically center in header */
+    transform: translateY(-50%);
     z-index: 1001; /* Above cart button */
-    font-size: 2.5rem; /* Larger for easier tapping */
-    background: rgba(
-      0,
-      0,
-      0,
-      0.7
-    ); /* Semi-transparent background for visibility */
-    border-radius: 8px;
-    padding: 5px 10px;
+    font-size: 2.2rem; /* Good tapping size */
+    background: transparent; /* No background needed */
+    border-radius: 0;
+    padding: 0;
   }
 
   .nav-links {

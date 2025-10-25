@@ -79,7 +79,7 @@ body {
     height: auto; /* Auto height to fit scaled image */
     min-height: 300px; /* Increased minimum height */
     max-height: 450px; /* Increased maximum height for larger image */
-    margin-top: 120px; /* More space below header and hamburger */
+    margin-top: 100px; /* Space below header (hamburger now in header) */
     margin-bottom: 15px; /* Reduced gap before buttons */
     padding: 0 5px; /* Minimal side padding to allow image to be larger */
     overflow: visible; /* Allow image to use full space */
