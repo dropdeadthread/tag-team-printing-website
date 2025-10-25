@@ -77,19 +77,22 @@ body {
 
   .banner-container {
     height: auto; /* Auto height to fit scaled image */
-    min-height: 250px; /* Minimum height */
-    max-height: 380px; /* Maximum height to prevent too tall */
-    margin-top: 100px; /* More space below header to prevent overlap with logo */
-    margin-bottom: 20px; /* Gap before buttons */
-    padding: 0 15px; /* Side padding */
+    min-height: 300px; /* Increased minimum height */
+    max-height: 450px; /* Increased maximum height for larger image */
+    margin-top: 120px; /* More space below header and hamburger */
+    margin-bottom: 15px; /* Reduced gap before buttons */
+    padding: 0 5px; /* Minimal side padding to allow image to be larger */
+    overflow: visible; /* Allow image to use full space */
   }
 
   .banner-image {
     object-fit: contain; /* Show full image without cropping */
     object-position: center; /* Center the image */
-    width: 100%; /* Full width */
+    width: 105%; /* Slightly larger than container for "P" and "K" to reach edges */
+    max-width: 105%; /* Allow slight overflow */
     height: auto; /* Auto height maintains aspect ratio */
-    max-height: 380px; /* Match container max-height */
+    max-height: 450px; /* Match container max-height */
+    margin-left: -2.5%; /* Center the 105% width image */
   }
 
   .home-action-buttons {
