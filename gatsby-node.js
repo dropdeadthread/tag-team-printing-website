@@ -274,7 +274,9 @@ exports.createPages = async ({ graphql, actions }) => {
         allSsProduct {
           nodes {
             id
+            styleID
             styleName
+            brandName
             title
           }
         }
@@ -297,10 +299,14 @@ exports.createPages = async ({ graphql, actions }) => {
           ),
           context: {
             styleCode: product.styleName, // Use styleName for the query parameter
+            styleID: product.styleID, // Pass styleID for API lookup
+            brandName: product.brandName, // Pass brandName for API lookup
             id: product.id,
           },
         });
-        console.log(`Created product page: /products/${slug}`);
+        console.log(
+          `Created product page: /products/${slug} (${product.brandName} ${product.styleName}, styleID: ${product.styleID})`,
+        );
       }
     });
   } catch (error) {

@@ -25,11 +25,18 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       try {
         setLoading(true);
 
-        console.log('Loading product with styleCode:', pageContext.styleCode);
+        console.log('Loading product with pageContext:', pageContext);
+
+        // Use styleID if available (it's unique), otherwise use styleName
+        const queryParam = pageContext.styleID
+          ? `styleID=${pageContext.styleID}`
+          : `styleName=${encodeURIComponent(pageContext.styleCode)}`;
+
+        console.log('Fetching with query:', queryParam);
 
         // Use get-product Netlify function instead of static JSON
         const response = await fetch(
-          `/.netlify/functions/get-product?styleName=${encodeURIComponent(pageContext.styleCode)}`,
+          `/.netlify/functions/get-product?${queryParam}`,
         );
 
         if (!response.ok) {
