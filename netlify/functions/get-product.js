@@ -6,53 +6,89 @@ if (typeof globalThis.fetch !== 'function') {
 
 exports.handler = async function (event) {
   try {
-    const { styleID } = event.queryStringParameters || {};
+    const { styleID, styleName } = event.queryStringParameters || {};
 
-    if (!styleID) {
+    if (!styleID && !styleName) {
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'styleID parameter is required' }),
+        body: JSON.stringify({
+          error: 'styleID or styleName parameter is required',
+        }),
       };
     }
 
-    console.log(`get-product API called with styleID: ${styleID}`);
-
-    // Fetch product data
-    const dataUrl = 'https://tagteamprints.com/data/all_styles_raw.json';
-    console.log(`Fetching data from: ${dataUrl}`);
-
-    const response = await fetch(dataUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch data: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log(`Loaded ${data.length} total styles`);
-
-    // Find the specific product by styleID
-    const product = data.find(
-      (item) => item.styleID && item.styleID.toString() === styleID.toString(),
+    console.log(
+      `get-product API called with styleID: ${styleID}, styleName: ${styleName}`,
     );
 
-    if (!product) {
+    const username = process.env.SNS_API_USERNAME;
+    const password = process.env.SNS_API_KEY;
+    const basicAuth =
+      username && password
+        ? Buffer.from(`${username}:${password}`).toString('base64')
+        : null;
+
+    if (!basicAuth) {
+      console.error('S&S API credentials not available');
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error: 'API credentials not configured',
+        }),
+      };
+    }
+
+    // Use S&S API v2/styles endpoint - can search by styleID or styleName
+    const filter = styleID || styleName;
+    const styleUrl = `https://api-ca.ssactivewear.com/v2/styles/${encodeURIComponent(filter)}`;
+
+    console.log(`Fetching style from S&S API: ${styleUrl}`);
+
+    const styleResponse = await fetch(styleUrl, {
+      headers: {
+        Authorization: `Basic ${basicAuth}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!styleResponse.ok) {
+      console.error(`S&S API style fetch failed: ${styleResponse.status}`);
+      return {
+        statusCode: styleResponse.status,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error: 'Product not found in S&S catalog',
+          details: `HTTP ${styleResponse.status}`,
+        }),
+      };
+    }
+
+    const styleData = await styleResponse.json();
+    console.log(`Received ${styleData.length} style(s) from S&S`);
+
+    if (!styleData || styleData.length === 0) {
       return {
         statusCode: 404,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           error: 'Product not found',
-          styleID: styleID,
+          styleID,
+          styleName,
         }),
       };
     }
 
+    const product = styleData[0]; // API returns array
     console.log(`Found product: ${product.title || product.styleName}`);
 
-    // Transform product data
+    // Transform product data to match expected format
     const productData = {
       styleID: product.styleID,
       styleCode: product.styleName,
       styleName: product.styleName,
+      partNumber: product.partNumber,
       title: product.title,
       name: product.title,
       description: product.description,
@@ -61,14 +97,17 @@ exports.handler = async function (event) {
       categories: product.categories,
       styleImage: product.styleImage,
       baseCategory: product.baseCategory,
-      mill: product.mill || null,
-      piecesPerCase: product.piecesPerCase || null,
-      colors: [], // S&S data doesn't include color variations in simple format
+      catalogPageNumber: product.catalogPageNumber,
+      newStyle: product.newStyle,
+      brandImage: product.brandImage,
     };
 
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
       body: JSON.stringify(productData),
     };
   } catch (error) {
