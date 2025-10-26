@@ -45,28 +45,49 @@ exports.handler = async function (event) {
     const styleUrl = `https://api-ca.ssactivewear.com/v2/styles/${encodeURIComponent(filter)}`;
 
     console.log(`Fetching style from S&S API: ${styleUrl}`);
+    console.log(`Filter value: "${filter}"`);
 
     const styleResponse = await fetch(styleUrl, {
       headers: {
         Authorization: `Basic ${basicAuth}`,
         Accept: 'application/json',
+        'User-Agent': 'TagTeamPrinting/1.0',
       },
     });
 
+    console.log(`S&S API response status: ${styleResponse.status}`);
+
     if (!styleResponse.ok) {
       console.error(`S&S API style fetch failed: ${styleResponse.status}`);
+
+      // Try to get error details
+      let errorBody = '';
+      try {
+        errorBody = await styleResponse.text();
+        console.error(`S&S API error response: ${errorBody}`);
+      } catch (e) {
+        console.error('Could not read error response body');
+      }
+
       return {
         statusCode: styleResponse.status,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           error: 'Product not found in S&S catalog',
           details: `HTTP ${styleResponse.status}`,
+          filter: filter,
+          url: styleUrl,
+          errorBody: errorBody || 'No error body',
         }),
       };
     }
 
     const styleData = await styleResponse.json();
     console.log(`Received ${styleData.length} style(s) from S&S`);
+    console.log(
+      `First style:`,
+      styleData[0] ? JSON.stringify(styleData[0]).substring(0, 200) : 'none',
+    );
 
     if (!styleData || styleData.length === 0) {
       return {
