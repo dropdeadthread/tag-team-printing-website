@@ -20,31 +20,27 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   const [colorInventoryLoading, setColorInventoryLoading] = useState(false);
 
   useEffect(() => {
-    // Load product data from our JSON file directly
+    // Load product data from Netlify function (uses S&S API)
     const loadProduct = async () => {
       try {
         setLoading(true);
 
-        const response = await fetch('/data/all_styles_raw.json');
-        const data = await response.json();
+        console.log('Loading product with styleCode:', pageContext.styleCode);
 
-        // Ensure data is an array
-        let allProducts = Array.isArray(data) ? data : data.products || [];
-
-        if (!Array.isArray(allProducts)) {
-          console.error(
-            'Expected allProducts to be an array, got:',
-            typeof allProducts,
-            allProducts,
-          );
-          allProducts = [];
-        }
-
-        const foundProduct = allProducts.find(
-          (p) => p.styleName === pageContext.styleCode,
+        // Use get-product Netlify function instead of static JSON
+        const response = await fetch(
+          `/.netlify/functions/get-product?styleName=${encodeURIComponent(pageContext.styleCode)}`,
         );
 
-        // Product lookup completed
+        if (!response.ok) {
+          console.error(`Failed to fetch product: ${response.status}`);
+          setProduct(null);
+          setLoading(false);
+          return;
+        }
+
+        const foundProduct = await response.json();
+        console.log('Loaded product from S&S API:', foundProduct);
 
         setProduct(foundProduct);
 
