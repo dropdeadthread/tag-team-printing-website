@@ -132,13 +132,13 @@ exports.handler = async function (event) {
       // Category-based filtering
       const itemCategories = item.categories ? item.categories.split(',') : [];
 
-      // Exclude category 9 (Youth) and 64 (Baby/Infant)
-      if (itemCategories.includes('9') || itemCategories.includes('64')) {
+      // Exclude category 9 (Youth)
+      if (itemCategories.includes('9')) {
         return false;
       }
 
-      // For headwear (category 56), only keep 5-panel hats
-      const isHeadwear = itemCategories.includes('56');
+      // For headwear (category 11), only keep 5-panel hats
+      const isHeadwear = itemCategories.includes('11');
       if (isHeadwear) {
         const is5PanelHat =
           title.includes('5-panel') ||

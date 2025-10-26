@@ -58,9 +58,9 @@ exports.sourceNodes = async ({
         'YP Classics',
         'Valucap',
       ];
-      // Category IDs: 21=T-Shirts, 36=Hoodies, 38=Long Sleeve, 56=Headwear, 11=Tank Tops
-      // Removed: 9=Youth, 64=Baby/Infant/Onesies
-      const selectedCategories = ['21', '36', '38', '56', '11'];
+      // Category IDs: 21=T-Shirts, 36=Hoodies, 400=Crewnecks, 38=Full-Zips, 56=Long Sleeves, 11=Headwear, 64=Tank Tops
+      // Removed: 9=Youth
+      const selectedCategories = ['21', '36', '400', '38', '56', '11', '64'];
 
       const filteredData = data
         .filter((item) => {
@@ -85,8 +85,8 @@ exports.sourceNodes = async ({
             title.includes('baby') ||
             title.includes('onesie');
 
-          // For headwear (category 56), only keep 5-panel hats
-          const isHeadwear = item.categories && item.categories.includes('56');
+          // For headwear (category 11), only keep 5-panel hats
+          const isHeadwear = item.categories && item.categories.includes('11');
           const is5PanelHat =
             title.includes('5-panel') ||
             title.includes('five panel') ||
@@ -141,16 +141,36 @@ exports.sourceNodes = async ({
     console.log('- Response headers:', Object.fromEntries(response.headers));
 
     // Check response status before parsing
+    let data;
     if (!response.ok) {
       console.error(`S&S API error: ${response.status} ${response.statusText}`);
       console.error(
         'Response headers:',
         Object.fromEntries(response.headers.entries()),
       );
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+      console.warn(
+        'S&S API request failed, falling back to local cached data...',
+      );
 
-    const data = await response.json();
+      // Fall back to local JSON file
+      try {
+        const fs = require('fs');
+        const pathModule = require('path');
+        const filePath = pathModule.resolve('./data/all_styles_raw.json');
+        const rawData = fs.readFileSync(filePath, 'utf8');
+        data = JSON.parse(rawData);
+        console.log(
+          `Loaded ${data.length} products from local fallback file due to API error`,
+        );
+      } catch (fileError) {
+        console.error('Failed to read local fallback file:', fileError);
+        throw new Error(
+          `S&S API failed (${response.status}) and no local fallback available`,
+        );
+      }
+    } else {
+      data = await response.json();
+    }
     console.log('- Response data type:', typeof data);
     console.log(
       '- Response data preview:',
@@ -177,9 +197,9 @@ exports.sourceNodes = async ({
       'YP Classics',
       'Valucap',
     ]; // Popular, reliable brands with correct names
-    // Category IDs: 21=T-Shirts, 36=Hoodies, 38=Long Sleeve, 56=Headwear, 11=Tank Tops
-    // Removed: 9=Youth, 64=Baby/Infant/Onesies
-    const selectedCategories = ['21', '36', '38', '56', '11'];
+    // Category IDs: 21=T-Shirts, 36=Hoodies, 400=Crewnecks, 38=Full-Zips, 56=Long Sleeves, 11=Headwear, 64=Tank Tops
+    // Removed: 9=Youth
+    const selectedCategories = ['21', '36', '400', '38', '56', '11', '64'];
 
     const filteredData = data
       .filter((item) => {
@@ -204,8 +224,8 @@ exports.sourceNodes = async ({
           title.includes('baby') ||
           title.includes('onesie');
 
-        // For headwear (category 56), only keep 5-panel hats
-        const isHeadwear = item.categories && item.categories.includes('56');
+        // For headwear (category 11), only keep 5-panel hats
+        const isHeadwear = item.categories && item.categories.includes('11');
         const is5PanelHat =
           title.includes('5-panel') ||
           title.includes('five panel') ||
