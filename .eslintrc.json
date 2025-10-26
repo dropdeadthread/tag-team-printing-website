@@ -15,10 +15,7 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "requireConfigFile": false,
-    "babelOptions": {
-      "presets": ["@babel/preset-react"]
-    }
+    "requireConfigFile": true
   },
   "parser": "@babel/eslint-parser",
   "plugins": ["react", "jsx-a11y"],
