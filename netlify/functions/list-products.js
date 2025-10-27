@@ -1,7 +1,10 @@
-// Ensure fetch is available (Node 18+ has it). If not, create a lazy polyfill that dynamically imports node-fetch.
-if (typeof globalThis.fetch !== 'function') {
-  globalThis.fetch = (...args) =>
-    import('node-fetch').then((m) => (m.default || m)(...args));
+// Ensure fetch is available (Node 18+ has it built-in, Node < 18 needs polyfill)
+let fetch;
+if (typeof globalThis.fetch === 'function') {
+  fetch = globalThis.fetch;
+} else {
+  // For Node < 18, use node-fetch from dependencies
+  fetch = require('node-fetch');
 }
 
 const SELECTED_BRANDS = [

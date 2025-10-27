@@ -1,0 +1,9 @@
+# Ignore Netlify Functions (they use different Babel config)
+netlify/functions/
+
+# Standard ignores
+node_modules/
+.cache/
+public/
+dist/
+build/
