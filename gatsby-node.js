@@ -76,15 +76,7 @@ exports.sourceNodes = async ({
                 .includes(catId),
             );
 
-          // Explicitly exclude category 9 (Youth) - matches list-products.js logic
-          const itemCategories = item.categories
-            ? item.categories.split(',').map((id) => id.trim())
-            : [];
-          if (itemCategories.includes('9')) {
-            return false;
-          }
-
-          // Filter out youth/baby products by title
+          // Filter out youth/baby products by title (category 9 filter removed - too aggressive)
           const title = (item.title || '').toLowerCase();
           const isYouthOrBaby =
             title.includes('youth') ||
@@ -229,15 +221,7 @@ exports.sourceNodes = async ({
               .includes(catId),
           );
 
-        // Explicitly exclude category 9 (Youth) - matches list-products.js logic
-        const itemCategories = item.categories
-          ? item.categories.split(',').map((id) => id.trim())
-          : [];
-        if (itemCategories.includes('9')) {
-          return false;
-        }
-
-        // Filter out youth/baby products by title
+        // Filter out youth/baby products by title (category 9 filter removed - too aggressive)
         const title = (item.title || '').toLowerCase();
         const isYouthOrBaby =
           title.includes('youth') ||
