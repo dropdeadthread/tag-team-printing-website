@@ -76,6 +76,14 @@ exports.sourceNodes = async ({
                 .includes(catId),
             );
 
+          // Explicitly exclude category 9 (Youth) - matches list-products.js logic
+          const itemCategories = item.categories
+            ? item.categories.split(',').map((id) => id.trim())
+            : [];
+          if (itemCategories.includes('9')) {
+            return false;
+          }
+
           // Filter out youth/baby products by title
           const title = (item.title || '').toLowerCase();
           const isYouthOrBaby =
@@ -99,7 +107,13 @@ exports.sourceNodes = async ({
 
           return brandMatch && categoryMatch && !isYouthOrBaby;
         })
-        .slice(0, 500);
+        .sort((a, b) => {
+          // Sort by brand first, then by title - ensures consistent ordering
+          if (a.brandName !== b.brandName) {
+            return (a.brandName || '').localeCompare(b.brandName || '');
+          }
+          return (a.title || '').localeCompare(b.title || '');
+        }); // Removed .slice() limit to include ALL matching products
 
       console.log(
         `Loaded ${data.length} total products from local file, ${filteredData.length} from selected brands`,
@@ -215,6 +229,14 @@ exports.sourceNodes = async ({
               .includes(catId),
           );
 
+        // Explicitly exclude category 9 (Youth) - matches list-products.js logic
+        const itemCategories = item.categories
+          ? item.categories.split(',').map((id) => id.trim())
+          : [];
+        if (itemCategories.includes('9')) {
+          return false;
+        }
+
         // Filter out youth/baby products by title
         const title = (item.title || '').toLowerCase();
         const isYouthOrBaby =
@@ -238,7 +260,13 @@ exports.sourceNodes = async ({
 
         return brandMatch && categoryMatch && !isYouthOrBaby;
       })
-      .slice(0, 500); // Increased limit for more products
+      .sort((a, b) => {
+        // Sort by brand first, then by title - ensures consistent ordering
+        if (a.brandName !== b.brandName) {
+          return (a.brandName || '').localeCompare(b.brandName || '');
+        }
+        return (a.title || '').localeCompare(b.title || '');
+      }); // Removed .slice() limit to include ALL matching products
 
     console.log(
       `Fetched ${data.length} total products, ${filteredData.length} from selected brands`,
