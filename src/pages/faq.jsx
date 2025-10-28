@@ -82,21 +82,29 @@ const FAQ = () => (
           <strong>I have an idea but no artwork — can you help?</strong>
           <br />
           Absolutely. Our in-house design crew can create something custom for
-          you from scratch or clean up what you’ve got. Design time is billed at
-          $50/hr — your first virtual proof is free.
+          you from scratch or clean up what you&apos;ve got. Design time is
+          billed at $50/hr — your first virtual proof is free.
         </p>
         <p>
           <strong>What file types do you accept?</strong>
           <br />
-          Vector files preferred: .AI, .EPS, .PDF (text outlined, links
-          embedded). We also accept layered .PSD files at 300 DPI at actual
-          print size. Please include PMS color specs for spot color jobs.
+          <strong>Vector files preferred:</strong> .AI, .EPS, or .PDF (all text
+          converted to outlines &amp; linked files embedded)
+          <br />
+          <strong>Photoshop:</strong> Save as .PSD at 300 DPI or higher, at
+          final print size (please leave in layers)
+          <br />
+          <strong>Important:</strong> PMS colors must be specified for all spot
+          color prints. Exact print size must be specified (art preferably sent
+          at size).
         </p>
         <p>
           <strong>Can I get a proof before printing?</strong>
           <br />
           Yes — your first virtual proof is free. Additional proofs (due to
-          client changes) are $5 each, and a proof without an order is $10.
+          client changes) are $5 each.{' '}
+          <strong>Changes must be made in writing.</strong> A virtual proof
+          without an order is $10.
         </p>
 
         <SectionTitle>Quotes, Pricing & Minimums</SectionTitle>
@@ -120,22 +128,40 @@ const FAQ = () => (
           <strong>Additional Charges:</strong>
         </p>
         <FAQList>
-          <li>Screen Charge: $30/color</li>
-          <li>Reprint Setup: $20/color</li>
-          <li>Under Minimum: $20 surcharge</li>
-          <li>Art: $50/hr</li>
-          <li>Fold: $0.10 ea | Fold &amp; Bag: $0.25 ea</li>
-          <li>Names: $4 | Numbers: $3</li>
-          <li>Additional fees may apply for specialty items or color bases.</li>
+          <li>Screen Charge: $30 per imprint colour</li>
+          <li>Re-print Set-up: $20 per imprint colour</li>
+          <li>Less than minimum (15pc): $20.00</li>
+          <li>Art Charges: $50.00/hr</li>
+          <li>First Virtual Proof: FREE</li>
+          <li>Additional Virtual Proofs (due to client changes): $5.00 ea.</li>
+          <li>Virtual Proof Without Order: $10.00</li>
+          <li>Fold: $0.10 ea. | Fold &amp; Bag: $0.25 ea.</li>
+          <li>1 Colour Name: $4.00 ea.</li>
+          <li>1 Colour Number: $3.00 ea.</li>
+          <li>Additional print charges may apply on specialty items.</li>
         </FAQList>
+
+        <p>
+          <strong>Colour Garments:</strong>
+          <br />
+          Add 1 imprint colour for each location on items requiring a base or
+          flash.
+        </p>
 
         <SectionTitle>Turnaround & Rush</SectionTitle>
         <p>
           <strong>Standard turnaround?</strong>
           <br />
-          5–7 business days from artwork approval and garment arrival. During
-          peak season (April–mid November), expect 10–15 business days. Orders
-          after 12pm count as next-day.
+          Normally 5–7 business days from artwork approval and garment arrival.
+          Peak season (April–mid November) can reach 10–15 business days.
+          <br />
+          <strong>Important:</strong> Orders received after 12pm will be counted
+          as next day.
+          <br />
+          <strong>
+            Art must be approved &amp; goods must be received at least 3 days
+            before your requested due date.
+          </strong>
         </p>
         <p>
           <strong>Rush order fees:</strong>
@@ -150,11 +176,14 @@ const FAQ = () => (
 
         <SectionTitle>Shipping & Delivery</SectionTitle>
         <p>
-          <strong>Do you ship?</strong>
+          <strong>Shipping Info:</strong>
           <br />
-          Yes — we ship Canada-wide. Pickup available at 1014 First St E,
-          Cornwall, ON. Shipping with insurance? Let us know the value — a $5
-          fee applies.
+          1014 First St E., Cornwall, ON.
+          <br />
+          We ship Canada-wide. Local pickup available at our Cornwall location.
+          <br />
+          <strong>Insurance:</strong> Additional $5.00 S&amp;H charged if
+          insurance is needed. Amount must be provided.
         </p>
         <p>
           <strong>Do you deliver?</strong>
@@ -185,21 +214,37 @@ const FAQ = () => (
           printed at your own risk.
         </p>
 
-        <SectionTitle>Order Requirements</SectionTitle>
-        <p>Your PO must include:</p>
-        <FAQList>
-          <li>Brand, style, colour, size breakdown</li>
-          <li>Print location(s) and PMS colours</li>
-          <li>Shipping info and due date</li>
-          <li>Approved art at final size, 300 DPI</li>
-        </FAQList>
-
-        <SectionTitle>Spoilage & Underruns</SectionTitle>
+        <SectionTitle>Order Submission Guidelines</SectionTitle>
         <p>
-          We reserve the right to ship up to 2% fewer items than ordered.
-          Spoilage up to 2% or 3 garments (whichever is greater) is considered
-          acceptable. Claims must be made within 5 business days. No replacement
-          or credit is given on non-ASI garments.
+          <strong>P.O. must include:</strong>
+        </p>
+        <FAQList>
+          <li>Brand(s), style(s), colour(s)</li>
+          <li>Sizes, print locations</li>
+          <li>Shipping info &amp; requested due date</li>
+        </FAQList>
+        <p>
+          <strong>
+            Orders received after 12pm will be counted as next day.
+          </strong>
+        </p>
+
+        <SectionTitle>Under Runs and Spoilage / Damage Rate</SectionTitle>
+        <p>
+          <strong>
+            We reserve the right to bill &amp; ship 2% under the quantity
+            ordered.
+          </strong>
+          <br />
+          Spoilage / damage rate of 2% or 3 pieces — customer is responsible
+          for. Above 2% or 3 pieces, T.T.P. is responsible.
+          <br />
+          <strong>
+            (Replacement or credit does not apply to items not intended for ASI
+            use)
+          </strong>
+          <br />
+          <strong>Damage claims must be made within 5 business days.</strong>
         </p>
       </FAQCard>
     </FAQContainer>
