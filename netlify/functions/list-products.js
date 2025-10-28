@@ -140,15 +140,7 @@ exports.handler = async function (event) {
       // REMOVED: Aggressive category 9 filter was excluding adult products that are also available in youth sizes
       // Now relying only on title-based filtering above
 
-      // For headwear (category 11), only keep 5-panel hats
-      const isHeadwear = itemCategories.includes('11');
-      if (isHeadwear) {
-        const is5PanelHat =
-          title.includes('5-panel') ||
-          title.includes('five panel') ||
-          title.includes('5 panel');
-        return is5PanelHat;
-      }
+      // REMOVED: 5-panel only filter was too restrictive - now allowing all headwear from category 11
 
       return true;
     });
@@ -161,30 +153,75 @@ exports.handler = async function (event) {
       if (!item.categories) return false;
       const itemCategories = item.categories.split(',').map((id) => id.trim());
 
-      // Category-specific filtering logic (preserved from original)
+      // Category-specific filtering logic
+      const title = (item.title || '').toLowerCase();
+      const baseCategory = (item.baseCategory || '').toLowerCase();
+
       if (category.toString() === '21') {
+        // T-Shirts
         return (
           (itemCategories.includes('21') ||
-            (item.baseCategory && item.baseCategory.includes('T-Shirts')) ||
-            (item.title && item.title.toLowerCase().includes('t-shirt'))) &&
+            baseCategory.includes('t-shirts') ||
+            title.includes('t-shirt')) &&
           !itemCategories.includes('64') &&
-          !(
-            item.baseCategory === 'T-Shirts - Long Sleeve' ||
-            item.title.toLowerCase().includes('long sleeve')
-          ) &&
-          !item.title.toLowerCase().includes('tank')
+          !baseCategory.includes('long sleeve') &&
+          !title.includes('long sleeve') &&
+          !title.includes('tank')
         );
       }
 
       if (category.toString() === '64') {
+        // Tank Tops
         return (
           itemCategories.includes('64') ||
-          (item.baseCategory && item.baseCategory.includes('Tank')) ||
-          (item.title && item.title.toLowerCase().includes('tank'))
+          baseCategory.includes('tank') ||
+          title.includes('tank')
         );
       }
 
-      // Add other category filters as needed...
+      if (category.toString() === '400') {
+        // Crewnecks - category 400 doesn't exist in S&S API, use title/baseCategory
+        return (
+          title.includes('crewneck') ||
+          title.includes('crew neck') ||
+          baseCategory.includes('crew')
+        );
+      }
+
+      if (category.toString() === '36') {
+        // Hoodies
+        return (
+          itemCategories.includes('36') ||
+          title.includes('hoodie') ||
+          baseCategory.includes('hoodie')
+        );
+      }
+
+      if (category.toString() === '38') {
+        // Full-Zip / Zip-Ups
+        return (
+          itemCategories.includes('38') ||
+          title.includes('full-zip') ||
+          title.includes('full zip') ||
+          baseCategory.includes('full-zip')
+        );
+      }
+
+      if (category.toString() === '56') {
+        // Long Sleeves
+        return (
+          itemCategories.includes('56') ||
+          title.includes('long sleeve') ||
+          baseCategory.includes('long sleeve')
+        );
+      }
+
+      if (category.toString() === '11') {
+        // Headwear - already filtered to category 11 products only
+        return itemCategories.includes('11');
+      }
+
+      // Default: match by category ID
       return itemCategories.includes(category.toString());
     });
 

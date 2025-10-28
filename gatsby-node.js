@@ -103,27 +103,7 @@ exports.sourceNodes = async ({
           if (brandMatch && categoryMatch && !isYouthOrBaby)
             debugCounts.afterYouthFilter++;
 
-          // For headwear (category 11), only keep 5-panel hats
-          // FIX: Check if '11' is in the array, not if the string contains '11'
-          const itemCategories = item.categories
-            ? item.categories.split(',').map((id) => id.trim())
-            : [];
-          const isHeadwear = itemCategories.includes('11');
-          const is5PanelHat =
-            title.includes('5-panel') ||
-            title.includes('five panel') ||
-            title.includes('5 panel');
-
-          // If it's headwear, must be 5-panel; otherwise just check brand and category
-          if (isHeadwear) {
-            const passes =
-              brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
-            if (passes) debugCounts.final++;
-            if (!passes && brandMatch && categoryMatch)
-              debugCounts.headwearFiltered++;
-            return passes;
-          }
-
+          // REMOVED: 5-panel only filter was too restrictive - now allowing all headwear from category 11
           const passes = brandMatch && categoryMatch && !isYouthOrBaby;
           if (passes) debugCounts.final++;
           return passes;
@@ -284,27 +264,7 @@ exports.sourceNodes = async ({
         if (brandMatch && categoryMatch && !isYouthOrBaby)
           debugCounts.afterYouthFilter++;
 
-        // For headwear (category 11), only keep 5-panel hats
-        // FIX: Check if '11' is in the array, not if the string contains '11'
-        const itemCategories = item.categories
-          ? item.categories.split(',').map((id) => id.trim())
-          : [];
-        const isHeadwear = itemCategories.includes('11');
-        const is5PanelHat =
-          title.includes('5-panel') ||
-          title.includes('five panel') ||
-          title.includes('5 panel');
-
-        // If it's headwear, must be 5-panel; otherwise just check brand and category
-        if (isHeadwear) {
-          const passes =
-            brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
-          if (passes) debugCounts.final++;
-          if (!passes && brandMatch && categoryMatch)
-            debugCounts.headwearFiltered++;
-          return passes;
-        }
-
+        // REMOVED: 5-panel only filter was too restrictive - now allowing all headwear from category 11
         const passes = brandMatch && categoryMatch && !isYouthOrBaby;
         if (passes) debugCounts.final++;
         return passes;
