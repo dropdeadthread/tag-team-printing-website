@@ -62,11 +62,24 @@ exports.sourceNodes = async ({
       // Removed: 9=Youth
       const selectedCategories = ['21', '36', '400', '38', '56', '11', '64'];
 
+      // Debug: Count filtering stages
+      let debugCounts = {
+        total: data.length,
+        brandMatch: 0,
+        categoryMatch: 0,
+        afterYouthFilter: 0,
+        headwearFiltered: 0,
+        final: 0,
+      };
+
       const filteredData = data
         .filter((item) => {
           const brandMatch =
             selectedBrands.includes(item.BrandName) ||
             selectedBrands.includes(item.brandName);
+
+          if (brandMatch) debugCounts.brandMatch++;
+
           const categoryMatch =
             item.categories &&
             selectedCategories.some((catId) =>
@@ -75,6 +88,8 @@ exports.sourceNodes = async ({
                 .map((id) => id.trim())
                 .includes(catId),
             );
+
+          if (brandMatch && categoryMatch) debugCounts.categoryMatch++;
 
           // Filter out youth/baby products by title (category 9 filter removed - too aggressive)
           const title = (item.title || '').toLowerCase();
@@ -85,8 +100,15 @@ exports.sourceNodes = async ({
             title.includes('baby') ||
             title.includes('onesie');
 
+          if (brandMatch && categoryMatch && !isYouthOrBaby)
+            debugCounts.afterYouthFilter++;
+
           // For headwear (category 11), only keep 5-panel hats
-          const isHeadwear = item.categories && item.categories.includes('11');
+          // FIX: Check if '11' is in the array, not if the string contains '11'
+          const itemCategories = item.categories
+            ? item.categories.split(',').map((id) => id.trim())
+            : [];
+          const isHeadwear = itemCategories.includes('11');
           const is5PanelHat =
             title.includes('5-panel') ||
             title.includes('five panel') ||
@@ -94,10 +116,17 @@ exports.sourceNodes = async ({
 
           // If it's headwear, must be 5-panel; otherwise just check brand and category
           if (isHeadwear) {
-            return brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
+            const passes =
+              brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
+            if (passes) debugCounts.final++;
+            if (!passes && brandMatch && categoryMatch)
+              debugCounts.headwearFiltered++;
+            return passes;
           }
 
-          return brandMatch && categoryMatch && !isYouthOrBaby;
+          const passes = brandMatch && categoryMatch && !isYouthOrBaby;
+          if (passes) debugCounts.final++;
+          return passes;
         })
         .sort((a, b) => {
           // Sort by brand first, then by title - ensures consistent ordering
@@ -107,8 +136,15 @@ exports.sourceNodes = async ({
           return (a.title || '').localeCompare(b.title || '');
         }); // Removed .slice() limit to include ALL matching products
 
+      console.log('\n📊 FILTERING DEBUG (Local File):');
+      console.log(`Total products: ${debugCounts.total}`);
+      console.log(`✓ Brand match: ${debugCounts.brandMatch}`);
+      console.log(`✓ Brand + Category match: ${debugCounts.categoryMatch}`);
+      console.log(`✓ After youth filter: ${debugCounts.afterYouthFilter}`);
+      console.log(`✗ Headwear filtered out: ${debugCounts.headwearFiltered}`);
+      console.log(`✓ FINAL: ${debugCounts.final}`);
       console.log(
-        `Loaded ${data.length} total products from local file, ${filteredData.length} from selected brands`,
+        `Loaded ${data.length} total products from local file, ${filteredData.length} from selected brands\n`,
       );
 
       filteredData.forEach((item) => {
@@ -207,11 +243,24 @@ exports.sourceNodes = async ({
     // Removed: 9=Youth
     const selectedCategories = ['21', '36', '400', '38', '56', '11', '64'];
 
+    // Debug: Count filtering stages
+    let debugCounts = {
+      total: data.length,
+      brandMatch: 0,
+      categoryMatch: 0,
+      afterYouthFilter: 0,
+      headwearFiltered: 0,
+      final: 0,
+    };
+
     const filteredData = data
       .filter((item) => {
         const brandMatch =
           selectedBrands.includes(item.BrandName) ||
           selectedBrands.includes(item.brandName);
+
+        if (brandMatch) debugCounts.brandMatch++;
+
         const categoryMatch =
           item.categories &&
           selectedCategories.some((catId) =>
@@ -220,6 +269,8 @@ exports.sourceNodes = async ({
               .map((id) => id.trim())
               .includes(catId),
           );
+
+        if (brandMatch && categoryMatch) debugCounts.categoryMatch++;
 
         // Filter out youth/baby products by title (category 9 filter removed - too aggressive)
         const title = (item.title || '').toLowerCase();
@@ -230,8 +281,15 @@ exports.sourceNodes = async ({
           title.includes('baby') ||
           title.includes('onesie');
 
+        if (brandMatch && categoryMatch && !isYouthOrBaby)
+          debugCounts.afterYouthFilter++;
+
         // For headwear (category 11), only keep 5-panel hats
-        const isHeadwear = item.categories && item.categories.includes('11');
+        // FIX: Check if '11' is in the array, not if the string contains '11'
+        const itemCategories = item.categories
+          ? item.categories.split(',').map((id) => id.trim())
+          : [];
+        const isHeadwear = itemCategories.includes('11');
         const is5PanelHat =
           title.includes('5-panel') ||
           title.includes('five panel') ||
@@ -239,10 +297,17 @@ exports.sourceNodes = async ({
 
         // If it's headwear, must be 5-panel; otherwise just check brand and category
         if (isHeadwear) {
-          return brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
+          const passes =
+            brandMatch && categoryMatch && is5PanelHat && !isYouthOrBaby;
+          if (passes) debugCounts.final++;
+          if (!passes && brandMatch && categoryMatch)
+            debugCounts.headwearFiltered++;
+          return passes;
         }
 
-        return brandMatch && categoryMatch && !isYouthOrBaby;
+        const passes = brandMatch && categoryMatch && !isYouthOrBaby;
+        if (passes) debugCounts.final++;
+        return passes;
       })
       .sort((a, b) => {
         // Sort by brand first, then by title - ensures consistent ordering
@@ -252,8 +317,15 @@ exports.sourceNodes = async ({
         return (a.title || '').localeCompare(b.title || '');
       }); // Removed .slice() limit to include ALL matching products
 
+    console.log('\n📊 FILTERING DEBUG (API Data):');
+    console.log(`Total products: ${debugCounts.total}`);
+    console.log(`✓ Brand match: ${debugCounts.brandMatch}`);
+    console.log(`✓ Brand + Category match: ${debugCounts.categoryMatch}`);
+    console.log(`✓ After youth filter: ${debugCounts.afterYouthFilter}`);
+    console.log(`✗ Headwear filtered out: ${debugCounts.headwearFiltered}`);
+    console.log(`✓ FINAL: ${debugCounts.final}`);
     console.log(
-      `Fetched ${data.length} total products, ${filteredData.length} from selected brands`,
+      `Fetched ${data.length} total products, ${filteredData.length} from selected brands\n`,
     );
 
     filteredData.forEach((item) => {
