@@ -133,12 +133,12 @@ exports.handler = async function (event) {
       if (isYouthOrBaby) return false;
 
       // Category-based filtering
-      const itemCategories = item.categories ? item.categories.split(',') : [];
+      const itemCategories = item.categories
+        ? item.categories.split(',').map((id) => id.trim())
+        : [];
 
-      // Exclude category 9 (Youth)
-      if (itemCategories.includes('9')) {
-        return false;
-      }
+      // REMOVED: Aggressive category 9 filter was excluding adult products that are also available in youth sizes
+      // Now relying only on title-based filtering above
 
       // For headwear (category 11), only keep 5-panel hats
       const isHeadwear = itemCategories.includes('11');
@@ -159,7 +159,7 @@ exports.handler = async function (event) {
     // Filter by category
     const categoryProducts = brandFiltered.filter((item) => {
       if (!item.categories) return false;
-      const itemCategories = item.categories.split(',');
+      const itemCategories = item.categories.split(',').map((id) => id.trim());
 
       // Category-specific filtering logic (preserved from original)
       if (category.toString() === '21') {
