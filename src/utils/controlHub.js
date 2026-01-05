@@ -17,27 +17,29 @@ async function sendToControlHub(endpoint, data, method = 'POST') {
       method: method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CONTROL_HUB_API_KEY}`,
-        'X-Source': 'tagteam-website'
+        'x-api-key': CONTROL_HUB_API_KEY, // FIXED: Match Control Hub's expected header format
+        'X-Source': 'tagteam-website',
       },
       body: JSON.stringify({
         timestamp: new Date().toISOString(),
         source: 'website',
-        ...data
-      })
+        ...data,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`Control Hub responded with ${response.status}: ${response.statusText}`);
+      throw new Error(
+        `Control Hub responded with ${response.status}: ${response.statusText}`,
+      );
     }
 
     return await response.json();
   } catch (error) {
     console.error('❌ Control Hub communication error:', error);
-    
+
     // Fallback: Still save to local JSON files as backup
     await saveToLocalBackup(endpoint, data);
-    
+
     throw error;
   }
 }
@@ -54,8 +56,8 @@ async function sendOrderToControlHub(orderData) {
     notifications: {
       email: true,
       sms: orderData.totalPrice > 200,
-      slack: true
-    }
+      slack: true,
+    },
   });
 }
 
@@ -71,8 +73,8 @@ async function sendContactToControlHub(contactData) {
     notifications: {
       email: true,
       sms: false,
-      slack: true
-    }
+      slack: true,
+    },
   });
 }
 
@@ -87,9 +89,10 @@ async function sendOrderStatusToControlHub(orderId, statusData) {
     status: statusData,
     notifications: {
       customer_email: true,
-      customer_sms: statusData.status === 'completed' || statusData.status === 'shipped',
-      internal_slack: true
-    }
+      customer_sms:
+        statusData.status === 'completed' || statusData.status === 'shipped',
+      internal_slack: true,
+    },
   });
 }
 
@@ -102,8 +105,8 @@ async function sendCustomerToControlHub(customerData) {
     customer: customerData,
     notifications: {
       welcome_email: true,
-      internal_slack: false
-    }
+      internal_slack: false,
+    },
   });
 }
 
@@ -112,13 +115,17 @@ async function sendCustomerToControlHub(customerData) {
  * For additional business intelligence beyond Google Analytics
  */
 async function sendAnalyticsToControlHub(eventData) {
-  return await sendToControlHub('/api/analytics', {
-    type: 'website_event',
-    event: eventData,
-    notifications: {
-      real_time_dashboard: true
-    }
-  }, 'POST');
+  return await sendToControlHub(
+    '/api/analytics',
+    {
+      type: 'website_event',
+      event: eventData,
+      notifications: {
+        real_time_dashboard: true,
+      },
+    },
+    'POST',
+  );
 }
 
 /**
@@ -131,9 +138,9 @@ async function getFromControlHub(endpoint) {
     const response = await fetch(`${CONTROL_HUB_URL}${endpoint}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${CONTROL_HUB_API_KEY}`,
-        'X-Source': 'tagteam-website'
-      }
+        Authorization: `Bearer ${CONTROL_HUB_API_KEY}`,
+        'X-Source': 'tagteam-website',
+      },
     });
 
     if (!response.ok) {
@@ -155,19 +162,19 @@ async function saveToLocalBackup(endpoint, data) {
   try {
     const fs = require('fs').promises;
     const path = require('path');
-    
+
     // Determine backup file based on endpoint
     let backupFile = 'backup.json';
     if (endpoint.includes('orders')) backupFile = 'orders.json';
     if (endpoint.includes('contacts')) backupFile = 'contactMessages.json';
     if (endpoint.includes('customers')) backupFile = 'customers.json';
-    
+
     const backupPath = path.join(process.cwd(), 'data', backupFile);
     const backupData = {
       ...data,
       _backup: true,
       _backupTimestamp: new Date().toISOString(),
-      _needsControlHubSync: true
+      _needsControlHubSync: true,
     };
 
     // Read existing data
@@ -181,10 +188,10 @@ async function saveToLocalBackup(endpoint, data) {
 
     // Add new data
     existingData.push(backupData);
-    
+
     // Write back to file
     await fs.writeFile(backupPath, JSON.stringify(existingData, null, 2));
-    
+
     console.log('✅ Data saved to local backup:', backupFile);
   } catch (error) {
     console.error('❌ Failed to save local backup:', error);
@@ -199,23 +206,124 @@ async function checkControlHubHealth() {
     const response = await fetch(`${CONTROL_HUB_URL}/health`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${CONTROL_HUB_API_KEY}`
+        Authorization: `Bearer ${CONTROL_HUB_API_KEY}`,
       },
-      timeout: 5000 // 5 second timeout
+      timeout: 5000, // 5 second timeout
     });
-    
+
     return {
       status: response.ok ? 'healthy' : 'error',
       url: CONTROL_HUB_URL,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     return {
       status: 'offline',
       error: error.message,
       url: CONTROL_HUB_URL,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
+  }
+}
+
+/**
+ * CLIENT FILE UPLOAD FUNCTIONS
+ * Token-based secure file upload system
+ */
+
+/**
+ * Validate an upload token
+ * @param {string} token - Upload token from URL
+ * @returns {Promise<Object>} - Token validation result with order info
+ */
+async function validateUploadToken(token) {
+  try {
+    const response = await fetch(
+      `${CONTROL_HUB_URL}/api/client-upload/validate/${token}`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Source': 'tagteam-website',
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Token validation failed');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('❌ Token validation error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Upload files with a valid token
+ * @param {string} token - Upload token
+ * @param {FileList|File[]} files - Files to upload
+ * @returns {Promise<Object>} - Upload result
+ */
+async function uploadClientFiles(token, files) {
+  try {
+    const formData = new FormData();
+
+    // Add files to form data
+    Array.from(files).forEach((file) => {
+      formData.append('files', file);
+    });
+
+    const response = await fetch(
+      `${CONTROL_HUB_URL}/api/client-upload/${token}/upload`,
+      {
+        method: 'POST',
+        headers: {
+          'X-Source': 'tagteam-website',
+        },
+        body: formData,
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'File upload failed');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('❌ File upload error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get list of uploaded files for a token
+ * @param {string} token - Upload token
+ * @returns {Promise<Object>} - List of uploaded files
+ */
+async function getUploadedFiles(token) {
+  try {
+    const response = await fetch(
+      `${CONTROL_HUB_URL}/api/client-upload/${token}/files`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Source': 'tagteam-website',
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch files');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('❌ Fetch files error:', error);
+    throw error;
   }
 }
 
@@ -229,7 +337,10 @@ module.exports = {
   sendAnalyticsToControlHub,
   getFromControlHub,
   checkControlHubHealth,
-  saveToLocalBackup
+  saveToLocalBackup,
+  validateUploadToken,
+  uploadClientFiles,
+  getUploadedFiles,
 };
 
 // For ES6 imports
@@ -242,5 +353,8 @@ export {
   sendAnalyticsToControlHub,
   getFromControlHub,
   checkControlHubHealth,
-  saveToLocalBackup
+  saveToLocalBackup,
+  validateUploadToken,
+  uploadClientFiles,
+  getUploadedFiles,
 };
