@@ -157,11 +157,35 @@ async function getFromControlHub(endpoint) {
 /**
  * Local backup function - saves to JSON file if Control Hub is unavailable
  * This ensures no data is lost during Control Hub downtime
+ * Note: Only works in Node.js environment (server-side), not in browser or SSR
  */
 async function saveToLocalBackup(endpoint, data) {
+  // Skip in browser environment or during SSR/build
+  if (
+    typeof window !== 'undefined' ||
+    typeof process === 'undefined' ||
+    !process.cwd
+  ) {
+    console.warn(
+      '⚠️ Local backup skipped: Not available in browser/SSR environment',
+    );
+    return;
+  }
+
+  // Skip during Gatsby build/SSR
+  if (
+    process.env.NODE_ENV === 'production' &&
+    typeof document === 'undefined'
+  ) {
+    console.warn('⚠️ Local backup skipped: Running in SSR/build environment');
+    return;
+  }
+
   try {
-    const fs = require('fs').promises;
-    const path = require('path');
+    // Dynamic import to avoid bundling fs/path in browser code
+    // This will only execute on actual Node.js server, not during Gatsby SSR
+    const fs = eval('require')('fs').promises;
+    const path = eval('require')('path');
 
     // Determine backup file based on endpoint
     let backupFile = 'backup.json';
@@ -327,23 +351,7 @@ async function getUploadedFiles(token) {
   }
 }
 
-// Export all functions for use in API endpoints
-module.exports = {
-  sendToControlHub,
-  sendOrderToControlHub,
-  sendContactToControlHub,
-  sendOrderStatusToControlHub,
-  sendCustomerToControlHub,
-  sendAnalyticsToControlHub,
-  getFromControlHub,
-  checkControlHubHealth,
-  saveToLocalBackup,
-  validateUploadToken,
-  uploadClientFiles,
-  getUploadedFiles,
-};
-
-// For ES6 imports
+// ES6 exports for Gatsby compatibility
 export {
   sendToControlHub,
   sendOrderToControlHub,

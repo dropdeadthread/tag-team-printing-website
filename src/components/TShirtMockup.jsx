@@ -19,10 +19,10 @@ const TShirtContainer = styled.div`
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  background: #F9FAFB;
+  background: #f9fafb;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #E5E7EB;
+  border: 2px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,61 +40,77 @@ const ArtOverlay = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  pointer-events: ${props => props.$hasArtwork ? 'auto' : 'none'};
+  pointer-events: ${(props) => (props.$hasArtwork ? 'auto' : 'none')};
   z-index: 2;
-  cursor: ${props => props.$hasArtwork ? 'move' : 'default'};
+  cursor: ${(props) => (props.$hasArtwork ? 'move' : 'default')};
   user-select: none;
 `;
 
 const ArtImage = styled.img`
-  max-width: ${props => {
-    switch(props.$printLocation) {
-      case 'left-chest': return '60px';
-      case 'full-front': return '160px';
-      case 'full-back': return '160px';
-      default: return '100px';
+  max-width: ${(props) => {
+    switch (props.$printLocation) {
+      case 'left-chest':
+        return '60px';
+      case 'full-front':
+        return '160px';
+      case 'full-back':
+        return '160px';
+      default:
+        return '100px';
     }
   }};
-  max-height: ${props => {
-    switch(props.$printLocation) {
-      case 'left-chest': return '60px';
-      case 'full-front': return '200px';
-      case 'full-back': return '200px';
-      default: return '120px';
+  max-height: ${(props) => {
+    switch (props.$printLocation) {
+      case 'left-chest':
+        return '60px';
+      case 'full-front':
+        return '200px';
+      case 'full-back':
+        return '200px';
+      default:
+        return '120px';
     }
   }};
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   border-radius: 4px;
-  
+
   /* Support for transparent PNG backgrounds */
   background: transparent;
 `;
 
 const PlaceholderArt = styled.div`
-  width: ${props => {
-    switch(props.$printLocation) {
-      case 'left-chest': return '60px';
-      case 'full-front': return '160px';
-      case 'full-back': return '160px';
-      default: return '100px';
+  width: ${(props) => {
+    switch (props.$printLocation) {
+      case 'left-chest':
+        return '60px';
+      case 'full-front':
+        return '160px';
+      case 'full-back':
+        return '160px';
+      default:
+        return '100px';
     }
   }};
-  height: ${props => {
-    switch(props.$printLocation) {
-      case 'left-chest': return '60px';
-      case 'full-front': return '120px';
-      case 'full-back': return '120px';
-      default: return '80px';
+  height: ${(props) => {
+    switch (props.$printLocation) {
+      case 'left-chest':
+        return '60px';
+      case 'full-front':
+        return '120px';
+      case 'full-back':
+        return '120px';
+      default:
+        return '80px';
     }
   }};
-  border: 2px dashed #9CA3AF;
+  border: 2px dashed #9ca3af;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.8);
-  color: #6B7280;
+  color: #6b7280;
   font-size: 0.8rem;
   text-align: center;
   padding: 0.5rem;
@@ -105,7 +121,7 @@ const LocationIndicator = styled.div`
   bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
-  background: #1F2937;
+  background: #1f2937;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -115,34 +131,34 @@ const LocationIndicator = styled.div`
 
 // T-shirt mockup image mapping
 const TSHIRT_MOCKUPS = {
-  'white': '/images/white tshirt mockup.png',
-  'black': '/images/black tshirt mockup.png',
-  'navy': '/images/Navy blue tshirt mockup.png',
+  white: '/images/white tshirt mockup.png',
+  black: '/images/black tshirt mockup.png',
+  navy: '/images/Navy blue tshirt mockup.png',
   'navy-blue': '/images/Navy blue tshirt mockup.png',
-  'red': '/images/red tshirt mockup.png',
+  red: '/images/red tshirt mockup.png',
   'cardinal-red': '/images/red tshirt mockup.png',
-  'royal': '/images/royal blue tshirt mockup.png',
+  royal: '/images/royal blue tshirt mockup.png',
   'royal-blue': '/images/royal blue tshirt mockup.png',
-  'forest': '/images/green tshirt mockup.png',
+  forest: '/images/green tshirt mockup.png',
   'forest-green': '/images/green tshirt mockup.png',
   'military-green': '/images/green tshirt mockup.png',
-  'yellow': '/images/yellow tshirt mockup.png',
-  'gold': '/images/yellow tshirt mockup.png',
+  yellow: '/images/yellow tshirt mockup.png',
+  gold: '/images/yellow tshirt mockup.png',
   // Fallback colors that will use closest match
-  'maroon': '/images/red tshirt mockup.png',
-  'burgundy': '/images/red tshirt mockup.png',
-  'purple': '/images/royal blue tshirt mockup.png',
-  'charcoal': '/images/black tshirt mockup.png',
-  'brown': '/images/black tshirt mockup.png',
+  maroon: '/images/red tshirt mockup.png',
+  burgundy: '/images/red tshirt mockup.png',
+  purple: '/images/royal blue tshirt mockup.png',
+  charcoal: '/images/black tshirt mockup.png',
+  brown: '/images/black tshirt mockup.png',
   'dark green': '/images/green tshirt mockup.png',
-  'heather grey': '/images/white tshirt mockup.png'
+  'heather grey': '/images/white tshirt mockup.png',
 };
 
-const TShirtMockup = ({ 
-  garmentColor = 'white', 
+const TShirtMockup = ({
+  garmentColor = 'white',
   printLocation = 'full-front',
   artworkUrl = null,
-  garmentStyle = 'basic-tee'
+  garmentStyle: _garmentStyle = 'basic-tee',
 }) => {
   const [artPosition, setArtPosition] = useState({ x: '50%', y: '50%' });
   const [isDragging, setIsDragging] = useState(false);
@@ -151,7 +167,10 @@ const TShirtMockup = ({
 
   // Debug logging for artwork URL changes
   useEffect(() => {
-    console.log('👕 TShirtMockup: artworkUrl changed to:', artworkUrl ? `URL (${artworkUrl.substring(0, 50)}...)` : 'null');
+    console.log(
+      '👕 TShirtMockup: artworkUrl changed to:',
+      artworkUrl ? `URL (${artworkUrl.substring(0, 50)}...)` : 'null',
+    );
     console.log('👕 TShirtMockup: artworkUrl type:', typeof artworkUrl);
     console.log('👕 TShirtMockup: artworkUrl length:', artworkUrl?.length || 0);
     console.log('👕 TShirtMockup: Will show artwork?', !!artworkUrl);
@@ -159,15 +178,15 @@ const TShirtMockup = ({
 
   useEffect(() => {
     // Adjust art position based on print location
-    switch(printLocation) {
+    switch (printLocation) {
       case 'left-chest':
-        setArtPosition({ x: '38%', y: '42%' });
+        setArtPosition({ x: '62%', y: '30%' });
         break;
       case 'full-front':
-        setArtPosition({ x: '50%', y: '52%' });
+        setArtPosition({ x: '50%', y: '35%' });
         break;
       case 'full-back':
-        setArtPosition({ x: '50%', y: '52%' });
+        setArtPosition({ x: '50%', y: '35%' });
         break;
       default:
         setArtPosition({ x: '50%', y: '50%' });
@@ -175,31 +194,37 @@ const TShirtMockup = ({
   }, [printLocation]);
 
   // Drag handlers for artwork positioning
-  const handleMouseDown = useCallback((e) => {
-    if (!artworkUrl) return;
-    
-    setIsDragging(true);
-    const artRect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - artRect.left - artRect.width / 2,
-      y: e.clientY - artRect.top - artRect.height / 2
-    });
-    e.preventDefault();
-  }, [artworkUrl]);
+  const handleMouseDown = useCallback(
+    (e) => {
+      if (!artworkUrl) return;
 
-  const handleMouseMove = useCallback((e) => {
-    if (!isDragging || !containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - dragOffset.x - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - dragOffset.y - rect.top) / rect.height) * 100;
-    
-    // Keep artwork within bounds
-    const clampedX = Math.max(10, Math.min(90, x));
-    const clampedY = Math.max(15, Math.min(85, y));
-    
-    setArtPosition({ x: `${clampedX}%`, y: `${clampedY}%` });
-  }, [isDragging, dragOffset]);
+      setIsDragging(true);
+      const artRect = e.currentTarget.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - artRect.left - artRect.width / 2,
+        y: e.clientY - artRect.top - artRect.height / 2,
+      });
+      e.preventDefault();
+    },
+    [artworkUrl],
+  );
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!isDragging || !containerRef.current) return;
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((e.clientX - dragOffset.x - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - dragOffset.y - rect.top) / rect.height) * 100;
+
+      // Keep artwork within bounds
+      const clampedX = Math.max(10, Math.min(90, x));
+      const clampedY = Math.max(15, Math.min(85, y));
+
+      setArtPosition({ x: `${clampedX}%`, y: `${clampedY}%` });
+    },
+    [isDragging, dragOffset],
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -209,7 +234,7 @@ const TShirtMockup = ({
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
@@ -217,55 +242,75 @@ const TShirtMockup = ({
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  const tshirtMockupSrc = TSHIRT_MOCKUPS[garmentColor?.toLowerCase()] || TSHIRT_MOCKUPS['white'];
+  const tshirtMockupSrc =
+    TSHIRT_MOCKUPS[garmentColor?.toLowerCase()] || TSHIRT_MOCKUPS['white'];
 
   const getLocationLabel = () => {
-    switch(printLocation) {
-      case 'left-chest': return 'Left Chest';
-      case 'full-front': return 'Full Front';
-      case 'full-back': return 'Full Back';
-      default: return 'Print Location';
+    switch (printLocation) {
+      case 'left-chest':
+        return 'Left Chest';
+      case 'full-front':
+        return 'Full Front';
+      case 'full-back':
+        return 'Full Back';
+      default:
+        return 'Print Location';
     }
   };
 
   return (
     <MockupContainer>
-      <MockupHeader>
-        Design Preview
-      </MockupHeader>
-      
+      <MockupHeader>Design Preview</MockupHeader>
+
       <TShirtContainer ref={containerRef}>
         {/* Real T-Shirt Mockup Image */}
-        <TShirtImage 
-          src={tshirtMockupSrc} 
+        <TShirtImage
+          src={tshirtMockupSrc}
           alt={`${garmentColor} t-shirt mockup`}
         />
 
         {/* Art Overlay */}
-        <ArtOverlay 
+        <ArtOverlay
           $hasArtwork={!!artworkUrl}
-          style={{ 
-            left: artPosition.x, 
+          style={{
+            left: artPosition.x,
             top: artPosition.y,
             transform: `translate(-50%, -50%)`,
-            opacity: isDragging ? 0.8 : 1
+            opacity: isDragging ? 0.8 : 1,
           }}
           onMouseDown={handleMouseDown}
         >
           {artworkUrl ? (
-            <ArtImage 
-              src={artworkUrl} 
-              alt="Design preview" 
+            <ArtImage
+              src={artworkUrl}
+              alt="Design preview"
               $printLocation={printLocation}
-              onLoad={() => console.log('✅ TShirtMockup: Artwork image loaded successfully')}
-              onError={(e) => console.error('❌ TShirtMockup: Artwork image failed to load:', e)}
+              onLoad={() =>
+                console.log(
+                  '✅ TShirtMockup: Artwork image loaded successfully',
+                )
+              }
+              onError={(e) =>
+                console.error(
+                  '❌ TShirtMockup: Artwork image failed to load:',
+                  e,
+                )
+              }
             />
           ) : (
             <PlaceholderArt $printLocation={printLocation}>
               {printLocation === 'left-chest' ? (
-                <>📋<br/>Logo</>
+                <>
+                  📋
+                  <br />
+                  Logo
+                </>
               ) : (
-                <>🎨<br/>Your Design</>
+                <>
+                  🎨
+                  <br />
+                  Your Design
+                </>
               )}
             </PlaceholderArt>
           )}
@@ -274,7 +319,13 @@ const TShirtMockup = ({
         <LocationIndicator>
           {getLocationLabel()}
           {artworkUrl && (
-            <div style={{ fontSize: '0.7rem', color: '#6B7280', marginTop: '0.25rem' }}>
+            <div
+              style={{
+                fontSize: '0.7rem',
+                color: '#6B7280',
+                marginTop: '0.25rem',
+              }}
+            >
               💡 Drag artwork to reposition
             </div>
           )}
