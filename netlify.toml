@@ -13,9 +13,10 @@
   to = "/.netlify/functions/ss-images?path=:splat"
   status = 200
 
+# Image CDN optimization - only when imgcdn query param is present
+# Removed force=true to allow Gatsby pages to work properly
 [[redirects]]
   from = "/*"
   query = {imgcdn = "true"}
   to = "/.netlify/images?url=/:splat&fm=webp"
   status = 200
-  force = true

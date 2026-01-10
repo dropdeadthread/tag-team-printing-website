@@ -5,11 +5,36 @@ import Layout from '../components/Layout';
 import '../styles/cart.css';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateCartItemQuantity } =
-    useContext(CartContext);
+  // Defensive: Ensure context is available
+  const context = useContext(CartContext);
+
+  // Fallback if context is blocked or unavailable
+  if (!context) {
+    return (
+      <Layout>
+        <div className="cart-container">
+          <div className="cart-content">
+            <h1 className="cart-title">Cart Unavailable</h1>
+            <p className="empty-cart-message">
+              Unable to load cart. Please disable browser extensions and refresh
+              the page.
+            </p>
+            <Link
+              to="/"
+              style={{ color: '#fff5d1', textDecoration: 'underline' }}
+            >
+              Return to Home
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const { cartItems = [], removeFromCart, updateCartItemQuantity } = context;
 
   // Cart items use standardized format - no need to merge with product data
-  const mergedCart = cartItems.map((item) => ({
+  const mergedCart = (cartItems || []).map((item) => ({
     ...item,
     quantity: item.quantity || 1,
   }));

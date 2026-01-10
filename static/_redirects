@@ -1,0 +1,17 @@
+# Netlify Redirects for Tag Team Printing
+# This file ensures proper SPA routing for Gatsby
+
+# S&S Images proxy (handled by Netlify function)
+/ss-images/*  /.netlify/functions/ss-images?path=:splat  200
+
+# Gatsby client-side routing fallback - DO NOT redirect these
+/cart                   /cart/index.html                 200
+/cart/                  /cart/index.html                 200
+/checkout               /checkout/index.html             200
+/checkout/              /checkout/index.html             200
+/products/*             /products/:splat/index.html      200
+/shop/*                 /shop/:splat/index.html          200
+/categories/*           /categories/:splat/index.html    200
+
+# Gatsby 404 page fallback (for any non-matching routes)
+/*                      /index.html                      200
