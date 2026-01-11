@@ -1,12 +1,13 @@
 const { Client, Environment } = require('square');
 const crypto = require('crypto');
 
-const client = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment: Environment.Production,
-});
-
 exports.handler = async (event, context) => {
+  // Initialize Square client inside handler to ensure env vars are available
+  const client = new Client({
+    accessToken: process.env.SQUARE_ACCESS_TOKEN,
+    environment: Environment.Production,
+  });
+
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
