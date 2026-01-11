@@ -50,15 +50,18 @@ const ProductCard = ({ product }) => {
     'Product';
   const brand = product.Brand || product.brand || product.brandName || '';
   const slug = slugify(name);
-  const productId = product.Style || product.styleID || product.styleCode;
+  const styleID = product.styleID || product.Style || product.styleCode;
 
-  const handleImageError = (e) => {
+  const handleImageError = (_e) => {
     console.log('Image failed to load:', image);
     setImgError(true);
   };
 
   return (
-    <Link to={`/products/${productId}`} className="wrestling-card-link">
+    <Link
+      to={styleID && slug ? `/products/${styleID}/${slug}/` : '/products/'}
+      className="wrestling-card-link"
+    >
       <div className="wrestling-card">
         <div className="product-image-wrapper">
           <img

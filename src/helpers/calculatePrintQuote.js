@@ -191,10 +191,10 @@ export function calculatePrintQuote({
 
   // Apply rush order premium based on selected option
   const rushOrderOptions = {
-    '5day': 0.2,
-    '4day': 0.3,
-    '3day': 0.4,
-    '2day': 0.5,
+    '5day': 0.2, // 20%
+    '4day': 0.3, // 30%
+    '3day': 0.5, // 50% (fixed from 40%)
+    '2day': 1.0, // 100% (fixed from 50%)
   };
 
   let rushPremium = 0;

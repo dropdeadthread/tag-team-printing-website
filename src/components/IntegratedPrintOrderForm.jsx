@@ -40,7 +40,7 @@ const isDarkGarment = (colorValue) => {
 };
 
 const IntegratedPrintOrderForm = ({
-  preSelectedGarment = null, // { title, price, wholesalePrice, color, size, brandName, styleID }
+  preSelectedGarment = null, // { title, price, wholesalePrice, color, size, brandName, styleID, baseCategory }
   isEmbedded = false, // Whether this is embedded in a product page or standalone
 }) => {
   const [shirtCount, setShirtCount] = useState(15);
@@ -62,6 +62,50 @@ const IntegratedPrintOrderForm = ({
   const [garmentType, setGarmentType] = useState('tee');
   const [warning, setWarning] = useState('');
 
+  // Add-ons state
+  const [addOns, setAddOns] = useState({
+    backPrint: false,
+    neckTag: false,
+    sleeve: false,
+    other: false,
+  });
+
+  const [addOnInkColors, setAddOnInkColors] = useState({
+    backPrint: [],
+    neckTag: [],
+    sleeve: [],
+    other: [],
+  });
+
+  const [addOnColorCounts, setAddOnColorCounts] = useState({
+    backPrint: 1,
+    neckTag: 1,
+    sleeve: 1,
+    other: 1,
+  });
+
+  // Check if current product is headwear (exclude add-ons for headwear)
+  const isHeadwear =
+    preSelectedGarment?.baseCategory?.toLowerCase().includes('headwear') ||
+    preSelectedGarment?.baseCategory?.toLowerCase().includes('hat') ||
+    false;
+
+  // Add-on color limits (max colors per location)
+  const ADD_ON_COLOR_LIMITS = {
+    backPrint: 6,
+    neckTag: 1,
+    sleeve: 1,
+    other: 2,
+  };
+
+  // Track which add-ons are expanded
+  const [expandedAddOns, setExpandedAddOns] = useState({
+    backPrint: false,
+    neckTag: false,
+    sleeve: false,
+    other: false,
+  });
+
   // Lock-in logic to prevent mixing garment types
   const checkGarmentCompatibility = useCallback(
     (newType) => {
@@ -82,6 +126,64 @@ const IntegratedPrintOrderForm = ({
     },
     [garmentType],
   );
+
+  // Handle add-on toggle
+  const handleAddOnToggle = (addOnKey) => {
+    const newValue = !addOns[addOnKey];
+    setAddOns({
+      ...addOns,
+      [addOnKey]: newValue,
+    });
+
+    // If enabling, expand the add-on; if disabling, collapse and clear colors
+    if (newValue) {
+      setExpandedAddOns({
+        ...expandedAddOns,
+        [addOnKey]: true,
+      });
+    } else {
+      setExpandedAddOns({
+        ...expandedAddOns,
+        [addOnKey]: false,
+      });
+      setAddOnInkColors({
+        ...addOnInkColors,
+        [addOnKey]: [],
+      });
+      // Reset color count to 1
+      setAddOnColorCounts({
+        ...addOnColorCounts,
+        [addOnKey]: 1,
+      });
+    }
+  };
+
+  // Handle add-on color count change
+  const handleAddOnColorCountChange = (addOnKey, newCount) => {
+    setAddOnColorCounts({
+      ...addOnColorCounts,
+      [addOnKey]: newCount,
+    });
+
+    // Clear selected colors if new count is less than currently selected
+    if (addOnInkColors[addOnKey].length > newCount) {
+      setAddOnInkColors({
+        ...addOnInkColors,
+        [addOnKey]: addOnInkColors[addOnKey].slice(0, newCount),
+      });
+    }
+  };
+
+  // Handle add-on ink color selection
+  const handleAddOnColorChange = (addOnKey, index, value) => {
+    const currentColors = addOnInkColors[addOnKey] || [];
+    const newColors = [...currentColors];
+    newColors[index] = value;
+    setAddOnInkColors({
+      ...addOnInkColors,
+      [addOnKey]: newColors,
+    });
+  };
 
   // Handle garment source change
   const handleGarmentSourceChange = (source) => {
@@ -202,9 +304,30 @@ const IntegratedPrintOrderForm = ({
             }
           : {};
 
+    // Calculate total setup fees: main print + all active add-ons
+    let totalSetupFees = numColors * 30; // Main print setup
+    if (hasUnderbase) {
+      totalSetupFees += 30; // Underbase screen
+    }
+
+    // Add setup fees for each active add-on location (only if not headwear)
+    if (!isHeadwear) {
+      Object.keys(addOns).forEach((addOnKey) => {
+        if (addOns[addOnKey]) {
+          totalSetupFees += addOnColorCounts[addOnKey] * 30;
+        }
+      });
+    }
+
+    // Count active add-ons as additional locations (only if not headwear)
+    const activeAddOns =
+      !isHeadwear && Object.values(addOns).filter(Boolean).length;
+    const totalLocations = 1 + (activeAddOns || 0);
+
     const result = calculatePrintQuote({
       garmentQty: shirtCount,
       colorCount: numColors,
+      locationCount: totalLocations,
       inkColors: inkColors.filter((color) => color.trim() !== ''), // Only non-empty colors
       needsUnderbase: hasUnderbase,
       garmentBrand: preSelectedGarment?.brandName || '',
@@ -213,6 +336,19 @@ const IntegratedPrintOrderForm = ({
     });
 
     if (result.valid) {
+      // Override the setup total with our correctly calculated value
+      result.setupTotal = totalSetupFees;
+
+      // Recalculate subtotal and total with correct setup fees
+      const garmentTotal = shirtCount * result.garmentCostPerShirt;
+      const printingTotal = result.printingTotal || 0;
+      const subtotal = garmentTotal + totalSetupFees + printingTotal;
+      const tax = subtotal * 0.13;
+      const totalWithTax = subtotal + tax;
+
+      result.subtotal = subtotal.toFixed(2);
+      result.totalWithTax = totalWithTax.toFixed(2);
+
       setQuote(result);
       setError('');
     } else {
@@ -227,14 +363,38 @@ const IntegratedPrintOrderForm = ({
     preSelectedGarment,
     garmentSource,
     recommendedColor,
+    addOns,
+    addOnColorCounts,
+    isHeadwear,
   ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Calculate total setup fees: main print + all active add-ons
+    let totalSetupFees = numColors * 30; // Main print setup
+    if (hasUnderbase) {
+      totalSetupFees += 30; // Underbase screen
+    }
+
+    // Add setup fees for each active add-on location (only if not headwear)
+    if (!isHeadwear) {
+      Object.keys(addOns).forEach((addOnKey) => {
+        if (addOns[addOnKey]) {
+          totalSetupFees += addOnColorCounts[addOnKey] * 30;
+        }
+      });
+    }
+
+    // Count active add-ons as additional locations
+    const activeAddOns =
+      !isHeadwear && Object.values(addOns).filter(Boolean).length;
+    const totalLocations = 1 + (activeAddOns || 0);
+
     const result = calculatePrintQuote({
       garmentQty: shirtCount,
       colorCount: numColors,
+      locationCount: totalLocations,
       garmentColor: preSelectedGarment?.color || '',
       inkColors: inkColors.filter((color) => color.trim() !== ''),
       needsUnderbase: hasUnderbase,
@@ -248,6 +408,9 @@ const IntegratedPrintOrderForm = ({
       return;
     }
 
+    // Override setup total
+    result.setupTotal = totalSetupFees;
+
     setError('');
     setStatus('Submitting...');
 
@@ -258,6 +421,13 @@ const IntegratedPrintOrderForm = ({
     formData.append('hasUnderbase', hasUnderbase);
     formData.append('notes', notes);
     formData.append('quote', JSON.stringify(result));
+
+    // Add add-ons data if not headwear
+    if (!isHeadwear) {
+      formData.append('addOns', JSON.stringify(addOns));
+      formData.append('addOnInkColors', JSON.stringify(addOnInkColors));
+      formData.append('addOnColorCounts', JSON.stringify(addOnColorCounts));
+    }
 
     // Add pre-selected garment info if available
     if (preSelectedGarment) {
@@ -288,6 +458,32 @@ const IntegratedPrintOrderForm = ({
             : '',
         );
         setArtFile(null);
+
+        // Reset add-ons
+        setAddOns({
+          backPrint: false,
+          neckTag: false,
+          sleeve: false,
+          other: false,
+        });
+        setAddOnInkColors({
+          backPrint: [],
+          neckTag: [],
+          sleeve: [],
+          other: [],
+        });
+        setAddOnColorCounts({
+          backPrint: 1,
+          neckTag: 1,
+          sleeve: 1,
+          other: 1,
+        });
+        setExpandedAddOns({
+          backPrint: false,
+          neckTag: false,
+          sleeve: false,
+          other: false,
+        });
       } else {
         setStatus('❌ Error submitting order. Please try again.');
       }
@@ -528,6 +724,452 @@ const IntegratedPrintOrderForm = ({
         >
           Reset to Auto-Calculate
         </button>
+      )}
+
+      {/* Add-ons Section - Only show if not headwear */}
+      {!isHeadwear && (
+        <div className="addons-section" style={{ marginTop: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem', color: '#2563EB' }}>
+            Additional Print Locations (Optional)
+          </h3>
+
+          {/* Back Print */}
+          <div
+            className={`addon-card ${addOns.backPrint ? 'active' : ''}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleAddOnToggle('backPrint')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAddOnToggle('backPrint');
+              }
+            }}
+            style={{
+              border: addOns.backPrint
+                ? '2px solid #2563EB'
+                : '2px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              cursor: 'pointer',
+              backgroundColor: addOns.backPrint ? '#EFF6FF' : 'white',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <strong
+                  style={{ color: addOns.backPrint ? '#2563EB' : '#374151' }}
+                >
+                  🔙 Back Print (Full Color Options)
+                </strong>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    color: '#6B7280',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  Add a full-color design to the back (up to 6 colors)
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#059669',
+                  fontWeight: '600',
+                }}
+              >
+                +${addOnColorCounts.backPrint * 30} setup
+              </div>
+            </div>
+
+            {addOns.backPrint && expandedAddOns.backPrint && (
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                style={{
+                  marginTop: '1rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid #E5E7EB',
+                }}
+              >
+                <label htmlFor="backPrint-color-count">
+                  How many colors for back print?
+                  <select
+                    id="backPrint-color-count"
+                    value={addOnColorCounts.backPrint}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleAddOnColorCountChange(
+                        'backPrint',
+                        parseInt(e.target.value),
+                      );
+                    }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      marginTop: '0.5rem',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {Array.from(
+                      { length: ADD_ON_COLOR_LIMITS.backPrint },
+                      (_, i) => i + 1,
+                    ).map((num) => (
+                      <option key={num} value={num}>
+                        {num} Color{num > 1 ? 's' : ''} (${num * 30} setup)
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div style={{ marginTop: '1rem' }}>
+                  <span style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Ink Colors:
+                  </span>
+                  {Array.from(
+                    { length: addOnColorCounts.backPrint },
+                    (_, i) => (
+                      <input
+                        key={i}
+                        type="text"
+                        placeholder={`Color ${i + 1}`}
+                        value={addOnInkColors.backPrint?.[i] || ''}
+                        onChange={(e) =>
+                          handleAddOnColorChange('backPrint', i, e.target.value)
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          marginBottom: '0.5rem',
+                        }}
+                      />
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Neck Tag */}
+          <div
+            className={`addon-card ${addOns.neckTag ? 'active' : ''}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleAddOnToggle('neckTag')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAddOnToggle('neckTag');
+              }
+            }}
+            style={{
+              border: addOns.neckTag
+                ? '2px solid #2563EB'
+                : '2px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              cursor: 'pointer',
+              backgroundColor: addOns.neckTag ? '#EFF6FF' : 'white',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <strong
+                  style={{ color: addOns.neckTag ? '#2563EB' : '#374151' }}
+                >
+                  🏷️ Neck Tag Printing
+                </strong>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    color: '#6B7280',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  Replace neck tag with your custom print (1 color only)
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#059669',
+                  fontWeight: '600',
+                }}
+              >
+                +$30 setup
+              </div>
+            </div>
+
+            {addOns.neckTag && expandedAddOns.neckTag && (
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                style={{
+                  marginTop: '1rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid #E5E7EB',
+                }}
+              >
+                <label
+                  htmlFor="neckTag-color"
+                  style={{ display: 'block', marginBottom: '0.5rem' }}
+                >
+                  Ink Color:
+                </label>
+                <input
+                  id="neckTag-color"
+                  type="text"
+                  placeholder="Color (e.g., Black, White)"
+                  value={addOnInkColors.neckTag?.[0] || ''}
+                  onChange={(e) =>
+                    handleAddOnColorChange('neckTag', 0, e.target.value)
+                  }
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Sleeve */}
+          <div
+            className={`addon-card ${addOns.sleeve ? 'active' : ''}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleAddOnToggle('sleeve')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAddOnToggle('sleeve');
+              }
+            }}
+            style={{
+              border: addOns.sleeve ? '2px solid #2563EB' : '2px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              cursor: 'pointer',
+              backgroundColor: addOns.sleeve ? '#EFF6FF' : 'white',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <strong
+                  style={{ color: addOns.sleeve ? '#2563EB' : '#374151' }}
+                >
+                  💪 Sleeve Printing
+                </strong>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    color: '#6B7280',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  Add a design to the sleeve (1 color only)
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#059669',
+                  fontWeight: '600',
+                }}
+              >
+                +$30 setup
+              </div>
+            </div>
+
+            {addOns.sleeve && expandedAddOns.sleeve && (
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                style={{
+                  marginTop: '1rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid #E5E7EB',
+                }}
+              >
+                <label
+                  htmlFor="sleeve-color"
+                  style={{ display: 'block', marginBottom: '0.5rem' }}
+                >
+                  Ink Color:
+                </label>
+                <input
+                  id="sleeve-color"
+                  type="text"
+                  placeholder="Color (e.g., Black, White)"
+                  value={addOnInkColors.sleeve?.[0] || ''}
+                  onChange={(e) =>
+                    handleAddOnColorChange('sleeve', 0, e.target.value)
+                  }
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Other Location */}
+          <div
+            className={`addon-card ${addOns.other ? 'active' : ''}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleAddOnToggle('other')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleAddOnToggle('other');
+              }
+            }}
+            style={{
+              border: addOns.other ? '2px solid #2563EB' : '2px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              cursor: 'pointer',
+              backgroundColor: addOns.other ? '#EFF6FF' : 'white',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <strong style={{ color: addOns.other ? '#2563EB' : '#374151' }}>
+                  📍 Other Location
+                </strong>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    color: '#6B7280',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  Custom location print (up to 2 colors)
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#059669',
+                  fontWeight: '600',
+                }}
+              >
+                +${addOnColorCounts.other * 30} setup
+              </div>
+            </div>
+
+            {addOns.other && expandedAddOns.other && (
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                style={{
+                  marginTop: '1rem',
+                  paddingTop: '1rem',
+                  borderTop: '1px solid #E5E7EB',
+                }}
+              >
+                <label htmlFor="other-color-count">
+                  How many colors for other location?
+                  <select
+                    id="other-color-count"
+                    value={addOnColorCounts.other}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleAddOnColorCountChange(
+                        'other',
+                        parseInt(e.target.value),
+                      );
+                    }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      marginTop: '0.5rem',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {Array.from(
+                      { length: ADD_ON_COLOR_LIMITS.other },
+                      (_, i) => i + 1,
+                    ).map((num) => (
+                      <option key={num} value={num}>
+                        {num} Color{num > 1 ? 's' : ''} (${num * 30} setup)
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div style={{ marginTop: '1rem' }}>
+                  <span style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Ink Colors:
+                  </span>
+                  {Array.from({ length: addOnColorCounts.other }, (_, i) => (
+                    <input
+                      key={i}
+                      type="text"
+                      placeholder={`Color ${i + 1}`}
+                      value={addOnInkColors.other?.[i] || ''}
+                      onChange={(e) =>
+                        handleAddOnColorChange('other', i, e.target.value)
+                      }
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        marginBottom: '0.5rem',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <label>

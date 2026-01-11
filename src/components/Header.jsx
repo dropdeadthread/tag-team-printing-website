@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'gatsby';
 import '../styles/header.css';
 
-const Header = ({ itemCount }) => {
+const Header = ({ itemCount: _itemCount }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   const toggleNav = () => {
@@ -26,6 +26,7 @@ const Header = ({ itemCount }) => {
       <nav className={`nav-links ${isNavOpen ? 'show' : ''}`}>
         <Link to="/order">Order Prints</Link>
         <Link to="/categories">Browse Products</Link>
+        <Link to="/brands">Brands</Link>
         <Link to="/about">About</Link>
         <Link to="/design-services">Design Services</Link>
         <Link to="/faq">FAQ</Link>

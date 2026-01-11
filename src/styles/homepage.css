@@ -128,3 +128,95 @@ body {
   flex-direction: column;
   justify-content: center;
 }
+
+/* === TESTIMONIALS SECTION === */
+.testimonials-section {
+  max-width: 1200px;
+  margin: 60px auto 80px;
+  padding: 40px 20px;
+  background: rgba(255, 245, 209, 0.3);
+  border: 3px solid #2563eb;
+  border-radius: 12px;
+}
+
+.testimonials-title {
+  font-family: 'HawlersEightRough', 'Impact', 'Arial Black', sans-serif;
+  color: #c32b14;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 0 20px;
+}
+
+.testimonial-card {
+  background: white;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 30px 25px;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.15);
+}
+
+.testimonial-rating {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #ffc107;
+}
+
+.testimonial-comment {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.testimonial-author {
+  font-family: 'HawlersEightRough', var(--main-font), Arial, sans-serif;
+  font-size: 1.1rem;
+  color: #2563eb;
+  font-weight: bold;
+  text-align: right;
+  margin: 0;
+}
+
+/* === MOBILE TESTIMONIALS === */
+@media (max-width: 768px) {
+  .testimonials-section {
+    margin: 40px 15px 60px;
+    padding: 30px 15px;
+  }
+
+  .testimonials-title {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0;
+  }
+
+  .testimonial-card {
+    padding: 25px 20px;
+  }
+
+  .testimonial-comment {
+    font-size: 0.95rem;
+  }
+}

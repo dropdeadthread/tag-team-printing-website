@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import styled from 'styled-components';
 import Layout from '../components/Layout';
 
@@ -40,82 +41,173 @@ const SectionTitle = styled.h2`
   letter-spacing: 1px;
 `;
 
-const DesignerPage = () => (
-  <Layout>
-    <DesignContainer>
-      <DesignCard>
-        <DesignTitle>Tag Team Printing — Design Services</DesignTitle>
-        <p>
-          Custom artwork, merch design, and print-ready prep — all under one
-          roof.
-        </p>
+const OrderButton = styled.a`
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 1.25rem;
+  background: #ff5050;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'HawlersEightRough', 'Impact', 'Arial Black', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 80, 80, 0.3);
 
-        <SectionTitle>■ Technical Prep Work — $25/hr</SectionTitle>
-        <p>
-          For quick fixes and production-ready adjustments on client-provided
-          files. Perfect when your design just needs a little love before
-          hitting the press.
-        </p>
-        <p>
-          <b>Includes:</b> 1 free revision, 1 free virtual proof, $5 for
-          additional revisions.
-        </p>
-        <p>
-          <b>Examples:</b> Color separations, raster-to-vector conversion,
-          resizing logos, fixing resolution issues.
-        </p>
+  &:hover {
+    background: #e63946;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 80, 80, 0.4);
+  }
+`;
 
-        <SectionTitle>■ Creative & Branding Design — $50/hr</SectionTitle>
-        <p>
-          For full-scale custom projects where we create something from scratch.
-          When you need original artwork, merch layouts, or killer branding,
-          we&apos;re your crew.
-        </p>
-        <p>
-          <b>Includes:</b> Up to 3 free revisions, 1 free virtual proof, $5 for
-          additional revisions.
-        </p>
-        <p>
-          <b>Examples:</b> T-shirt graphics, album covers, logos, posters, full
-          merch layouts.
-        </p>
+const DesignerPage = () => {
+  const siteUrl =
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : 'https://tagteamprints.com';
 
-        <SectionTitle>■■ Standalone Design Projects — $50/hr</SectionTitle>
-        <p>
-          Not printing with us? No problem. We&apos;ll deliver finished,
-          print-ready files that you fully own.
-        </p>
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Custom Design Services',
+    provider: {
+      '@type': 'Organization',
+      name: 'Tag Team Printing',
+      url: siteUrl,
+    },
+    serviceType: 'Graphic Design and Technical Prep',
+    description:
+      'Custom artwork, merch design, and print-ready prep services for screen printing',
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Technical Prep Work',
+        price: '25',
+        priceCurrency: 'CAD',
+        description:
+          'Quick fixes and production-ready adjustments on client-provided files',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Creative & Branding Design',
+        price: '50',
+        priceCurrency: 'CAD',
+        description:
+          'Full-scale custom projects with original artwork and branding',
+      },
+    ],
+    areaServed: {
+      '@type': 'Place',
+      name: 'Cornwall, Ontario',
+    },
+  };
 
-        {/* Turnaround times removed for realistic expectations */}
-        <div
-          style={{
-            background: '#e0e7ff',
-            border: '2px solid #2563EB',
-            borderRadius: '8px',
-            padding: '1.2rem 1.5rem',
-            marginTop: '2.5rem',
-            textAlign: 'center',
-            fontWeight: 'bold',
-            fontSize: '1.15rem',
-          }}
-        >
-          Have questions about our design process, file prep, or creative
-          services?{' '}
-          <a
-            href="/designer-faq"
+  return (
+    <Layout>
+      <Helmet>
+        <title>Design Services - Tag Team Printing</title>
+        <meta
+          name="description"
+          content="Custom graphic design services for screen printing. Technical prep work at $25/hr and creative design at $50/hr. Logo design, merch graphics, and print-ready files."
+        />
+        <meta
+          property="og:title"
+          content="Design Services - Tag Team Printing"
+        />
+        <meta
+          property="og:description"
+          content="Custom graphic design services for screen printing. Technical prep work at $25/hr and creative design at $50/hr."
+        />
+        <meta property="og:type" content="website" />
+        <script type="application/ld+json">
+          {JSON.stringify(serviceSchema)}
+        </script>
+      </Helmet>
+      <DesignContainer>
+        <DesignCard>
+          <DesignTitle>Tag Team Printing — Design Services</DesignTitle>
+
+          <OrderButton href="/design-order">🎨 Order Custom Design</OrderButton>
+
+          <p>
+            Custom artwork, merch design, and print-ready prep — all under one
+            roof.
+          </p>
+
+          <SectionTitle>■ Technical Prep Work — $25/hr</SectionTitle>
+          <p>
+            For quick fixes and production-ready adjustments on client-provided
+            files. Perfect when your design just needs a little love before
+            hitting the press.
+          </p>
+          <p>
+            <b>Includes:</b> 1 free revision, 1 free virtual proof, $5 for
+            additional revisions.
+          </p>
+          <p>
+            <b>Examples:</b> Color separations, raster-to-vector conversion,
+            resizing logos, fixing resolution issues.
+          </p>
+
+          <SectionTitle>■ Creative & Branding Design — $50/hr</SectionTitle>
+          <p>
+            For full-scale custom projects where we create something from
+            scratch. When you need original artwork, merch layouts, or killer
+            branding, we&apos;re your crew.
+          </p>
+          <p>
+            <b>Includes:</b> Up to 3 free revisions, 1 free virtual proof, $5
+            for additional revisions.
+          </p>
+          <p>
+            <b>Examples:</b> T-shirt graphics, album covers, logos, posters,
+            full merch layouts.
+          </p>
+
+          <SectionTitle>■■ Standalone Design Projects — $50/hr</SectionTitle>
+          <p>
+            Not printing with us? No problem. We&apos;ll deliver finished,
+            print-ready files that you fully own.
+          </p>
+
+          {/* Turnaround times removed for realistic expectations */}
+          <div
             style={{
-              color: '#0070d1',
+              background: '#e0e7ff',
+              border: '2px solid #2563EB',
+              borderRadius: '8px',
+              padding: '1.2rem 1.5rem',
+              marginTop: '2.5rem',
+              textAlign: 'center',
               fontWeight: 'bold',
-              textDecoration: 'underline',
+              fontSize: '1.15rem',
             }}
           >
-            Check out our Designer FAQ
-          </a>
-          .
-        </div>
-      </DesignCard>
-    </DesignContainer>
-  </Layout>
-);
+            Have questions about our design process, file prep, or creative
+            services?{' '}
+            <a
+              href="/designer-faq"
+              style={{
+                color: '#0070d1',
+                fontWeight: 'bold',
+                textDecoration: 'underline',
+              }}
+            >
+              Check out our Designer FAQ
+            </a>
+            .
+          </div>
+        </DesignCard>
+      </DesignContainer>
+    </Layout>
+  );
+};
 
 export default DesignerPage;

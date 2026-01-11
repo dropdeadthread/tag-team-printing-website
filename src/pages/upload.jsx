@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { navigate } from 'gatsby';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Layout from '../components/Layout';
 import Seo from '../components/SEO';
@@ -292,6 +291,9 @@ const ClientUploadPage = () => {
 
   // Load token from URL and validate
   useEffect(() => {
+    // Skip during SSR
+    if (typeof window === 'undefined') return;
+
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token');
 

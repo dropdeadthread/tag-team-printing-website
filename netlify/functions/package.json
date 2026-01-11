@@ -4,6 +4,7 @@
   "private": true,
   "type": "commonjs",
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "nodemailer": "^7.0.10"
   }
 }

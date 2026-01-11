@@ -4,6 +4,14 @@
 # S&S Images proxy (handled by Netlify function)
 /ss-images/*  /.netlify/functions/ss-images?path=:splat  200
 
+# Redirect literal placeholder bracket routes (cleanup)
+/products/[styleID]/[slug]  /products/  301
+/products/[styleID]/[slug]/ /products/  301
+/styles/[slug]             /products/  301
+/styles/[slug]/            /products/  301
+/brand/[slug]              /products/  301
+/brand/[slug]/             /products/  301
+
 # Gatsby client-side routing fallback - DO NOT redirect these
 /cart                   /cart/index.html                 200
 /cart/                  /cart/index.html                 200

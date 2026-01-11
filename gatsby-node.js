@@ -306,7 +306,27 @@ exports.sourceNodes = async ({
 };
 
 exports.createPages = async ({ graphql, actions }) => {
-  const { createPage } = actions;
+  const { createPage, createRedirect } = actions;
+  const fs = require('fs');
+
+  const slugify = (value) =>
+    (value || '')
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+  const getBrandLogoUrl = (brandImage) => {
+    if (!brandImage) return null;
+
+    const fileName = (brandImage.match(/[^/\\]+$/) || [null])[0];
+    if (!fileName) return null;
+
+    const diskPath = path.resolve('./static/images/Brands', fileName);
+    if (!fs.existsSync(diskPath)) return null;
+
+    return `/images/Brands/${fileName}`;
+  };
 
   try {
     // Create category pages with corrected categorization
@@ -342,6 +362,11 @@ exports.createPages = async ({ graphql, actions }) => {
             styleName
             brandName
             title
+            description
+            baseCategory
+            categories
+            styleImage
+            brandImage
           }
         }
       }
@@ -352,26 +377,94 @@ exports.createPages = async ({ graphql, actions }) => {
       return;
     }
 
+    // Create brand pages (curated list)
+    const curatedBrands = new Set([
+      'Gildan',
+      'JERZEES',
+      'BELLA + CANVAS',
+      'Next Level',
+      'Hanes',
+      'Comfort Colors',
+      'Threadfast Apparel',
+      'M&O',
+      'Richardson',
+      'YP Classics',
+      'Valucap',
+    ]);
+
+    const createdBrandPages = new Set();
+    result.data.allSsProduct.nodes.forEach((product) => {
+      const brandName = product.brandName;
+      if (!brandName || !curatedBrands.has(brandName)) return;
+      if (createdBrandPages.has(brandName)) return;
+
+      const brandSlug = slugify(brandName);
+      if (!brandSlug) return;
+
+      const brandPath = `/brand/${brandSlug}/`;
+      createPage({
+        path: brandPath,
+        component: path.resolve(`src/templates/BrandProductsTemplate.jsx`),
+        context: {
+          brandName,
+          brandSlug,
+          brandLogoUrl: getBrandLogoUrl(product.brandImage),
+          canonicalPath: brandPath,
+        },
+      });
+
+      createdBrandPages.add(brandName);
+    });
+
     // Create individual product pages
     result.data.allSsProduct.nodes.forEach((product) => {
-      const slug = product.styleName;
-      if (slug) {
-        createPage({
-          path: `/products/${slug}`,
-          component: path.resolve(
-            `src/templates/SimpleProductPageTemplate.jsx`,
-          ),
-          context: {
-            styleCode: product.styleName, // Use styleName for the query parameter
-            styleID: product.styleID, // Pass styleID for API lookup
-            brandName: product.brandName, // Pass brandName for API lookup
-            id: product.id,
+      const styleID = product.styleID;
+      const baseName = product.title || product.styleName;
+      const slug = slugify(baseName);
+
+      if (!styleID || !slug) return;
+
+      const legacyPath = product.styleName
+        ? `/products/${product.styleName}`
+        : null;
+      const newPath = `/products/${styleID}/${slug}/`;
+
+      createPage({
+        path: newPath,
+        component: path.resolve(`src/templates/SimpleProductPageTemplate.jsx`),
+        context: {
+          id: product.id,
+          styleID: product.styleID,
+          styleCode: product.styleName,
+          brandName: product.brandName,
+          slug,
+          canonicalPath: newPath,
+          initialProduct: {
+            styleID: product.styleID,
+            styleName: product.styleName,
+            brandName: product.brandName,
+            title: product.title,
+            description: product.description,
+            baseCategory: product.baseCategory,
+            categories: product.categories,
+            styleImage: product.styleImage,
+            brandImage: product.brandImage,
           },
+        },
+      });
+
+      if (legacyPath && legacyPath !== newPath) {
+        createRedirect({
+          fromPath: legacyPath,
+          toPath: newPath,
+          isPermanent: true,
+          redirectInBrowser: true,
         });
-        console.log(
-          `Created product page: /products/${slug} (${product.brandName} ${product.styleName}, styleID: ${product.styleID})`,
-        );
       }
+
+      console.log(
+        `Created product page: ${newPath} (${product.brandName || ''} ${product.styleName || ''}, styleID: ${product.styleID})`,
+      );
     });
   } catch (error) {
     console.error('Error in createPages:', error);
@@ -421,8 +514,37 @@ exports.onPostBuild = async ({ reporter }) => {
       './public/data/all_styles_raw.json',
     );
 
+    // Copy reviews.json to public directory
+    await fs.copy('./data/reviews.json', './public/data/reviews.json');
+
+    // Provide a root-level sitemap.xml convenience file.
+    // gatsby-plugin-sitemap outputs an index at public/sitemap/sitemap-index.xml.
+    // Some tooling/checklists expect /sitemap.xml.
+    const sitemapIndexPath = path.resolve('./public/sitemap/sitemap-index.xml');
+    const sitemapRootPath = path.resolve('./public/sitemap.xml');
+    if (await fs.pathExists(sitemapIndexPath)) {
+      if (await fs.pathExists(sitemapRootPath)) {
+        const existing = await fs.stat(sitemapRootPath);
+        if (existing.isDirectory()) {
+          await fs.remove(sitemapRootPath);
+        }
+      }
+      await fs.copy(sitemapIndexPath, sitemapRootPath);
+    }
+
     reporter.info('Successfully copied data files to public directory');
   } catch (error) {
     reporter.error('Failed to copy data files:', error);
+  }
+};
+
+// Defer SSR for client-only pages
+exports.onCreatePage = async ({ page, actions }) => {
+  const { createPage } = actions;
+
+  // Defer upload page from SSR (client-only, requires token parameter)
+  if (page.path.match(/^\/upload/)) {
+    page.defer = true;
+    createPage(page);
   }
 };

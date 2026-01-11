@@ -1,13 +1,23 @@
 import React, { useContext, useState, useEffect } from 'react';
+import { Link } from 'gatsby';
 import { CartContext } from '../context/CartContext';
 import Layout from '../components/Layout';
 import IntegratedPrintOrderForm from '../components/IntegratedPrintOrderForm';
+import SEO from '../components/SEO';
 
 // Simple working product template that loads data directly
 const SimpleProductPageTemplate = ({ pageContext }) => {
+  const slugify = (value) =>
+    (value || '')
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
   const { addToCart } = useContext(CartContext);
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialProduct = pageContext?.initialProduct || null;
+  const [product, setProduct] = useState(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
   const [selectedSize, setSelectedSize] = useState('M');
   const [inventoryData, setInventoryData] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -20,10 +30,12 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   const [colorInventoryLoading, setColorInventoryLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Load product data from Netlify function (uses S&S API)
     const loadProduct = async () => {
       try {
-        setLoading(true);
+        if (!initialProduct) setLoading(true);
 
         console.log('Loading product with pageContext:', pageContext);
 
@@ -39,26 +51,32 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           `/.netlify/functions/get-product?${queryParam}`,
         );
 
+        let foundProduct = null;
         if (!response.ok) {
           console.error(`Failed to fetch product: ${response.status}`);
-          setProduct(null);
-          setLoading(false);
-          return;
+        } else {
+          foundProduct = await response.json();
+          console.log('Loaded product from S&S API:', foundProduct);
         }
 
-        const foundProduct = await response.json();
-        console.log('Loaded product from S&S API:', foundProduct);
+        const productForInventory = foundProduct || initialProduct;
 
-        setProduct(foundProduct);
+        if (isMounted) {
+          if (foundProduct) setProduct(foundProduct);
+          if (!productForInventory && !initialProduct) setProduct(null);
+        }
 
         // Load inventory data
-        if (foundProduct?.styleID) {
+        if (productForInventory?.styleID) {
           // Always use the real Netlify function (not the mock API)
           const apiEndpoint = '/.netlify/functions/get-inventory';
           const inventoryResponse = await fetch(
-            `${apiEndpoint}?styleCode=${foundProduct.styleID}`,
+            `${apiEndpoint}?styleCode=${productForInventory.styleID}`,
           );
           const inventory = await inventoryResponse.json();
+
+          if (!isMounted) return;
+
           setInventoryData(inventory);
 
           // Set default color if available
@@ -80,7 +98,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           }
         }
 
-        setLoading(false);
+        if (isMounted && !initialProduct) setLoading(false);
       } catch (error) {
         console.error('Error loading product:', error);
         console.error('Error details:', {
@@ -88,16 +106,53 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           stack: error.stack,
           styleCode: pageContext.styleCode,
         });
-        setLoading(false);
+        if (isMounted && !initialProduct) setLoading(false);
       }
     };
 
     loadProduct();
-  }, [pageContext.styleCode]);
+    return () => {
+      isMounted = false;
+    };
+  }, [pageContext.styleCode, pageContext.styleID]);
+
+  const canonicalPath = pageContext?.canonicalPath || '';
+  const productName =
+    product?.title || product?.styleName || pageContext?.styleCode || 'Product';
+  const productDescription =
+    product?.description ||
+    `Shop ${productName} and get fast custom screen printing from Tag Team Printing.`;
+  const productImage = product?.styleImage
+    ? `/ss-images/${product.styleImage}`
+    : product?.styleID
+      ? `/ss-images/Images/Style/${product.styleID}_fm.jpg`
+      : '/images/logo.png';
+
+  const productSchema = product?.styleID
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: productName,
+        description: productDescription,
+        sku: String(product.styleID),
+        brand: product?.brandName
+          ? { '@type': 'Brand', name: product.brandName }
+          : undefined,
+        image: [productImage],
+        url: canonicalPath,
+      }
+    : null;
 
   if (loading) {
     return (
       <Layout>
+        <SEO
+          title={productName}
+          description={productDescription}
+          image={productImage}
+          url={canonicalPath}
+          schema={productSchema}
+        />
         <div
           style={{
             padding: '4rem 2rem',
@@ -133,6 +188,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   if (!product) {
     return (
       <Layout>
+        <SEO title="Product not found" url={canonicalPath} />
         <div
           style={{
             padding: '4rem 2rem',
@@ -424,6 +480,13 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
   return (
     <Layout>
+      <SEO
+        title={productName}
+        description={productDescription}
+        image={productImage}
+        url={canonicalPath}
+        schema={productSchema}
+      />
       <style>
         {`
           @keyframes slideDown {
@@ -1337,7 +1400,14 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
                   <div style={{ marginBottom: '0.5rem' }}>
                     <strong style={{ color: '#333' }}>Brand:</strong>
                     <span style={{ color: '#666', marginLeft: '0.5rem' }}>
-                      {product.brandName}
+                      {product.brandName ? (
+                        <Link
+                          to={`/brand/${slugify(product.brandName)}/`}
+                          style={{ color: '#666', textDecoration: 'underline' }}
+                        >
+                          {product.brandName}
+                        </Link>
+                      ) : null}
                     </span>
                   </div>
                   <div style={{ marginBottom: '0.5rem' }}>

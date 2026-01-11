@@ -12,6 +12,12 @@ require('dotenv').config({
 require('dotenv').config();
 
 module.exports = {
+  siteMetadata: {
+    siteUrl:
+      process.env.GATSBY_SITE_URL ||
+      process.env.URL ||
+      'https://tagteamprints.com',
+  },
   plugins: [
     {
       resolve: `gatsby-source-filesystem`,
@@ -60,6 +66,21 @@ module.exports = {
         sampleRate: 5,
         siteSpeedSampleRate: 10,
         cookieDomain: 'tagteamprints.com',
+      },
+    },
+    {
+      resolve: 'gatsby-plugin-sitemap',
+      options: {
+        output: '/sitemap/',
+        createLinkInHead: true,
+        // Exclude file-system route placeholders (these are not real crawlable URLs)
+        // NOTE: gatsby-plugin-sitemap uses minimatch globs; '[' and ']' are special.
+        // To match literal brackets, escape them as '[[]' and '[]]'.
+        excludes: [
+          '/products/[[]styleID[]]/[[]slug[]]/',
+          '/brand/[[]slug[]]/',
+          '/styles/[[]slug[]]/',
+        ],
       },
     },
   ],

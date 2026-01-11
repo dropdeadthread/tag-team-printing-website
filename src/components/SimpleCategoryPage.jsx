@@ -991,7 +991,15 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                         }}
                       >
                         <Link
-                          to={`/products/${styleName || name}`}
+                          to={(() => {
+                            const safeName = (name || styleName || '')
+                              .toLowerCase()
+                              .replace(/[^a-z0-9]+/g, '-')
+                              .replace(/(^-|-$)+/g, '');
+                            return styleID && safeName
+                              ? `/products/${styleID}/${safeName}/`
+                              : '/products/';
+                          })()}
                           style={{
                             textDecoration: 'none',
                             color: 'inherit',

@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "styleID": "general",
+    "name": "Sarah M.",
+    "email": "sarah@example.com",
+    "rating": 5,
+    "comment": "Tag Team knocked it out of the park with our hockey team jerseys. Quality prints that haven't faded after dozens of washes. Fast turnaround too!",
+    "date": "2025-12-15T10:30:00.000Z"
+  },
+  {
+    "styleID": "general",
+    "name": "Mike D.",
+    "email": "mike@example.com",
+    "rating": 5,
+    "comment": "Best screen printing in Cornwall, hands down. They helped us design our brewery's merch line and the results were incredible. Highly recommend!",
+    "date": "2025-11-28T14:20:00.000Z"
+  },
+  {
+    "styleID": "general",
+    "name": "Jessica L.",
+    "email": "jessica@example.com",
+    "rating": 5,
+    "comment": "Used them for our company event t-shirts. Great communication, fair pricing, and the shirts looked amazing. Will definitely use them again!",
+    "date": "2026-01-05T09:15:00.000Z"
+  }
+]
