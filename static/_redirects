@@ -4,6 +4,9 @@
 # S&S Images proxy (handled by Netlify function)
 /ss-images/*  /.netlify/functions/ss-images?path=:splat  200
 
+# API routes to Netlify functions
+/api/create-checkout  /.netlify/functions/create-checkout  200
+
 # Redirect literal placeholder bracket routes (cleanup)
 /products/[styleID]/[slug]  /products/  301
 /products/[styleID]/[slug]/ /products/  301
