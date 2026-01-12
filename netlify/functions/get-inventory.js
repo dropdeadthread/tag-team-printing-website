@@ -158,7 +158,7 @@ exports.handler = async (event) => {
         sku,
         sizeName,
         colorName,
-        wholesalePrice,
+        customerPrice, // S&S API uses customerPrice, not wholesalePrice
         color1,
         colorSwatchImage,
         colorFrontImage,
@@ -174,9 +174,9 @@ exports.handler = async (event) => {
 
       const totalQty = inventoryMap[sku] || 0;
 
-      // Apply size adjustment to wholesale price
+      // Apply size adjustment to wholesale price (S&S customerPrice is wholesale)
       const adjustedWholesale = getSizeAdjustedWholesalePrice(
-        wholesalePrice,
+        customerPrice,
         sizeName,
       );
 
