@@ -10,9 +10,23 @@ const slugify = (value) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '');
 
-const getBrandLogoUrl = (brandImage) => {
-  if (!brandImage) return null;
-  const fileName = (brandImage.match(/[^/\\]+$/) || [null])[0];
+// Mapping of brand names to their logo filenames in static/images/Brands/
+const brandLogoMap = {
+  'threadfast apparel': '272_fm.jpg',
+  'bella + canvas': '5_fm.jpg',
+  'comfort colors': '8_fm.jpg',
+  jerzees: '23_fm.jpg',
+  gildan: '35_fm.jpg', // Also have 73_fm.jpg as alternative
+  valucap: '70_fm.jpg',
+  'm&o': '169_fm.jpg',
+  'yp classics': '71_fm.jpg',
+  richardson: '138_fm.jpg',
+};
+
+const getBrandLogoUrl = (brandName) => {
+  if (!brandName) return null;
+  const normalizedBrand = brandName.toLowerCase();
+  const fileName = brandLogoMap[normalizedBrand];
   if (!fileName) return null;
   return `/images/Brands/${fileName}`;
 };
@@ -42,7 +56,7 @@ const BrandsPage = ({ data }) => {
     byBrand.set(brandName, {
       brandName,
       brandSlug: slugify(brandName),
-      brandLogoUrl: getBrandLogoUrl(p?.brandImage),
+      brandLogoUrl: getBrandLogoUrl(brandName),
     });
   });
 
@@ -107,7 +121,6 @@ export const query = graphql`
     allSsProduct {
       nodes {
         brandName
-        brandImage
       }
     }
   }
