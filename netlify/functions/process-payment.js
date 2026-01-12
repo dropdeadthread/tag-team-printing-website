@@ -2,13 +2,24 @@
 const { Client, Environment } = require('square');
 const crypto = require('crypto');
 
+// Fail loudly if token is missing - prevents silent authentication failures
+const token = (process.env.SQUARE_ACCESS_TOKEN || '').trim();
+if (!token) {
+  throw new Error(
+    'Missing SQUARE_ACCESS_TOKEN - Square SDK cannot authenticate without it',
+  );
+}
+
+// Use production environment in production, sandbox otherwise
+const environment =
+  process.env.NODE_ENV === 'production'
+    ? Environment.Production
+    : Environment.Sandbox;
+
 // Initialize Square client
 const client = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment:
-    process.env.NODE_ENV === 'production'
-      ? Environment.Production
-      : Environment.Sandbox,
+  token, // ✅ FIXED: Square SDK v42+ uses 'token', not 'accessToken'
+  environment,
 });
 
 // Netlify Function Handler
@@ -67,6 +78,42 @@ exports.handler = async function (event) {
       amount: result.payment.amountMoney.amount,
       status: result.payment.status,
     });
+
+    // ✅ SYNC PAYMENT TO CONTROL HUB (for order matching)
+    try {
+      const controlHubUrl =
+        process.env.CONTROL_HUB_URL || 'http://localhost:4000';
+      const controlHubSync = await fetch(`${controlHubUrl}/api/square/sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.CONTROL_HUB_API_KEY || 'dev-secret-key',
+        },
+        body: JSON.stringify({
+          transactionId: result.payment.id,
+          amount: result.payment.amountMoney.amount,
+          currency: result.payment.amountMoney.currency,
+          status: result.payment.status,
+          orderId: result.payment.orderId,
+          customerId: result.payment.customerId,
+          receiptUrl: result.payment.receiptUrl,
+          timestamp: result.payment.createdAt,
+        }),
+      });
+
+      if (controlHubSync.ok) {
+        console.log('✅ Payment synced to Control Hub');
+      } else {
+        console.warn(
+          '⚠️ Control Hub payment sync failed (payment still processed)',
+        );
+      }
+    } catch (syncError) {
+      console.warn(
+        '⚠️ Control Hub unreachable (payment still processed):',
+        syncError.message,
+      );
+    }
 
     return {
       statusCode: 200,

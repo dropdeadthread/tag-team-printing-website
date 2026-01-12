@@ -441,13 +441,14 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
   const handleAddToCart = () => {
     addToCart({
+      styleID: product.styleID,
       Title: product.title,
+      Brand: product.brandName,
       Price: currentPrice,
       Size: selectedSize,
       Image: product ? getProductImageUrl(product, selectedColor) : null,
       Color: selectedColor?.name || 'Standard',
       Quantity: quantity,
-      StyleID: product.styleID,
     });
 
     // Show visual confirmation

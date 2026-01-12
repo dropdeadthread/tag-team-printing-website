@@ -809,7 +809,7 @@ const StreamlinedOrderForm = () => {
     };
 
     try {
-      const response = await fetch('/api/streamlined-order.js', {
+      const response = await fetch('/.netlify/functions/streamlined-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
