@@ -22,6 +22,7 @@ function sortSizesByOrder(sizesObj) {
 
 function getSizeAdjustedWholesalePrice(wholesalePrice, sizeName) {
   const price = parseFloat(wholesalePrice);
+  if (isNaN(price)) return null; // Return null if price is invalid
   if (sizeName === '2XL') return price + 2;
   if (['3XL', '4XL', '5XL'].includes(sizeName)) return price + 3;
   return price;
@@ -30,6 +31,8 @@ function getSizeAdjustedWholesalePrice(wholesalePrice, sizeName) {
 // Calculate retail price with tiered markup strategy
 function calculateRetailPrice(adjustedWholesale) {
   const price = parseFloat(adjustedWholesale);
+  if (isNaN(price) || price <= 0) return null; // Return null for invalid prices
+
   let multiplier;
   if (price <= 4.25)
     multiplier = 2.5; // $3 Gildan → $7.50
@@ -170,11 +173,22 @@ exports.handler = async (event) => {
       if (color && colorName !== color) continue;
 
       const totalQty = inventoryMap[sku] || 0;
-      // Use wholesale pricing with size adjustments (no retail markup for print shop)
+
+      // Apply size adjustment to wholesale price
       const adjustedWholesale = getSizeAdjustedWholesalePrice(
         wholesalePrice,
         sizeName,
       );
+
+      // Calculate retail price with markup
+      const retailPrice = calculateRetailPrice(adjustedWholesale);
+
+      // Log if price is missing (for debugging)
+      if (!retailPrice) {
+        console.log(
+          `[get-inventory] Missing price for ${sizeName} ${colorName}: wholesale=${wholesalePrice}, adjusted=${adjustedWholesale}`,
+        );
+      }
 
       if (!colorMap.has(colorName)) {
         // Helper to ensure URL has protocol (S&S API sometimes returns full URLs, sometimes relative)
@@ -207,7 +221,7 @@ exports.handler = async (event) => {
       const entry = colorMap.get(colorName);
       entry.sizes[sizeName] = {
         available: totalQty,
-        price: parseFloat(calculateRetailPrice(adjustedWholesale)) || 12.0,
+        price: parseFloat(retailPrice) || 12.0,
       };
     }
 
