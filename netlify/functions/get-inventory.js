@@ -27,14 +27,15 @@ function getSizeAdjustedWholesalePrice(wholesalePrice, sizeName) {
   return price;
 }
 
-function calculateRetailPrice(adjustedWholesale) {
-  const price = parseFloat(adjustedWholesale);
-  let multiplier;
-  if (price < 4.25) multiplier = 2.5;
-  else if (price <= 6.99) multiplier = 2.0;
-  else multiplier = 1.6;
-  return (price * multiplier).toFixed(2);
-}
+// REMOVED: Retail markup function - print shops use wholesale pricing
+// function calculateRetailPrice(adjustedWholesale) {
+//   const price = parseFloat(adjustedWholesale);
+//   let multiplier;
+//   if (price < 4.25) multiplier = 2.5;
+//   else if (price <= 6.99) multiplier = 2.0;
+//   else multiplier = 1.6;
+//   return (price * multiplier).toFixed(2);
+// }
 
 // 🧠 Simple in-memory cache (clears on cold start)
 const cache = new Map();
@@ -167,12 +168,11 @@ exports.handler = async (event) => {
       if (color && colorName !== color) continue;
 
       const totalQty = inventoryMap[sku] || 0;
-      // Use markup pricing for individual product display instead of quantity tiers
+      // Use wholesale pricing with size adjustments (no retail markup for print shop)
       const adjustedWholesale = getSizeAdjustedWholesalePrice(
         wholesalePrice,
         sizeName,
       );
-      const retailPrice = calculateRetailPrice(adjustedWholesale);
 
       if (!colorMap.has(colorName)) {
         // Helper to ensure URL has protocol (S&S API sometimes returns full URLs, sometimes relative)
@@ -205,7 +205,7 @@ exports.handler = async (event) => {
       const entry = colorMap.get(colorName);
       entry.sizes[sizeName] = {
         available: totalQty,
-        price: parseFloat(retailPrice) || 25.0,
+        price: parseFloat(adjustedWholesale) || 10.0,
       };
     }
 
