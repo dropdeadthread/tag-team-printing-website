@@ -435,8 +435,8 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
   const brandLogoUrl = null; // Disable brand logos for now due to CORS issues
 
   // Get pricing from selected color and size
-  const rawPrice = selectedColor?.sizes?.[selectedSize]?.price || 10.0;
-  const currentPrice = parseFloat(rawPrice) || 10.0;
+  const rawPrice = selectedColor?.sizes?.[selectedSize]?.price || 12.0;
+  const currentPrice = parseFloat(rawPrice) || 12.0;
   const stockAmount = selectedColor?.sizes?.[selectedSize]?.available || 0;
 
   const handleAddToCart = () => {

@@ -27,15 +27,17 @@ function getSizeAdjustedWholesalePrice(wholesalePrice, sizeName) {
   return price;
 }
 
-// REMOVED: Retail markup function - print shops use wholesale pricing
-// function calculateRetailPrice(adjustedWholesale) {
-//   const price = parseFloat(adjustedWholesale);
-//   let multiplier;
-//   if (price < 4.25) multiplier = 2.5;
-//   else if (price <= 6.99) multiplier = 2.0;
-//   else multiplier = 1.6;
-//   return (price * multiplier).toFixed(2);
-// }
+// Calculate retail price with tiered markup strategy
+function calculateRetailPrice(adjustedWholesale) {
+  const price = parseFloat(adjustedWholesale);
+  let multiplier;
+  if (price <= 4.25)
+    multiplier = 2.5; // $3 Gildan → $7.50
+  else if (price <= 6.99)
+    multiplier = 2.0; // $6 Next Level → $12.00
+  else multiplier = 1.6; // $8 Bella Canvas → $12.80
+  return (price * multiplier).toFixed(2);
+}
 
 // 🧠 Simple in-memory cache (clears on cold start)
 const cache = new Map();
@@ -205,7 +207,7 @@ exports.handler = async (event) => {
       const entry = colorMap.get(colorName);
       entry.sizes[sizeName] = {
         available: totalQty,
-        price: parseFloat(adjustedWholesale) || 10.0,
+        price: parseFloat(calculateRetailPrice(adjustedWholesale)) || 12.0,
       };
     }
 
