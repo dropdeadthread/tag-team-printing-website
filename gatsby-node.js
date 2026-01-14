@@ -1,5 +1,7 @@
 const path = require('path');
 const fetch = require('node-fetch');
+const filters = require('./src/utils/productFilters.cjs');
+
 exports.sourceNodes = async ({
   actions,
   createNodeId,
@@ -44,85 +46,14 @@ exports.sourceNodes = async ({
       const rawData = fs.readFileSync(filePath, 'utf8');
       const data = JSON.parse(rawData);
 
-      // Use same filtering logic as when API is available
-      const selectedBrands = [
-        'Gildan',
-        'JERZEES',
-        'BELLA + CANVAS',
-        'Next Level',
-        'Hanes',
-        'Comfort Colors',
-        'Threadfast Apparel',
-        'M&O', // Adding M&O brand
-        'Richardson',
-        'YP Classics',
-        'Valucap',
-      ];
-      // Category IDs: 21=T-Shirts, 36=Hoodies, 400=Crewnecks, 38=Full-Zips, 56=Long Sleeves, 11=Headwear, 64=Tank Tops
-      // Removed: 9=Youth
-      const selectedCategories = ['21', '36', '400', '38', '56', '11', '64'];
-
-      // Debug: Count filtering stages
-      let debugCounts = {
-        total: data.length,
-        brandMatch: 0,
-        categoryMatch: 0,
-        afterYouthFilter: 0,
-        headwearFiltered: 0,
-        final: 0,
-      };
-
-      const filteredData = data
-        .filter((item) => {
-          const brandMatch =
-            selectedBrands.includes(item.BrandName) ||
-            selectedBrands.includes(item.brandName);
-
-          if (brandMatch) debugCounts.brandMatch++;
-
-          const categoryMatch =
-            item.categories &&
-            selectedCategories.some((catId) =>
-              item.categories
-                .split(',')
-                .map((id) => id.trim())
-                .includes(catId),
-            );
-
-          if (brandMatch && categoryMatch) debugCounts.categoryMatch++;
-
-          // Filter out youth/baby products by title (category 9 filter removed - too aggressive)
-          const title = (item.title || '').toLowerCase();
-          const isYouthOrBaby =
-            title.includes('youth') ||
-            title.includes('toddler') ||
-            title.includes('infant') ||
-            title.includes('baby') ||
-            title.includes('onesie');
-
-          if (brandMatch && categoryMatch && !isYouthOrBaby)
-            debugCounts.afterYouthFilter++;
-
-          // REMOVED: 5-panel only filter was too restrictive - now allowing all headwear from category 11
-          const passes = brandMatch && categoryMatch && !isYouthOrBaby;
-          if (passes) debugCounts.final++;
-          return passes;
-        })
-        .sort((a, b) => {
-          // Sort by brand first, then by title - ensures consistent ordering
-          if (a.brandName !== b.brandName) {
-            return (a.brandName || '').localeCompare(b.brandName || '');
-          }
-          return (a.title || '').localeCompare(b.title || '');
-        }); // Removed .slice() limit to include ALL matching products
+      // Use centralized filtering logic from productFilters.cjs
+      const filteredData = filters.sortProducts(filters.filterForBuild(data));
 
       console.log('\n📊 FILTERING DEBUG (Local File):');
-      console.log(`Total products: ${debugCounts.total}`);
-      console.log(`✓ Brand match: ${debugCounts.brandMatch}`);
-      console.log(`✓ Brand + Category match: ${debugCounts.categoryMatch}`);
-      console.log(`✓ After youth filter: ${debugCounts.afterYouthFilter}`);
-      console.log(`✗ Headwear filtered out: ${debugCounts.headwearFiltered}`);
-      console.log(`✓ FINAL: ${debugCounts.final}`);
+      console.log(`Total products: ${data.length}`);
+      console.log(
+        `✓ FINAL (after brand/category/youth filters): ${filteredData.length}`,
+      );
       console.log(
         `Loaded ${data.length} total products from local file, ${filteredData.length} from selected brands\n`,
       );
@@ -204,86 +135,14 @@ exports.sourceNodes = async ({
       return;
     }
 
-    // Filter for only your selected brands and categories
-    const selectedBrands = [
-      'Gildan',
-      'JERZEES',
-      'BELLA + CANVAS',
-      'Next Level',
-      'Hanes',
-      'Comfort Colors',
-      'Threadfast Apparel',
-      'M&O', // Adding M&O brand
-      // Hat specialist brands for headwear category
-      'Richardson',
-      'YP Classics',
-      'Valucap',
-    ]; // Popular, reliable brands with correct names
-    // Category IDs: 21=T-Shirts, 36=Hoodies, 400=Crewnecks, 38=Full-Zips, 56=Long Sleeves, 11=Headwear, 64=Tank Tops
-    // Removed: 9=Youth
-    const selectedCategories = ['21', '36', '400', '38', '56', '11', '64'];
-
-    // Debug: Count filtering stages
-    let debugCounts = {
-      total: data.length,
-      brandMatch: 0,
-      categoryMatch: 0,
-      afterYouthFilter: 0,
-      headwearFiltered: 0,
-      final: 0,
-    };
-
-    const filteredData = data
-      .filter((item) => {
-        const brandMatch =
-          selectedBrands.includes(item.BrandName) ||
-          selectedBrands.includes(item.brandName);
-
-        if (brandMatch) debugCounts.brandMatch++;
-
-        const categoryMatch =
-          item.categories &&
-          selectedCategories.some((catId) =>
-            item.categories
-              .split(',')
-              .map((id) => id.trim())
-              .includes(catId),
-          );
-
-        if (brandMatch && categoryMatch) debugCounts.categoryMatch++;
-
-        // Filter out youth/baby products by title (category 9 filter removed - too aggressive)
-        const title = (item.title || '').toLowerCase();
-        const isYouthOrBaby =
-          title.includes('youth') ||
-          title.includes('toddler') ||
-          title.includes('infant') ||
-          title.includes('baby') ||
-          title.includes('onesie');
-
-        if (brandMatch && categoryMatch && !isYouthOrBaby)
-          debugCounts.afterYouthFilter++;
-
-        // REMOVED: 5-panel only filter was too restrictive - now allowing all headwear from category 11
-        const passes = brandMatch && categoryMatch && !isYouthOrBaby;
-        if (passes) debugCounts.final++;
-        return passes;
-      })
-      .sort((a, b) => {
-        // Sort by brand first, then by title - ensures consistent ordering
-        if (a.brandName !== b.brandName) {
-          return (a.brandName || '').localeCompare(b.brandName || '');
-        }
-        return (a.title || '').localeCompare(b.title || '');
-      }); // Removed .slice() limit to include ALL matching products
+    // Use centralized filtering logic from productFilters.cjs
+    const filteredData = filters.sortProducts(filters.filterForBuild(data));
 
     console.log('\n📊 FILTERING DEBUG (API Data):');
-    console.log(`Total products: ${debugCounts.total}`);
-    console.log(`✓ Brand match: ${debugCounts.brandMatch}`);
-    console.log(`✓ Brand + Category match: ${debugCounts.categoryMatch}`);
-    console.log(`✓ After youth filter: ${debugCounts.afterYouthFilter}`);
-    console.log(`✗ Headwear filtered out: ${debugCounts.headwearFiltered}`);
-    console.log(`✓ FINAL: ${debugCounts.final}`);
+    console.log(`Total products: ${data.length}`);
+    console.log(
+      `✓ FINAL (after brand/category/youth filters): ${filteredData.length}`,
+    );
     console.log(
       `Fetched ${data.length} total products, ${filteredData.length} from selected brands\n`,
     );
