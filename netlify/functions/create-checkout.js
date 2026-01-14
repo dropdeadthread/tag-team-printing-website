@@ -153,7 +153,8 @@ exports.handler = async (event, context) => {
     console.log('[create-checkout] Calling Square Payment Links API...');
 
     // Use the new Payment Links API instead of deprecated checkoutApi
-    const { result } = await client.checkout.paymentLinks.create({
+    // SDK v43 returns the response directly, not wrapped in { result }
+    const response = await client.checkout.paymentLinks.create({
       idempotencyKey,
       order: {
         locationId: locationId,
@@ -165,12 +166,37 @@ exports.handler = async (event, context) => {
     });
 
     console.log('[create-checkout] Square API call successful');
-    console.log('[create-checkout] Payment Link URL:', result.paymentLink.url);
+    console.log(
+      '[create-checkout] Full response:',
+      JSON.stringify(response, null, 2),
+    );
+
+    // Check for errors in the response
+    if (response.errors && response.errors.length > 0) {
+      console.error(
+        '[create-checkout] Square API returned errors:',
+        response.errors,
+      );
+      throw new Error(
+        response.errors.map((e) => e.detail || e.code).join(', '),
+      );
+    }
+
+    // Get the payment link URL
+    const checkoutUrl =
+      response.paymentLink?.url || response.paymentLink?.longUrl;
+
+    if (!checkoutUrl) {
+      console.error('[create-checkout] No URL in response:', response);
+      throw new Error('No checkout URL received from Square');
+    }
+
+    console.log('[create-checkout] Payment Link URL:', checkoutUrl);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ checkoutUrl: result.paymentLink.url }),
+      body: JSON.stringify({ checkoutUrl }),
     };
   } catch (error) {
     console.error('[create-checkout] ERROR occurred:');
