@@ -97,11 +97,12 @@ exports.handler = async (event, context) => {
     console.log('[create-checkout] Location ID:', locationId);
     console.log('[create-checkout] Cart items count:', cartItems.length);
 
+    // Square Payment Links API requires BigInt for amounts
     const lineItems = cartItems.map((item) => ({
       name: item.name || item.styleName || 'Product',
       quantity: (item.quantity || 1).toString(),
       basePriceMoney: {
-        amount: Math.round((item.price || 0) * 100), // In cents
+        amount: BigInt(Math.round((item.price || 0) * 100)), // BigInt in cents
         currency: 'CAD',
       },
       note: `${item.color || 'Default'} - ${item.size || 'M'}`,
@@ -131,35 +132,45 @@ exports.handler = async (event, context) => {
       }
     }
 
-    console.log('[create-checkout] Preparing Square API request');
+    console.log('[create-checkout] Preparing Square Payment Links API request');
     console.log(
       '[create-checkout] Line items:',
-      JSON.stringify(lineItems, null, 2),
+      JSON.stringify(
+        lineItems.map((item) => ({
+          ...item,
+          basePriceMoney: {
+            ...item.basePriceMoney,
+            amount: item.basePriceMoney.amount.toString(),
+          },
+        })),
+        null,
+        2,
+      ),
     );
 
     const idempotencyKey = crypto.randomUUID();
     console.log('[create-checkout] Idempotency key:', idempotencyKey);
-    console.log('[create-checkout] Calling Square Checkout API...');
+    console.log('[create-checkout] Calling Square Payment Links API...');
 
-    const { result } = await client.checkoutApi.createCheckout(locationId, {
+    // Use the new Payment Links API instead of deprecated checkoutApi
+    const { result } = await client.checkout.paymentLinks.create({
       idempotencyKey,
       order: {
         locationId: locationId,
         lineItems,
       },
-      redirectUrl: 'https://tagteamprints.com/order-confirmed',
+      checkoutOptions: {
+        redirectUrl: 'https://tagteamprints.com/order-confirmed',
+      },
     });
 
     console.log('[create-checkout] Square API call successful');
-    console.log(
-      '[create-checkout] Checkout URL:',
-      result.checkout.checkoutPageUrl,
-    );
+    console.log('[create-checkout] Payment Link URL:', result.paymentLink.url);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ checkoutUrl: result.checkout.checkoutPageUrl }),
+      body: JSON.stringify({ checkoutUrl: result.paymentLink.url }),
     };
   } catch (error) {
     console.error('[create-checkout] ERROR occurred:');
