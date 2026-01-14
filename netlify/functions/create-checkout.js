@@ -167,9 +167,14 @@ exports.handler = async (event, context) => {
     });
 
     console.log('[create-checkout] Square API call successful');
+    // Use replacer to handle BigInt serialization
     console.log(
       '[create-checkout] Full response:',
-      JSON.stringify(response, null, 2),
+      JSON.stringify(
+        response,
+        (key, value) => (typeof value === 'bigint' ? value.toString() : value),
+        2,
+      ),
     );
 
     // Check for errors in the response
