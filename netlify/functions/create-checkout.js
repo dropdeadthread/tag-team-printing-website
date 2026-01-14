@@ -1,4 +1,4 @@
-const { Client } = require('square');
+const { SquareClient } = require('square');
 const crypto = require('crypto');
 
 exports.handler = async (event, context) => {
@@ -6,9 +6,10 @@ exports.handler = async (event, context) => {
   console.log('[create-checkout] HTTP Method:', event.httpMethod);
 
   // Initialize Square client inside handler to ensure env vars are available
-  const client = new Client({
-    accessToken: process.env.SQUARE_ACCESS_TOKEN,
-    environment: 'production', // Use string instead of Environment.Production
+  // Square SDK v43 uses SquareClient (not Client) and 'token' (not accessToken)
+  const client = new SquareClient({
+    token: process.env.SQUARE_ACCESS_TOKEN,
+    environment: 'production',
   });
 
   console.log('[create-checkout] Square client initialized');
