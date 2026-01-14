@@ -1,4 +1,4 @@
-const { SquareClient } = require('square');
+const { SquareClient, SquareEnvironment } = require('square');
 const crypto = require('crypto');
 
 exports.handler = async (event, context) => {
@@ -6,10 +6,10 @@ exports.handler = async (event, context) => {
   console.log('[create-checkout] HTTP Method:', event.httpMethod);
 
   // Initialize Square client inside handler to ensure env vars are available
-  // Square SDK v43 uses SquareClient (not Client) and 'token' (not accessToken)
+  // Square SDK v43: environment must be the full URL, not just 'production'
   const client = new SquareClient({
     token: process.env.SQUARE_ACCESS_TOKEN,
-    environment: 'production',
+    environment: SquareEnvironment.Production, // "https://connect.squareup.com"
   });
 
   console.log('[create-checkout] Square client initialized');
