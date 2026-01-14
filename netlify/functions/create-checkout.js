@@ -2,11 +2,16 @@ const { Client, Environment } = require('square');
 const crypto = require('crypto');
 
 exports.handler = async (event, context) => {
+  console.log('[create-checkout] Function invoked');
+  console.log('[create-checkout] HTTP Method:', event.httpMethod);
+
   // Initialize Square client inside handler to ensure env vars are available
   const client = new Client({
     accessToken: process.env.SQUARE_ACCESS_TOKEN,
     environment: Environment.Production,
   });
+
+  console.log('[create-checkout] Square client initialized');
 
   // CORS headers - Allow only from Tag Team Printing domain
   const allowedOrigins = [
@@ -89,6 +94,9 @@ exports.handler = async (event, context) => {
       };
     }
 
+    console.log('[create-checkout] Location ID:', locationId);
+    console.log('[create-checkout] Cart items count:', cartItems.length);
+
     const lineItems = cartItems.map((item) => ({
       name: item.name || item.styleName || 'Product',
       quantity: (item.quantity || 1).toString(),
@@ -123,8 +131,18 @@ exports.handler = async (event, context) => {
       }
     }
 
+    console.log('[create-checkout] Preparing Square API request');
+    console.log(
+      '[create-checkout] Line items:',
+      JSON.stringify(lineItems, null, 2),
+    );
+
+    const idempotencyKey = crypto.randomUUID();
+    console.log('[create-checkout] Idempotency key:', idempotencyKey);
+    console.log('[create-checkout] Calling Square Checkout API...');
+
     const { result } = await client.checkoutApi.createCheckout(locationId, {
-      idempotencyKey: crypto.randomUUID(),
+      idempotencyKey,
       order: {
         locationId: locationId,
         lineItems,
@@ -132,13 +150,34 @@ exports.handler = async (event, context) => {
       redirectUrl: 'https://tagteamprints.com/order-confirmed',
     });
 
+    console.log('[create-checkout] Square API call successful');
+    console.log(
+      '[create-checkout] Checkout URL:',
+      result.checkout.checkoutPageUrl,
+    );
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({ checkoutUrl: result.checkout.checkoutPageUrl }),
     };
   } catch (error) {
-    console.error('Checkout Error:', error);
+    console.error('[create-checkout] ERROR occurred:');
+    console.error('[create-checkout] Error type:', error.constructor.name);
+    console.error('[create-checkout] Error message:', error.message);
+    console.error('[create-checkout] Error stack:', error.stack);
+
+    // Log full error object for debugging
+    if (error.errors && Array.isArray(error.errors)) {
+      console.error(
+        '[create-checkout] Square API errors:',
+        JSON.stringify(error.errors, null, 2),
+      );
+    }
+
+    if (error.statusCode) {
+      console.error('[create-checkout] HTTP Status Code:', error.statusCode);
+    }
 
     let errorMessage = 'Checkout failed';
     let errorDetails = error.message;
@@ -146,6 +185,7 @@ exports.handler = async (event, context) => {
     // Handle specific Square API errors
     if (error.errors && error.errors.length > 0) {
       errorDetails = error.errors.map((e) => e.detail || e.code).join(', ');
+      console.error('[create-checkout] Formatted error details:', errorDetails);
     }
 
     return {
