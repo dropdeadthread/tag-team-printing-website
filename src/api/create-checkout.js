@@ -12,19 +12,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = await req.json();
-    const { cartItems } = body;
+    // In Gatsby API routes, body is already parsed
+    const { cartItems } = req.body;
 
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: 'Invalid cart data' });
     }
 
     // Check if Square credentials are available
-    if (!process.env.SQUARE_ACCESS_TOKEN || !process.env.SQUARE_LOCATION_ID) {
+    const locationId =
+      process.env.GATSBY_SQUARE_LOCATION_ID || process.env.SQUARE_LOCATION_ID;
+    if (!process.env.SQUARE_ACCESS_TOKEN || !locationId) {
       return res.status(500).json({
         error: 'Square checkout not configured',
         details:
-          'Square API credentials are missing. Please configure SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID environment variables.',
+          'Square API credentials are missing. Please configure SQUARE_ACCESS_TOKEN and GATSBY_SQUARE_LOCATION_ID environment variables.',
       });
     }
 
@@ -38,17 +40,14 @@ export default async function handler(req, res) {
       note: `${item.color || 'Default'} - ${item.size || 'M'}`,
     }));
 
-    const { result } = await client.checkoutApi.createCheckout(
-      process.env.SQUARE_LOCATION_ID,
-      {
-        idempotencyKey: crypto.randomUUID(),
-        order: {
-          locationId: process.env.SQUARE_LOCATION_ID,
-          lineItems,
-        },
-        redirectUrl: 'https://tagteamprints.com/order-confirmed',
+    const { result } = await client.checkoutApi.createCheckout(locationId, {
+      idempotencyKey: crypto.randomUUID(),
+      order: {
+        locationId: locationId,
+        lineItems,
       },
-    );
+      redirectUrl: 'https://tagteamprints.com/order-confirmed',
+    });
 
     return res
       .status(200)
