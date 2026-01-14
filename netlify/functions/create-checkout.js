@@ -8,11 +8,23 @@ exports.handler = async (event, context) => {
     environment: Environment.Production,
   });
 
-  // CORS headers
+  // CORS headers - Allow only from Tag Team Printing domain
+  const allowedOrigins = [
+    'https://tagteamprints.com',
+    'https://www.tagteamprints.com',
+    'http://localhost:8000', // Gatsby dev server
+    'http://localhost:5000', // Alternative dev server
+  ];
+  const origin = event.headers.origin || event.headers.Origin;
+  const corsOrigin = allowedOrigins.includes(origin)
+    ? origin
+    : 'https://tagteamprints.com';
+
   const headers = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': corsOrigin,
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json',
   };
 
   // Handle preflight
@@ -44,14 +56,35 @@ exports.handler = async (event, context) => {
     }
 
     // Check if Square credentials are available
-    if (!process.env.SQUARE_ACCESS_TOKEN || !process.env.SQUARE_LOCATION_ID) {
+    // Support both GATSBY_SQUARE_LOCATION_ID (build-time) and SQUARE_LOCATION_ID (runtime)
+    const locationId =
+      process.env.GATSBY_SQUARE_LOCATION_ID || process.env.SQUARE_LOCATION_ID;
+    const accessToken = process.env.SQUARE_ACCESS_TOKEN;
+
+    if (!accessToken) {
+      console.error('Missing SQUARE_ACCESS_TOKEN');
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({
           error: 'Square checkout not configured',
           details:
-            'Square API credentials are missing. Please configure SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID environment variables.',
+            'SQUARE_ACCESS_TOKEN is not configured. Please contact support.',
+        }),
+      };
+    }
+
+    if (!locationId) {
+      console.error(
+        'Missing location ID - checked GATSBY_SQUARE_LOCATION_ID and SQUARE_LOCATION_ID',
+      );
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: 'Square checkout not configured',
+          details:
+            'Square location ID is not configured. Please contact support.',
         }),
       };
     }
@@ -66,17 +99,38 @@ exports.handler = async (event, context) => {
       note: `${item.color || 'Default'} - ${item.size || 'M'}`,
     }));
 
-    const { result } = await client.checkoutApi.createCheckout(
-      process.env.SQUARE_LOCATION_ID,
-      {
-        idempotencyKey: crypto.randomUUID(),
-        order: {
-          locationId: process.env.SQUARE_LOCATION_ID,
-          lineItems,
-        },
-        redirectUrl: 'https://tagteamprints.com/order-confirmed',
+    // Validate cart items before sending to Square
+    for (const item of cartItems) {
+      if (!item.price || item.price <= 0) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            error: 'Invalid cart data',
+            details: 'Some items have invalid pricing',
+          }),
+        };
+      }
+      if (!item.quantity || item.quantity <= 0) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            error: 'Invalid cart data',
+            details: 'Some items have invalid quantities',
+          }),
+        };
+      }
+    }
+
+    const { result } = await client.checkoutApi.createCheckout(locationId, {
+      idempotencyKey: crypto.randomUUID(),
+      order: {
+        locationId: locationId,
+        lineItems,
       },
-    );
+      redirectUrl: 'https://tagteamprints.com/order-confirmed',
+    });
 
     return {
       statusCode: 200,
