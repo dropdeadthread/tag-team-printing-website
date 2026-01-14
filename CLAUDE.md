@@ -389,3 +389,22 @@ tag team printing website/
 
 **Last Updated:** October 28, 2025
 **Current Status:** ✅ All systems operational. 241 product pages live. All category filters working correctly.
+
+## Recent Fixes (January 14, 2026)
+
+### Session: Centralize product filtering logic
+
+- **Summary:** Centralized the product filtering, sorting, and transformation logic into a single shared module to ensure build-time and runtime behavior stay identical and to reduce duplication and bugs.
+- **Files added:**
+  - `src/utils/productFilters.cjs` — new CommonJS module exporting filter helpers, sort, and transform functions.
+- **Files modified:**
+  - `netlify/functions/list-products.js` — now imports and uses `src/utils/productFilters.cjs` for brand/title filtering, category filtering, sorting, and transforming list responses.
+  - `gatsby-node.js` — now imports and uses `src/utils/productFilters.cjs` for both S&S API and local-fallback product filtering and sorting during `sourceNodes()`.
+- **Why:** Prevent build/runtime drift, make updates to brand/category/title rules in one place, and reduce risk of inconsistent product listings or "0 products" regressions.
+- **Testing notes:**
+  - Run `npm install` then `npm run develop` and verify category pages load products.
+  - Locally test function endpoint (with `netlify dev` if available) at `/.netlify/functions/list-products?category=21` to confirm responses.
+  - Run `npm run build` and `npm run serve` to validate production build.
+- **Deployment:** Changes are currently local only (not pushed). Push to feature branch and run CI/Netlify build after 3pm deployment window.
+
+---
