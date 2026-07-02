@@ -138,23 +138,22 @@ const BandMerchPrintingCanada = () => {
             </li>
           </ul>
 
-          <h2>We're Musicians Too</h2>
+          <h2>We&apos;re Musicians Too</h2>
           <p>
-            Unlike most commercial print shops, Tag Team Printing is run by
-            people who actually play shows, book bands, and design posters.
-            Through <strong>Split Toe Records</strong>, we've worked directly
-            with independent artists and understand the realities of selling
-            band merch at a show — keeping costs down, nailing the artwork, and
-            making a tour deadline. That experience shapes how we approach every
-            order.
+            Tag Team Printing is co-owned by two people who&apos;ve been deep in
+            the Ontario music scene for decades. Stacey Forrester has spent over
+            20 years making music, promoting shows, and designing art for bands
+            across Cornwall and London — he knows exactly what&apos;s at stake
+            when tour shirts need to be ready by Friday. Stacey Case brings his
+            own print and music background through years behind the press at{' '}
+            <strong>Rock N Roll Print Shop</strong> and his ongoing work with{' '}
+            <strong>The Tijuana Bibles</strong>.
           </p>
           <p>
-            Stacey Case has spent over 20 years in the Ontario music scene,
-            designing flyers and artwork for bands across Cornwall and London
-            and playing shows across the province. That background isn't a
-            marketing line — it's why we take band orders seriously and
-            understand what's actually at stake when your merch needs to be at
-            the venue by Friday.
+            Through <strong>Split Toe Records</strong>, they&apos;ve both worked
+            directly with independent artists and understand the realities of
+            independent band life. That experience shapes how we approach every
+            band merch order.
           </p>
 
           <h2>What We Print for Bands</h2>
