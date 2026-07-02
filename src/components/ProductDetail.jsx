@@ -1,14 +1,14 @@
 // ProductDetail.jsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "@reach/router";
+import React, { useEffect, useState } from 'react';
+import { useParams } from '@reach/router';
 
 // Helper to get correct image path
 const getImageUrl = (product) => {
-  if (!product) return "/placeholder.png";
+  if (!product) return '/placeholder.png';
   if (product.Style) {
     return `/images/Style/${product.Style}_fm.jpg`;
   }
-  return "/placeholder.png";
+  return '/placeholder.png';
 };
 
 const ProductDetail = () => {
@@ -17,7 +17,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     fetch(`/api/get-products?slug=${slug}`)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(setProduct);
   }, [slug]);
 
@@ -26,7 +26,11 @@ const ProductDetail = () => {
   return (
     <div>
       <h1>{product.title}</h1>
-      <img src={getImageUrl(product)} alt={product.title || product.Name} />
+      <img
+        src={getImageUrl(product)}
+        alt={product.title || product.Name}
+        loading="lazy"
+      />
       <div dangerouslySetInnerHTML={{ __html: product.description }} />
       {/* Add more product details here */}
     </div>

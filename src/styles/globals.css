@@ -3,6 +3,7 @@
   src: url('/fonts/HawlersEightRough.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 :root {
@@ -46,6 +47,92 @@ html {
   text-shadow:
     2px 2px 0px #fff,
     4px 4px 0px #000;
+}
+
+/* === BRANDS PAGE === */
+.brands-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 7rem 2rem 3rem;
+}
+
+.brands-page-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.brands-page-title {
+  font-family: 'HawlersEightRough', 'Impact', 'Arial Black', sans-serif;
+  color: #c32b14;
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 0.75rem 0;
+}
+
+.brands-page-desc {
+  color: rgba(255, 245, 209, 0.8);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.brands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.brand-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.25rem 1rem;
+  background: rgba(255, 245, 209, 0.06);
+  border: 2px solid rgba(195, 43, 20, 0.35);
+  border-radius: 8px;
+  text-decoration: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+  min-height: 90px;
+}
+
+.brand-card:hover {
+  background: rgba(255, 245, 209, 0.12);
+  border-color: #c32b14;
+}
+
+.brand-card-logo {
+  max-height: 44px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-card-name {
+  font-family: 'HawlersEightRough', 'Impact', sans-serif;
+  font-size: 1rem;
+  color: rgba(255, 245, 209, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .brands-page-wrapper {
+    padding: 6rem 1rem 2rem;
+  }
+
+  .brands-page-title {
+    font-size: 1.6rem;
+  }
+
+  .brands-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 }
 
 /* === HOMEPAGE === */

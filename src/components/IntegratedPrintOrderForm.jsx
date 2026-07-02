@@ -604,7 +604,7 @@ const IntegratedPrintOrderForm = ({
         Total items to be printed
         <span
           className="info-tooltip"
-          title={`MINIMUM ORDER REQUIREMENTS: We require higher minimums for complex prints to justify screen setup costs. 1 color = 15 shirts minimum, 2 colors = 20 shirts, 3 colors = 30 shirts, 4 colors = 40 shirts, 5 colors = 50 shirts, 6 colors = 60 shirts. Each additional color requires more time, materials, and screen preparation.`}
+          title={`MINIMUM ORDER: 12 pieces for all screen printing, regardless of color count. Orders under 12 pieces carry a $20 surcharge.`}
         >
           ❓
         </span>

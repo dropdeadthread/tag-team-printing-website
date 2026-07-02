@@ -19,7 +19,7 @@ const ContactPage = () => {
     email: 'info@tagteamprints.com',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '1014 First St East',
+      streetAddress: '1016 First St E',
       addressLocality: 'Cornwall',
       addressRegion: 'ON',
       postalCode: 'K6H 1N4',
@@ -204,7 +204,7 @@ const ContactPage = () => {
           <div>
             <h4 style={{ margin: '0 0 0.5rem 0', color: '#000' }}>Address</h4>
             <p style={{ margin: 0, lineHeight: 1.4 }}>
-              1014 First St East
+              1016 First St E
               <br />
               Cornwall, ON K6H 1N4
             </p>

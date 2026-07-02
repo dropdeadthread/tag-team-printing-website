@@ -23,6 +23,7 @@
 /products/*             /products/:splat/index.html      200
 /shop/*                 /shop/:splat/index.html          200
 /categories/*           /categories/:splat/index.html    200
+/category/*             /category/:splat/index.html      200
 
 # Gatsby 404 page fallback (for any non-matching routes)
 /*                      /index.html                      200

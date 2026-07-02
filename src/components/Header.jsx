@@ -17,6 +17,10 @@ const Header = ({ itemCount: _itemCount }) => {
             src="/images/logo.png"
             alt="Tag Team Logo"
             style={{ height: '120px', width: 'auto' }}
+            loading="eager"
+            fetchPriority="high"
+            width="auto"
+            height="120"
           />
         </Link>
       </div>
@@ -28,6 +32,7 @@ const Header = ({ itemCount: _itemCount }) => {
         <Link to="/categories">Browse Products</Link>
         <Link to="/brands">Brands</Link>
         <Link to="/about">About</Link>
+        <Link to="/portfolio">Portfolio</Link>
         <Link to="/design-services">Design Services</Link>
         <Link to="/faq">FAQ</Link>
         <Link to="/contact">Contact</Link>

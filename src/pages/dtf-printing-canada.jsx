@@ -63,7 +63,37 @@ const CTALink = styled.a`
 `;
 
 const DtfPrintingCanada = () => {
-  const schema = null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'DTF Printing Canada',
+    description:
+      'Direct-to-film (DTF) printing services across Canada. Vibrant full-color prints on any fabric. No minimums for DTF transfers. Nationwide shipping from Cornwall, Ontario.',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Tag Team Printing',
+      url: 'https://tagteamprints.com',
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
+    },
+    areaServed: { '@type': 'Country', name: 'Canada' },
+    serviceType: 'DTF Printing',
+    url: 'https://tagteamprints.com/dtf-printing-canada',
+    offers: {
+      '@type': 'Offer',
+      description:
+        'DTF transfer printing — works on cotton, polyester, and blends. Free quotes.',
+      priceCurrency: 'CAD',
+      seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
+    },
+  };
 
   return (
     <Layout>
@@ -72,7 +102,7 @@ const DtfPrintingCanada = () => {
         description="Get vibrant, full-color prints on any fabric with our DTF printing service in Canada. Nationwide shipping from Cornwall, ON."
         url="/dtf-printing-canada"
         keywords="DTF printing Canada"
-        schema={schema ? [schema] : null}
+        schema={schema}
       />
       <PageContainer>
         <ContentCard>
@@ -108,21 +138,19 @@ const DtfPrintingCanada = () => {
           </p>
           <ul>
             <li>
-              {' '}
-              **Faster Turnaround Times:** With DTF printing, you can get your
-              prints faster than traditional screen printing methods.
+              <strong>Faster Turnaround Times:</strong> With DTF printing, you
+              can get your prints faster than traditional screen printing
+              methods.
             </li>
             <li>
-              {' '}
-              **Cost-Effective:** Our DTF printing service is more
+              <strong>Cost-Effective:</strong> Our DTF printing service is more
               cost-effective than traditional screen printing, especially for
               large orders.
             </li>
             <li>
-              {' '}
-              **Increased Color Accuracy:** Direct-to-film printing ensures that
-              your colors are accurate and consistent, eliminating the risk of
-              human error.
+              <strong>Increased Color Accuracy:</strong> Direct-to-film printing
+              ensures that your colors are accurate and consistent, eliminating
+              the risk of human error.
             </li>
           </ul>
           <p>
@@ -132,19 +160,19 @@ const DtfPrintingCanada = () => {
           </p>
           <ul>
             <li>
-              {' '}
-              **Nationwide Shipping:** We ship our prints across Canada,
-              ensuring that you receive your products quickly and efficiently.
+              <strong>Nationwide Shipping:</strong> We ship our prints across
+              Canada, ensuring that you receive your products quickly and
+              efficiently.
             </li>
             <li>
-              {' '}
-              **Experienced Team:** Our team has years of experience in screen
-              printing and is dedicated to providing exceptional service.
+              <strong>Experienced Team:</strong> Our team has years of
+              experience in screen printing and is dedicated to providing
+              exceptional service.
             </li>
             <li>
-              {' '}
-              **State-of-the-Art Equipment:** Our equipment is the latest
-              technology, ensuring that your prints are of the highest quality.
+              <strong>State-of-the-Art Equipment:</strong> Our equipment is the
+              latest technology, ensuring that your prints are of the highest
+              quality.
             </li>
           </ul>
           <p>
@@ -155,7 +183,7 @@ const DtfPrintingCanada = () => {
             team will work with you to ensure that your prints meet your
             expectations.
           </p>
-          <p>> ## Frequently Asked Questions</p>
+          <h2>Frequently Asked Questions</h2>
           <h3>Q: How does DTF printing work?</h3>
           <p>
             A: Direct-to-film printing uses specialized film to apply ink
@@ -174,16 +202,16 @@ const DtfPrintingCanada = () => {
             A: With our DTF printing service, you can get your prints faster
             than traditional screen printing methods.
           </p>
-          <p>> ## Contact Us</p>
+          <h2>Contact Us</h2>
           <p>
             Ready to experience the benefits of DTF printing? Contact us today
             to get a quote for your next project. Our team is dedicated to
             providing exceptional service and ensuring that your prints meet
-            your expectations. Call or email us at [phone number] or [email
-            address]. We look forward to working with you!
+            your expectations. Call us at{' '}
+            <a href="tel:+16133634997">613-363-4997</a> or email{' '}
+            <a href="mailto:info@tagteamprints.com">info@tagteamprints.com</a>.
+            We look forward to working with you!
           </p>
-          <p>---</p>
-          <h2>FAQ</h2>
 
           <CTABox>
             <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>

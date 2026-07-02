@@ -63,16 +63,49 @@ const CTALink = styled.a`
 `;
 
 const CustomTShirtsCornwall = () => {
-  const schema = {};
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Custom T-Shirts Cornwall Ontario',
+    description:
+      'Custom t-shirt printing in Cornwall, Ontario. Screen printing and DTF on t-shirts for businesses, bands, schools, and events. Fast turnaround, local pickup available.',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Tag Team Printing',
+      url: 'https://tagteamprints.com',
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
+    },
+    areaServed: [
+      { '@type': 'City', name: 'Cornwall' },
+      { '@type': 'AdministrativeArea', name: 'Eastern Ontario' },
+    ],
+    serviceType: 'Custom T-Shirt Printing',
+    url: 'https://tagteamprints.com/custom-t-shirts-cornwall',
+    offers: {
+      '@type': 'Offer',
+      description:
+        'Custom t-shirt screen printing — minimum 12 pieces. Local pickup in Cornwall. Free quotes.',
+      priceCurrency: 'CAD',
+      seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
+    },
+  };
 
   return (
     <Layout>
       <SEO
         title="Custom T Shirts in Cornwall Ontario - Screen Printing Services"
-        description="Get fast, reliable custom t-shirt printing services in Cornwall, Ontario. No minimum order required. Local pickup and fast delivery available."
+        description="Custom t-shirt printing in Cornwall, Ontario. 12-piece minimum, one-week turnaround, local pickup available. Get a free quote today."
         url="/custom-t-shirts-cornwall"
         keywords="custom t-shirts Cornwall"
-        schema={schema ? [schema] : null}
+        schema={schema}
       />
       <PageContainer>
         <ContentCard>
@@ -80,52 +113,40 @@ const CustomTShirtsCornwall = () => {
             Custom T-Shirts Cornwall - Fast, Reliable Printing & Quality
             Guarantee
           </PageTitle>
-          <p>
-            > <strong>Expert Custom T-Shirt Printing in Cornwall</strong>
-          </p>
+          <h2>Expert Custom T-Shirt Printing in Cornwall</h2>
           <p>
             At Tag Team Printing, we offer high-quality custom t-shirts for
             businesses, events, sports leagues, and schools in Cornwall and
             surrounding areas. Our screen printing services are fast, reliable,
             and backed by a quality guarantee.
           </p>
+          <h2>12-Piece Minimum, Serious Results</h2>
           <p>
-            > <strong>No Minimum Order Required</strong>
+            Screen printing starts at 12 pieces — the right minimum for teams,
+            businesses, and events that want professional results. Whether you
+            need 12 shirts or 2,400, we can accommodate your order.
           </p>
-          <p>
-            We understand that every business is unique, which is why we don't
-            have minimum order requirements. Whether you need 24 shirts or
-            2,400, we can accommodate your needs.
-          </p>
-          <p>
-            > <strong>Local Pickup & Fast Delivery</strong>
-          </p>
+          <h2>Local Pickup &amp; Fast Delivery</h2>
           <p>
             We're committed to fast turnaround times and convenient pickup
             options. Choose from our local Cornwall location for quick and
             reliable service.
           </p>
-          <p>
-            > <strong>Compare Us to Online Competitors</strong>
-          </p>
+          <h2>Compare Us to Online Competitors</h2>
           <p>
             While online printing services may promise low prices, they often
             can't match the quality and personal touch that Tag Team Printing
             provides. Our expert team uses professional-grade equipment and
             takes pride in every shirt we produce.
           </p>
-          <p>
-            > <strong>Custom T-Shirt Services for Businesses & Events</strong>
-          </p>
+          <h2>Custom T-Shirt Services for Businesses &amp; Events</h2>
           <p>
             Our custom t-shirt printing services are perfect for businesses
             looking to create branded merchandise or events teams wanting to
             upgrade their uniforms. We also offer wholesale apparel options for
             schools, sports leagues, and more.
           </p>
-          <p>
-            > <strong>Get a Quote Today!</strong>
-          </p>
+          <h2>Get a Quote Today</h2>
           <p>
             Ready to order your custom t-shirts? Fill out our online form or
             give us a call at 613-363-4997 to get started. We can't wait to help
@@ -139,8 +160,8 @@ const CustomTShirtsCornwall = () => {
                 What is the minimum order quantity for custom t-shirt printing?
               </h3>
               <p>
-                We don't have a minimum order requirement. Order as many or as
-                few shirts as you need.
+                Screen printing starts at 12 pieces. Contact us to discuss your
+                order.
               </p>
             </div>
             <div className="faq-item" style={{ marginBottom: '1.5rem' }}>

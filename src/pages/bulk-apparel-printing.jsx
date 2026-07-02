@@ -63,7 +63,41 @@ const CTALink = styled.a`
 `;
 
 const BulkApparelPrinting = () => {
-  const schema = null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Bulk Apparel Printing Cornwall Ontario',
+    description:
+      'Volume screen printing for businesses, sports organizations, and corporate orders in Cornwall, Ontario. Staff uniforms, event shirts, and branded apparel. Volume discounts available.',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Tag Team Printing',
+      url: 'https://tagteamprints.com',
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
+    },
+    areaServed: [
+      { '@type': 'City', name: 'Cornwall' },
+      { '@type': 'AdministrativeArea', name: 'Eastern Ontario' },
+      { '@type': 'Country', name: 'Canada' },
+    ],
+    serviceType: 'Bulk Screen Printing',
+    url: 'https://tagteamprints.com/bulk-apparel-printing',
+    offers: {
+      '@type': 'Offer',
+      description:
+        'Bulk apparel printing — volume discounts, 7-10 business day turnaround. Free quotes.',
+      priceCurrency: 'CAD',
+      seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
+    },
+  };
 
   return (
     <Layout>
@@ -72,7 +106,7 @@ const BulkApparelPrinting = () => {
         description="Get high-quality bulk apparel printing services from Tag Team Printing in Cornwall, Ontario. Fast turnaround times, transparent pricing, and durable prints for businesses, events, and sports organizations."
         url="/bulk-apparel-printing"
         keywords="bulk apparel printing"
-        schema={schema ? [schema] : null}
+        schema={schema}
       />
       <PageContainer>
         <ContentCard>
@@ -91,24 +125,24 @@ const BulkApparelPrinting = () => {
           </p>
           <ul>
             <li>
-              **Volume Discounts**: Order hundreds of garments and enjoy
-              significant volume discounts on our screen printing services.
+              <strong>Volume Discounts:</strong> Order hundreds of garments and
+              enjoy significant volume discounts on our screen printing
+              services.
             </li>
             <li>
-              **Staff Uniforms & Corporate Orders**: We cater to businesses,
-              event organizers, and sports organizations with bulk apparel
-              orders. Our staff uniforms and corporate orders are tailored to
-              meet your specific needs.
+              <strong>Staff Uniforms &amp; Corporate Orders:</strong> We cater
+              to businesses, event organizers, and sports organizations with
+              bulk apparel orders tailored to your specific needs.
             </li>
             <li>
-              **Quality Control**: Our professional-grade equipment and
-              experienced print specialists guarantee durable prints that
+              <strong>Quality Control:</strong> Our professional-grade equipment
+              and experienced print specialists guarantee durable prints that
               withstand the rigors of daily wear and tear.
             </li>
             <li>
-              **Sourcing Hundreds of Garment Styles**: We work closely with S&S
-              Activewear, offering a vast range of styles to suit your brand's
-              unique requirements.
+              <strong>Hundreds of Garment Styles:</strong> We work closely with
+              S&amp;S Activewear, offering a vast range of styles to suit your
+              brand's unique requirements.
             </li>
           </ul>
           <p>
@@ -138,29 +172,27 @@ const BulkApparelPrinting = () => {
           </p>
           <ul>
             <li>
-              {' '}
-              **Quality Guaranteed**: Our professional-grade equipment and
-              experienced team guarantee durable prints that meet your brand's
-              standards.
+              <strong>Quality Guaranteed:</strong> Our professional-grade
+              equipment and experienced team guarantee durable prints that meet
+              your brand's standards.
             </li>
             <li>
-              {' '}
-              **Fast Turnaround Times**: We understand the importance of timely
-              delivery, ensuring your bulk apparel orders are ready when needed.
+              <strong>Fast Turnaround:</strong> Most bulk orders ready within
+              one week. Rush turnaround available — contact us to discuss your
+              deadline.
             </li>
             <li>
-              {' '}
-              **Transparent Pricing**: We provide transparent pricing to ensure
-              you're always aware of costs before placing an order.
+              <strong>Transparent Pricing:</strong> No hidden fees. We provide a
+              full quote before you commit to anything.
             </li>
           </ul>
           <p>
             <strong>Get a Quote Today!</strong>
           </p>
           <p>
-            Contact us at 613-363-4997 or tagteam@tagteamprints.com to discuss
-            your bulk apparel printing needs. Our team is here to help you find
-            the perfect solution for your business.
+            Contact us at 613-363-4997 or info@tagteamprints.com to discuss your
+            bulk apparel printing needs. Our team is here to help you find the
+            perfect solution for your business.
           </p>
 
           <section className="faq-section" style={{ marginTop: '2.5rem' }}>

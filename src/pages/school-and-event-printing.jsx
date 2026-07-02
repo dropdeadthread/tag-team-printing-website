@@ -63,7 +63,40 @@ const CTALink = styled.a`
 `;
 
 const SchoolAndEventPrinting = () => {
-  const schema = null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'School Spirit Wear and Event Shirt Printing Cornwall Ontario',
+    description:
+      'Custom school spirit wear, graduation shirts, sports jerseys, and fundraiser t-shirts printed in Cornwall, Ontario. Local pickup available. Minimum 10 shirts. Affordable pricing for schools and events.',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Tag Team Printing',
+      url: 'https://tagteamprints.com',
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
+    },
+    areaServed: [
+      { '@type': 'City', name: 'Cornwall' },
+      { '@type': 'AdministrativeArea', name: 'Eastern Ontario' },
+    ],
+    serviceType: 'School and Event Screen Printing',
+    url: 'https://tagteamprints.com/school-and-event-printing',
+    offers: {
+      '@type': 'Offer',
+      description:
+        'School spirit wear and event shirts — minimum 12 pieces. Local pickup in Cornwall. Free quotes.',
+      priceCurrency: 'CAD',
+      seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
+    },
+  };
 
   return (
     <Layout>
@@ -72,7 +105,7 @@ const SchoolAndEventPrinting = () => {
         description="Get professional-grade school spirit wear and event shirts printed in Cornwall, Ontario. Fast turnaround times, affordable prices, and local pickup available."
         url="/school-and-event-printing"
         keywords="school and event printing Cornwall"
-        schema={schema ? [schema] : null}
+        schema={schema}
       />
       <PageContainer>
         <ContentCard>
@@ -130,8 +163,8 @@ const SchoolAndEventPrinting = () => {
             Q: What is the minimum order quantity for custom school spirit wear?
           </h3>
           <p>
-            A: Our minimum order quantity is 10 shirts. However, we also offer a
-            one-off option for smaller orders.
+            A: Our minimum order is 12 pieces for screen printing. Contact us to
+            discuss your order size.
           </p>
           <h3>Q: Can I request a specific design or color scheme?</h3>
           <p>
@@ -167,8 +200,8 @@ const SchoolAndEventPrinting = () => {
                 wear?
               </h3>
               <p>
-                Our minimum order quantity is 10 shirts. However, we also offer
-                a one-off option for smaller orders.
+                Our minimum order is 12 pieces for screen printing. Contact us
+                to discuss your order size.
               </p>
             </div>
             <div className="faq-item" style={{ marginBottom: '1.5rem' }}>

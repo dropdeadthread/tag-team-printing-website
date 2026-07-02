@@ -1,10 +1,16 @@
 import * as React from 'react';
 import Layout from '../components/Layout';
+import SEO from '../components/SEO';
 import { Link } from 'gatsby';
 
 const NotFoundPage = () => {
   return (
     <Layout>
+      <SEO
+        title="Page Not Found | Tag Team Printing"
+        description="Sorry, we couldn't find that page. Browse our custom screen printing services or get a free quote."
+        url="/404"
+      />
       <div
         style={{
           textAlign: 'center',

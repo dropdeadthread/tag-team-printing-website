@@ -101,11 +101,62 @@ const PoliciesPage = () => (
             payment processors) or as required by law.
           </p>
 
+          <h3>Social Media &amp; Meta Platforms</h3>
+          <p>
+            We use Facebook and Instagram (Meta Platforms, Inc.) to communicate
+            with customers and promote our services. When you contact us through
+            Facebook or Instagram, we may receive basic profile information
+            (name, profile photo) solely to respond to your inquiry. This
+            information is not stored beyond the duration of your inquiry.
+          </p>
+
+          <h3>Cookies &amp; Analytics</h3>
+          <p>
+            Our website may use cookies to improve your experience and
+            anonymised analytics to understand site traffic. You can disable
+            cookies in your browser settings at any time.
+          </p>
+
+          <h3>CASL Compliance</h3>
+          <p>
+            Tag Team Printing complies with Canada&apos;s Anti-Spam Legislation
+            (CASL). We will only send commercial electronic messages with your
+            express or implied consent. Unsubscribe at any time using the link
+            in any email or by contacting us directly.
+          </p>
+
+          <h3>Data Deletion</h3>
+          <p>
+            You have the right to request deletion of your personal data at any
+            time. Email <strong>info@tagteamprints.com</strong> with the subject
+            line &quot;Data Deletion Request&quot; and we will process your
+            request within 30 days. If you connected via Facebook, you may also
+            submit a request through Facebook&apos;s{' '}
+            <a
+              href="https://www.facebook.com/help/contact/540977946302970"
+              style={{ color: '#c32b14' }}
+            >
+              data deletion tool
+            </a>
+            .
+          </p>
+
+          <h3>Your Rights</h3>
+          <p>
+            Under PIPEDA (Personal Information Protection and Electronic
+            Documents Act), you have the right to access, correct, and request
+            deletion of your personal information held by Tag Team Printing.
+          </p>
+
           <h3>Data Security</h3>
           <p>
             We implement appropriate security measures to protect your personal
             information. However, no method of transmission over the internet is
             100% secure.
+          </p>
+
+          <p style={{ fontSize: '0.85em', color: '#666', marginTop: '1rem' }}>
+            <em>Privacy policy last updated: April 17, 2026</em>
           </p>
         </div>
       </section>
@@ -267,7 +318,7 @@ const PoliciesPage = () => (
             </a>
           </li>
           <li>
-            <strong>Address:</strong> 1014 First St East, Cornwall, ON K6H 1N4
+            <strong>Address:</strong> 1016 First St E, Cornwall, ON K6H 1N4
           </li>
           <li>
             <strong>Hours:</strong> Monday - Friday, 9:00 AM - 5:00 PM

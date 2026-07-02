@@ -67,45 +67,37 @@ const BrandsPage = ({ data }) => {
   return (
     <Layout>
       <SEO
-        title="Brands"
-        description="Browse apparel brands available for printing."
-        canonicalPath="/brands/"
+        title="Apparel Brands | Tag Team Printing Cornwall"
+        description="Browse the wholesale apparel brands we print on — Gildan, Next Level, Bella+Canvas, Comfort Colors, AS Colour, and more. Available for custom screen printing and DTF."
+        url="/brands"
       />
 
-      <div style={{ padding: '1rem' }}>
-        <h1 style={{ marginTop: 0 }}>Brands</h1>
+      <div className="brands-page-wrapper">
+        <div className="brands-page-header">
+          <h1 className="brands-page-title">Apparel Brands</h1>
+          <p className="brands-page-desc">
+            We print on quality wholesale blanks sourced through S&amp;S
+            Activewear and SanMar. Browse our available brands below — click any
+            brand to see styles and colours.
+          </p>
+        </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '1rem',
-          }}
-        >
+        <div className="brands-grid">
           {brands.map((brand) => (
             <Link
               key={brand.brandName}
               to={`/brand/${brand.brandSlug}/`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
+              className="brand-card"
             >
               {brand.brandLogoUrl ? (
                 <img
                   src={brand.brandLogoUrl}
                   alt={`${brand.brandName} logo`}
                   loading="lazy"
-                  style={{ maxHeight: 42, width: 'auto' }}
+                  className="brand-card-logo"
                 />
               ) : null}
-              <span>{brand.brandName}</span>
+              <span className="brand-card-name">{brand.brandName}</span>
             </Link>
           ))}
         </div>

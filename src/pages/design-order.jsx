@@ -251,7 +251,6 @@ const RUSH_OPTIONS = [
     flat: 0,
   },
   { id: 'rush_72h', name: 'Express Rush (72 hours)', percentage: 50, flat: 0 },
-  { id: 'rush_same_day', name: 'Same-Day Rush', percentage: 75, flat: 200 },
 ];
 
 const DesignOrderPage = () => {

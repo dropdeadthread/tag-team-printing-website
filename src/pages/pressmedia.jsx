@@ -178,7 +178,7 @@ COMPANY OVERVIEW:
 Tag Team Printing is Cornwall, Ontario's premier custom screen printing and apparel service, specializing in high-quality custom designs for businesses, events, and organizations.
 
 CONTACT INFORMATION:
-Address: 1014 First St East, Cornwall, ON K6H 1N4
+Address: 1016 First St E, Cornwall, ON K6H 1N4
 Phone: (613) 363-4997
 Email: info@tagteamprints.com
 Website: https://tagteamprints.com

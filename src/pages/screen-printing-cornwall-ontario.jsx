@@ -63,16 +63,59 @@ const CTALink = styled.a`
 `;
 
 const ScreenPrintingCornwallOntario = () => {
-  const schema = {};
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Screen Printing Services Cornwall Ontario',
+    description:
+      'Professional screen printing in Cornwall, Ontario for businesses, sports teams, schools, and organizations. Fast turnaround, 12-piece minimum, transparent pricing. Serving Cornwall, SD&G, and Eastern Ontario.',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Tag Team Printing',
+      url: 'https://tagteamprints.com',
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
+    },
+    areaServed: [
+      { '@type': 'City', name: 'Cornwall' },
+      { '@type': 'AdministrativeArea', name: 'Stormont, Dundas and Glengarry' },
+      { '@type': 'AdministrativeArea', name: 'Eastern Ontario' },
+    ],
+    serviceType: 'Screen Printing',
+    url: 'https://tagteamprints.com/screen-printing-cornwall-ontario',
+    offers: {
+      '@type': 'Offer',
+      description:
+        'Custom screen printing — 12-piece minimum, fast turnaround, transparent pricing. Free quotes.',
+      priceCurrency: 'CAD',
+      seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
+    },
+    sameAs: [
+      'https://www.youtube.com/@tagteamprinting',
+      'https://www.instagram.com/dropdeadthread',
+      'https://www.facebook.com/dropdeadthread',
+    ],
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', 'h2', '.faq-item'],
+    },
+  };
 
   return (
     <Layout>
       <SEO
-        title="Screen Printing Services Cornwall ON | Fast Turnaround, No Minimums"
-        description="Get professional screen printed products in Cornwall, Ontario with fast turnaround times and no minimum order requirements."
+        title="Screen Printing Cornwall Ontario | Tag Team Printing"
+        description="Professional screen printing in Cornwall, Ontario. 12-piece minimum, one-week turnaround, transparent pricing. Serving businesses, teams, and organizations across Eastern Ontario."
         url="/screen-printing-cornwall-ontario"
         keywords="screen printing Cornwall Ontario"
-        schema={schema ? [schema] : null}
+        schema={schema}
       />
       <PageContainer>
         <ContentCard>
@@ -80,9 +123,9 @@ const ScreenPrintingCornwallOntario = () => {
             Expert Screen Printing in Cornwall, Ontario - Tag Team Printing
           </PageTitle>
           <p>
-            >{' '}
             <strong>
-              Precision Screen Printing & Custom Apparel in Cornwall, Ontario
+              Precision Screen Printing &amp; Custom Apparel in Cornwall,
+              Ontario
             </strong>
           </p>
           <p>
@@ -93,30 +136,26 @@ const ScreenPrintingCornwallOntario = () => {
             in every order.
           </p>
           <p>
-            We pride ourselves on fast turnaround times, no minimum orders, and
-            transparent pricing. Whether you need 24 shirts or 2,400, we'll work
+            We pride ourselves on fast turnaround times, a 12-piece minimum, and
+            transparent pricing. Whether you need 12 shirts or 2,400, we'll work
             with you to bring your vision to life. Contact us today to request a
             quote!
           </p>
-          <p>
-            > <strong>Why Choose Tag Team Printing?</strong>
-          </p>
+          <h2>Why Choose Tag Team Printing?</h2>
           <ul>
-            <li> Industry-standard screen printing (not vinyl shortcuts)</li>
             <li>
-              {' '}
-              Fast turnaround times (often same-day shipping in Cornwall)
+              Industry-standard screen printing — not vinyl or iron-on shortcuts
             </li>
-            <li> Transparent pricing and no hidden fees</li>
-            <li> Bulk order capability for large quantities</li>
+            <li>Most orders ready in one week; rush turnaround available</li>
+            <li>Transparent pricing, no hidden fees, no surprises</li>
             <li>
-              {' '}
-              In-house production control ensures quality and consistency
+              12-piece minimum — right-sized for teams, businesses, and events
             </li>
             <li>
-              {' '}
-              Serving Cornwall, SD&G, Eastern Ontario, and the Ottawa Valley
-              region
+              In-house production for quality and consistency on every run
+            </li>
+            <li>
+              Serving Cornwall, SD&amp;G, Eastern Ontario, and the Ottawa Valley
             </li>
           </ul>
 
@@ -125,15 +164,22 @@ const ScreenPrintingCornwallOntario = () => {
             <div className="faq-item" style={{ marginBottom: '1.5rem' }}>
               <h3>What is your minimum order quantity?</h3>
               <p>
-                We have no minimum orders. Contact us to request a quote for any
-                quantity.
+                Screen printing orders start at 12 pieces. Contact us for a
+                quote — we'll find the right approach for your order size.
               </p>
             </div>
             <div className="faq-item" style={{ marginBottom: '1.5rem' }}>
-              <h3>Do you offer same-day shipping in Cornwall?</h3>
+              <h3>How long does a typical order take?</h3>
               <p>
-                Yes, we offer same-day shipping on orders received before 2 PM
-                EST. Please contact us to confirm availability.
+                Most orders are ready within one week. Rush turnaround is
+                available — contact us to discuss your deadline.
+              </p>
+            </div>
+            <div className="faq-item" style={{ marginBottom: '1.5rem' }}>
+              <h3>Do you offer local pickup in Cornwall?</h3>
+              <p>
+                Yes. Pick up at 1016 First St E, Cornwall — Monday to Friday, 9
+                AM to 5 PM. We also ship Canada-wide.
               </p>
             </div>
           </section>

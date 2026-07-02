@@ -128,6 +128,36 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
       ? `/ss-images/Images/Style/${product.styleID}_fm.jpg`
       : '/images/logo.png';
 
+  // Compute price early so it can be used in productSchema below
+  const rawPrice = selectedColor?.sizes?.[selectedSize]?.price || 12.0;
+  const currentPrice = parseFloat(rawPrice) || 12.0;
+  const stockAmount = selectedColor?.sizes?.[selectedSize]?.available || 0;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://tagteamprints.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Shop',
+        item: 'https://tagteamprints.com/categories',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: productName,
+        item: `https://tagteamprints.com${canonicalPath}`,
+      },
+    ],
+  };
+
   const productSchema = product?.styleID
     ? {
         '@context': 'https://schema.org',
@@ -139,7 +169,17 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           ? { '@type': 'Brand', name: product.brandName }
           : undefined,
         image: [productImage],
-        url: canonicalPath,
+        url: `https://tagteamprints.com${canonicalPath}`,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'CAD',
+          price: currentPrice.toFixed(2),
+          availability: 'https://schema.org/InStock',
+          seller: {
+            '@type': 'Organization',
+            name: 'Tag Team Printing',
+          },
+        },
       }
     : null;
 
@@ -151,7 +191,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
           description={productDescription}
           image={productImage}
           url={canonicalPath}
-          schema={productSchema}
+          schema={[breadcrumbSchema, productSchema].filter(Boolean)}
         />
         <div
           style={{
@@ -434,11 +474,6 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
   const brandLogoUrl = null; // Disable brand logos for now due to CORS issues
 
-  // Get pricing from selected color and size
-  const rawPrice = selectedColor?.sizes?.[selectedSize]?.price || 12.0;
-  const currentPrice = parseFloat(rawPrice) || 12.0;
-  const stockAmount = selectedColor?.sizes?.[selectedSize]?.available || 0;
-
   const handleAddToCart = () => {
     addToCart({
       styleID: product.styleID,
@@ -486,7 +521,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
         description={productDescription}
         image={productImage}
         url={canonicalPath}
-        schema={productSchema}
+        schema={[breadcrumbSchema, productSchema].filter(Boolean)}
       />
       <style>
         {`

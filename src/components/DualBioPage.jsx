@@ -18,7 +18,7 @@ const DualBioGrid = styled.div`
   gap: 2rem;
   max-width: 1600px;
   margin: 0 auto;
-  
+
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -26,19 +26,21 @@ const DualBioGrid = styled.div`
 `;
 
 const BioCard = styled.div`
-  border: 3px solid #2563EB;
+  border: 3px solid #2563eb;
   position: relative;
   overflow: hidden;
-  transform: rotate(${props => props.side === 'left' ? '-0.5deg' : '0.5deg'});
+  transform: rotate(
+    ${(props) => (props.side === 'left' ? '-0.5deg' : '0.5deg')}
+  );
 `;
 
 const BioHeader = styled.div`
-  background: #2563EB;
+  background: #2563eb;
   color: white;
   padding: 1.5rem;
   text-align: center;
   position: relative;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -60,7 +62,7 @@ const Name = styled.h1`
   margin: 0;
   text-shadow: 3px 3px 0px #000;
   transform: scaleY(1.2);
-  
+
   @media (max-width: 768px) {
     font-size: 1.8rem;
   }
@@ -73,7 +75,7 @@ const Title = styled.h2`
   text-transform: uppercase;
   margin: 0.5rem 0 0 0;
   letter-spacing: 1px;
-  
+
   @media (max-width: 768px) {
     font-size: 1rem;
   }
@@ -95,9 +97,9 @@ const Tag = styled.span`
   font-size: 0.7rem;
   font-weight: bold;
   text-transform: uppercase;
-  border: 2px solid #2563EB;
-  transform: rotate(${props => Math.random() * 4 - 2}deg);
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  border: 2px solid #2563eb;
+  transform: rotate(${(props) => Math.random() * 4 - 2}deg);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 `;
 
 const BioContent = styled.div`
@@ -109,15 +111,15 @@ const Quote = styled.blockquote`
   font-family: 'HawlersEightRough', 'Impact', serif;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #2563EB;
+  color: #2563eb;
   text-align: center;
   margin: 0 0 1.5rem 0;
   padding: 1rem;
-  border-left: 5px solid #2563EB;
+  border-left: 5px solid #2563eb;
   font-style: italic;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   position: relative;
-  
+
   &::before {
     content: '"';
     font-size: 2rem;
@@ -125,7 +127,7 @@ const Quote = styled.blockquote`
     margin-right: 0.25rem;
     vertical-align: top;
   }
-  
+
   &::after {
     content: '"';
     font-size: 2rem;
@@ -133,7 +135,7 @@ const Quote = styled.blockquote`
     margin-left: 0.25rem;
     vertical-align: top;
   }
-  
+
   @media (max-width: 768px) {
     font-size: 1.3rem;
   }
@@ -145,7 +147,7 @@ const BioParagraph = styled.p`
   line-height: 1.6;
   margin-bottom: 1rem;
   text-align: justify;
-  
+
   &:first-of-type::first-letter {
     font-family: 'HawlersEightRough', 'Impact', serif;
     font-size: 3.5rem;
@@ -153,13 +155,13 @@ const BioParagraph = styled.p`
     float: left;
     line-height: 2.8rem;
     margin: 0.3rem 0.5rem 0 0;
-    color: #2563EB;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    color: #2563eb;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   }
-  
+
   @media (max-width: 768px) {
     font-size: 0.95rem;
-    
+
     &:first-of-type::first-letter {
       font-size: 3rem;
       line-height: 2.5rem;
@@ -168,7 +170,7 @@ const BioParagraph = styled.p`
 `;
 
 const PhotosSection = styled.div`
-  border-top: 3px solid #2563EB;
+  border-top: 3px solid #2563eb;
   padding: 1rem;
   margin-top: 1.5rem;
 `;
@@ -176,7 +178,7 @@ const PhotosSection = styled.div`
 const PhotosTitle = styled.h3`
   font-family: 'HawlersEightRough', 'Impact', sans-serif;
   font-size: 1.3rem;
-  color: #2563EB;
+  color: #2563eb;
   text-transform: uppercase;
   margin: 0 0 1rem 0;
   text-align: center;
@@ -191,13 +193,15 @@ const PhotoGrid = styled.div`
 
 const PhotoCard = styled.div`
   position: relative;
-  border: 2px solid #2563EB;
+  border: 2px solid #2563eb;
   border-radius: 8px;
   overflow: hidden;
-  transform: rotate(${props => Math.random() * 2 - 1}deg);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  
+  transform: rotate(${(props) => Math.random() * 2 - 1}deg);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
   &:hover {
     transform: rotate(0deg) scale(1.05);
     box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
@@ -209,7 +213,7 @@ const PhotoImage = styled.img`
   height: 200px;
   object-fit: cover;
   transition: transform 0.3s ease;
-  
+
   ${PhotoCard}:hover & {
     transform: scale(1.1);
   }
@@ -220,7 +224,7 @@ const PhotoCaption = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
   color: white;
   padding: 1rem 0.5rem 0.5rem;
   font-family: 'HawlersEightRough', 'Impact', sans-serif;
@@ -232,22 +236,79 @@ const PhotoCaption = styled.div`
 const PlaceholderPhoto = styled.div`
   width: 100%;
   height: 200px;
-  background: linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%);
+  background:
+    linear-gradient(45deg, #333 25%, transparent 25%),
+    linear-gradient(-45deg, #333 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #333 75%),
+    linear-gradient(-45deg, transparent 75%, #333 75%);
   background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2563EB;
+  color: #2563eb;
   font-family: 'HawlersEightRough', 'Impact', sans-serif;
   font-size: 1rem;
   text-transform: uppercase;
   text-align: center;
-  border: 2px dashed #2563EB;
+  border: 2px dashed #2563eb;
+`;
+
+const BookingSection = styled.div`
+  border-top: 3px solid #2563eb;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  background: rgba(37, 99, 235, 0.05);
+`;
+
+const BookingTitle = styled.h3`
+  font-family: 'HawlersEightRough', 'Impact', sans-serif;
+  font-size: 1.3rem;
+  color: #2563eb;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+`;
+
+const BookingBlurb = styled.p`
+  font-family: 'Arial', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #000;
+  text-align: center;
+  margin: 0 0 1rem 0;
+`;
+
+const BookingButton = styled.a`
+  display: block;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  font-family: 'HawlersEightRough', 'Impact', sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: 0.85rem 1.5rem;
+  border: 3px solid #2563eb;
+  box-shadow: 4px 4px 0px #2563eb;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #2563eb;
+    color: #fff;
+    box-shadow: 2px 2px 0px #000;
+    transform: translate(2px, 2px);
+  }
 `;
 
 const LinksSection = styled.div`
-  border-top: 3px solid #2563EB;
+  border-top: 3px solid #2563eb;
   padding: 1rem;
   margin-top: 1.5rem;
 `;
@@ -255,7 +316,7 @@ const LinksSection = styled.div`
 const LinksTitle = styled.h3`
   font-family: 'HawlersEightRough', 'Impact', sans-serif;
   font-size: 1.3rem;
-  color: #2563EB;
+  color: #2563eb;
   text-transform: uppercase;
   margin: 0 0 1rem 0;
   text-align: center;
@@ -268,10 +329,10 @@ const LinkCategory = styled.div`
 const LinkCategoryTitle = styled.h4`
   font-family: 'HawlersEightRough', 'Impact', sans-serif;
   font-size: 1rem;
-  color: #2563EB;
+  color: #2563eb;
   text-transform: uppercase;
   margin: 0 0 0.5rem 0;
-  border-bottom: 2px solid #2563EB;
+  border-bottom: 2px solid #2563eb;
   padding-bottom: 0.25rem;
 `;
 
@@ -285,75 +346,119 @@ const Link = styled.a`
   border-left: 3px solid transparent;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  
+
   &:hover {
-    color: #2563EB;
-    border-left-color: #2563EB;
+    color: #2563eb;
+    border-left-color: #2563eb;
     padding-left: 0.5rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   }
 `;
 
 const DualBioPage = () => {
   const staceyCase = {
-    name: "Stacey P. Case",
-    title: "Co-owner, Tag Team Printing",
-    tags: ["Visual Artist", "Drummer", "Screenprinter", "Stamp Carver", "Vinyl Junkie", "Pizza Provocateur", "Certified Legend"],
+    name: 'Stacey P. Case',
+    title: 'Co-owner, Tag Team Printing',
+    tags: [
+      'Visual Artist',
+      'Drummer',
+      'Screenprinter',
+      'Stamp Carver',
+      'Vinyl Junkie',
+      'Pizza Provocateur',
+      'Certified Legend',
+    ],
     quote: "We don't print for the masses, we print for the misfits.",
+    bookingCTA: {
+      email: 'caseystace@yahoo.ca',
+      subject: 'Show Flyer Design Request',
+      blurb:
+        'Real art made by a real artist with decades of experience. If your band, venue, or event needs a flyer, send him a message.',
+      buttonLabel: 'Request a Flyer Design',
+    },
     bio: {
       paragraphs: [
-        "Stacey P. Case isn’t just an artist — he’s a walking, printing, drumming archive of underground culture. A punk lifer with a screenprinting squeegee in one hand and a 45 in the other, Stacey has left his fingerprints on bands, books, storefronts, and film reels across Canada.",
-        "From co-founding punk outfit The Tijuana Bibles to sparking chaos with Toronto’s infamous Trash Palace cinema collective, his work has always been loud, fast, and unapologetically handmade. In 2004, he took that DIY ethos to absurd new heights when he co-created the Pillow Fight League, a semi-pro spectacle where women threw down in unscripted, full-contact pillow bouts that made international headlines.",
-        "At the helm of Rock N Roll Print Shop, Stacey’s pulled tens of thousands of prints — posters, record sleeves, zines, pizza boxes. Yep, pizza boxes. That passion evolved into the now-legendary Cornwall Pizza Record, pressed through his own Dive Bar Records label, featuring garage icon Bloodshot Bill and hometown hero Stagger Lee.",
-        "Whether he’s drawing up a punk flyer at 2am or slinging shirts at a local show, Stacey’s world revolves around creating the kind of work that moves people.",
-        "When Stacey prints, you feel it."
-      ]
+        'Stacey P. Case isn’t just an artist — he’s a walking, printing, drumming archive of underground culture. A punk lifer with a screenprinting squeegee in one hand and a 45 in the other, Stacey has left his fingerprints on bands, books, storefronts, and film reels across Canada.',
+        'From co-founding punk outfit The Tijuana Bibles to sparking chaos with Toronto’s infamous Trash Palace cinema collective, his work has always been loud, fast, and unapologetically handmade. In 2004, he took that DIY ethos to absurd new heights when he co-created the Pillow Fight League, a semi-pro spectacle where women threw down in unscripted, full-contact pillow bouts that made international headlines.',
+        'At the helm of Rock N Roll Print Shop, Stacey’s pulled tens of thousands of prints — posters, record sleeves, zines, pizza boxes. Yep, pizza boxes. That passion evolved into the now-legendary Cornwall Pizza Record, pressed through his own Dive Bar Records label, featuring garage icon Bloodshot Bill and hometown hero Stagger Lee.',
+        'Whether he’s drawing up a punk flyer at 2am or slinging shirts at a local show, Stacey’s world revolves around creating the kind of work that moves people.',
+        'When Stacey prints, you feel it.',
+      ],
     },
     photos: [
-      { src: "/images/staceycasetrashpalace.png", caption: "Rockin' the Leather in St. Catherines" },
-      { src: "/images/staceycasedjcase.png", caption: "DJ Case 45rpm in action" },
-      { src: "/images/staceycaserocknrollprintshop.png", caption: "At Rock N Roll Print Shop" },
-      { src: "/images/staceycaserocknrollprintshop1.png", caption: "Screenprinting mastery" }
+      {
+        src: '/images/staceycasetrashpalace.png',
+        caption: "Rockin' the Leather in St. Catherines",
+      },
+      {
+        src: '/images/staceycasedjcase.png',
+        caption: 'DJ Case 45rpm in action',
+      },
+      {
+        src: '/images/staceycaserocknrollprintshop.png',
+        caption: 'At Rock N Roll Print Shop',
+      },
+      {
+        src: '/images/staceycaserocknrollprintshop1.png',
+        caption: 'Screenprinting mastery',
+      },
     ],
     links: {
-      Instagram: ["@staceypcase", "@rocknrollprintshop", "@djcase45rpm", "@cornwallpizza"],
+      Instagram: [
+        '@staceypcase',
+        '@rocknrollprintshop',
+        '@djcase45rpm',
+        '@cornwallpizza',
+      ],
       Media: {
-        "StampBlankz Launch": "https://www.cornwallseawaynews.com/business/stacey-case-hosting-stampblankz-launch-at-cline-house-gallery/",
-        "The Weirdies": "https://nowtoronto.com/music/the-weirdies-volatile/",
-        "Tijuana Bibles Merch Feature": "https://www.cornwallseawaynews.com/community/tijuana-bibles-merch-hot-off-stacey-cases-press/",
-        "Squeegee Rampage": "https://www.youtube.com/watch?v=uA2MhNAgGJQ"
-      }
-    }
+        'StampBlankz Launch':
+          'https://www.cornwallseawaynews.com/business/stacey-case-hosting-stampblankz-launch-at-cline-house-gallery/',
+        'The Weirdies': 'https://nowtoronto.com/music/the-weirdies-volatile/',
+        'Tijuana Bibles Merch Feature':
+          'https://www.cornwallseawaynews.com/community/tijuana-bibles-merch-hot-off-stacey-cases-press/',
+        'Squeegee Rampage': 'https://www.youtube.com/watch?v=uA2MhNAgGJQ',
+      },
+    },
   };
 
   const staceyForrester = {
-    name: "Stacey Forrester",
-    title: "Co-owner, Tag Team Printing",
-    tags: ["Creative Director", "Brand Strategist", "Design Innovator", "Print Specialist", "Visual Storyteller", "Art Director"],
+    name: 'Stacey Forrester',
+    title: 'Co-owner, Tag Team Printing',
+    tags: [
+      'Creative Director',
+      'Brand Strategist',
+      'Design Innovator',
+      'Print Specialist',
+      'Visual Storyteller',
+      'Art Director',
+    ],
     quote: "Every design tells a story. We make sure it's worth telling.",
     bio: {
       paragraphs: [
         "Stacey Forrester is a screen printer, designer, punk rocker, and certified street rat raised on curb wax and cassette tapes. He grew up skating the cracked pavement of Cornwall in the 1990s, where style was DIY and every trick landed was earned. As part of the original crew that petitioned for and helped build Cornwall's second and third skateparks, Stacey learned early how to turn passion into concrete reality.",
         "That same drive took him to London, Ontario, where he spent over a decade shredding basslines in a thrash metal band and soaking in Canada's underground music scene. After years of playing shows, recording, and living loud, Stacey returned to Cornwall with a mission: to build something louder than amps. A print empire rooted in art, rebellion, and community.",
         "Stacey is a walking blueprint for DIY hustle and underground grit. As the co-founder of Tag Team Printing and Drop Dead Thread, he's equal parts illustrator, designer, and machine operator. Every print that leaves the shop is a battle-tested blend of craft and chaos: posters, tees, patches, stickers, album art, all built from scratch with analogue attitude.",
-        "Music and art have always been his core fuel, and Tag Team is the engine where it all comes together: DIY ethics, artistic precision, and a little bit of beautiful mess."
-      ]
+        'Music and art have always been his core fuel, and Tag Team is the engine where it all comes together: DIY ethics, artistic precision, and a little bit of beautiful mess.',
+      ],
     },
     photos: [
-      { src: "/images/Staceyforresterpic1.jpg", caption: "Stacey in action" },
-      { src: "/images/Staceyforresterpic2.jpg", caption: "Behind the scenes" },
-      { src: "/images/Staceyforresterpic3.jpg", caption: "Creative process" },
-      { src: "/images/Staceyforresterpic4.jpg", caption: "Art meets rebellion" }
+      { src: '/images/Staceyforresterpic1.jpg', caption: 'Stacey in action' },
+      { src: '/images/Staceyforresterpic2.jpg', caption: 'Behind the scenes' },
+      { src: '/images/Staceyforresterpic3.jpg', caption: 'Creative process' },
+      {
+        src: '/images/Staceyforresterpic4.jpg',
+        caption: 'Art meets rebellion',
+      },
     ],
     links: {
-      Instagram: ["@dropdeadthreadapparel", "@tagteamprinting"],
+      Instagram: ['@dropdeadthreadapparel', '@tagteamprinting'],
       Media: {
-        "Drop Dead Thread Website": "https://dropdeadthread.ca",
-        "Design Portfolio": "#",
-        "Creative Process": "#",
-        "Brand Case Studies": "#"
-      }
-    }
+        'Drop Dead Thread Website': 'https://dropdeadthread.ca',
+        'Design Portfolio': '#',
+        'Creative Process': '#',
+        'Brand Case Studies': '#',
+      },
+    },
   };
 
   const renderBio = (person, side) => (
@@ -367,24 +472,22 @@ const DualBioPage = () => {
           ))}
         </TagsContainer>
       </BioHeader>
-      
+
       <BioContent>
         <Quote>{person.quote}</Quote>
-        
+
         {person.bio.paragraphs.map((paragraph, index) => (
-          <BioParagraph key={index}>
-            {paragraph}
-          </BioParagraph>
+          <BioParagraph key={index}>{paragraph}</BioParagraph>
         ))}
-        
+
         {person.photos && person.photos.length > 0 ? (
           <PhotosSection>
             <PhotosTitle>Gallery</PhotosTitle>
             <PhotoGrid>
               {person.photos.map((photo, index) => (
                 <PhotoCard key={index}>
-                  <PhotoImage 
-                    src={photo.src} 
+                  <PhotoImage
+                    src={photo.src}
                     alt={photo.caption || `Photo ${index + 1}`}
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -407,22 +510,34 @@ const DualBioPage = () => {
             <PhotoGrid>
               {[1, 2, 3, 4].map((_, index) => (
                 <PhotoCard key={`placeholder-${index}`}>
-                  <PlaceholderPhoto>
-                    Photo Coming Soon
-                  </PlaceholderPhoto>
-                  <PhotoCaption>Add photos of {person.name.split(' ')[0]}</PhotoCaption>
+                  <PlaceholderPhoto>Photo Coming Soon</PlaceholderPhoto>
+                  <PhotoCaption>
+                    Add photos of {person.name.split(' ')[0]}
+                  </PhotoCaption>
                 </PhotoCard>
               ))}
             </PhotoGrid>
           </PhotosSection>
         )}
-        
+
+        {person.bookingCTA && (
+          <BookingSection>
+            <BookingTitle>Hire Stacey for Flyer Design</BookingTitle>
+            <BookingBlurb>{person.bookingCTA.blurb}</BookingBlurb>
+            <BookingButton
+              href={`mailto:${person.bookingCTA.email}?subject=${encodeURIComponent(person.bookingCTA.subject)}`}
+            >
+              {person.bookingCTA.buttonLabel}
+            </BookingButton>
+          </BookingSection>
+        )}
+
         <LinksSection>
           <LinksTitle>Connect & Explore</LinksTitle>
           <LinkCategory>
             <LinkCategoryTitle>Instagram</LinkCategoryTitle>
             {person.links.Instagram.map((handle, index) => (
-              <Link 
+              <Link
                 key={index}
                 href={`https://instagram.com/${handle}`}
                 target="_blank"
@@ -432,11 +547,11 @@ const DualBioPage = () => {
               </Link>
             ))}
           </LinkCategory>
-          
+
           <LinkCategory>
             <LinkCategoryTitle>Media & Features</LinkCategoryTitle>
             {Object.entries(person.links.Media).map(([title, url], index) => (
-              <Link 
+              <Link
                 key={index}
                 href={url}
                 target="_blank"

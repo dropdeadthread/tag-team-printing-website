@@ -78,9 +78,18 @@ const DesignerPage = () => {
     '@type': 'Service',
     name: 'Custom Design Services',
     provider: {
-      '@type': 'Organization',
+      '@type': 'LocalBusiness',
       name: 'Tag Team Printing',
       url: siteUrl,
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
     },
     serviceType: 'Graphic Design and Technical Prep',
     description:
@@ -104,7 +113,7 @@ const DesignerPage = () => {
       },
     ],
     areaServed: {
-      '@type': 'Place',
+      '@type': 'AdministrativeArea',
       name: 'Cornwall, Ontario',
     },
   };

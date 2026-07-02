@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import SEO from '../components/SEO';
 import StreamlinedOrderForm from '../components/StreamlinedOrderForm';
 import TShirtMockup from '../components/TShirtMockup';
 import FileUpload from '../components/FileUpload';
@@ -473,6 +474,11 @@ const OrderPage = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Place a Custom Print Order | Tag Team Printing Cornwall"
+        description="Start your custom screen printing order at Tag Team Printing in Cornwall, Ontario. Upload your design, choose your apparel, and get a fast turnaround quote."
+        url="/order"
+      />
       <OrderProvider>
         <OrderContainer>
           <OrderGrid>

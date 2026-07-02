@@ -24,15 +24,97 @@ const Layout = ({ children }) => {
     process.env.URL ||
     '';
 
-  const organizationSchema = siteUrl
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: siteTitle,
-        url: siteUrl,
-        logo: `${siteUrl}/images/logo.png`,
-      }
-    : null;
+  const canonicalUrl = siteUrl || 'https://tagteamprints.com';
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': ['LocalBusiness', 'PrintingCompany'],
+    name: 'Tag Team Printing',
+    url: canonicalUrl,
+    logo: `${canonicalUrl}/images/logo.png`,
+    image: `${canonicalUrl}/images/logo.png`,
+    telephone: '+1-613-363-4997',
+    email: 'info@tagteamprints.com',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '1016 First St E',
+      addressLocality: 'Cornwall',
+      addressRegion: 'ON',
+      postalCode: 'K6H 1N4',
+      addressCountry: 'CA',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 45.0186,
+      longitude: -74.7414,
+    },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '17:00',
+      },
+    ],
+    sameAs: [
+      'https://www.youtube.com/@tagteamprinting',
+      'https://www.instagram.com/dropdeadthread',
+      'https://www.facebook.com/dropdeadthread',
+    ],
+    priceRange: '$$',
+    areaServed: [
+      {
+        '@type': 'City',
+        name: 'Cornwall',
+        containedInPlace: { '@type': 'Province', name: 'Ontario' },
+      },
+      {
+        '@type': 'AdministrativeArea',
+        name: 'Eastern Ontario',
+      },
+    ],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Screen Printing Services',
+      itemListElement: [
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Custom Screen Printing',
+          },
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Bulk Apparel Printing',
+          },
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'DTF Printing',
+          },
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'School and Event Shirts',
+          },
+        },
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: 'Band and Artist Merch',
+          },
+        },
+      ],
+    },
+  };
 
   // Defensive: Check if CartContext is available
   const cartContext = useContext(CartContext);
@@ -46,11 +128,9 @@ const Layout = ({ children }) => {
     <div
       className={`layout-wrapper ${isProductPage ? 'product-layout' : ''} ${isCartPage ? 'cart-layout' : ''}`}
     >
-      {organizationSchema ? (
-        <Helmet>
-          <script type="application/ld+json">{`${JSON.stringify(organizationSchema)}`}</script>
-        </Helmet>
-      ) : null}
+      <Helmet htmlAttributes={{ lang: 'en' }}>
+        <script type="application/ld+json">{`${JSON.stringify(organizationSchema)}`}</script>
+      </Helmet>
       <Header itemCount={itemCount} /> {/* ✅ Passing cart count to Header */}
       <main>
         {children}

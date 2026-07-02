@@ -63,152 +63,201 @@ const CTALink = styled.a`
 `;
 
 const BandMerchPrintingCanada = () => {
-  const schema = null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Custom Band Merch Printing Canada',
+    description:
+      'Custom screen-printed band merchandise for Canadian bands and independent artists. Tour shirts, hoodies, concert merch, and musician apparel with a 12-piece minimum and fast turnaround. Based in Cornwall, Ontario.',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Tag Team Printing',
+      url: 'https://tagteamprints.com',
+      telephone: '+1-613-363-4997',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '1016 First St E',
+        addressLocality: 'Cornwall',
+        addressRegion: 'ON',
+        postalCode: 'K6H 1N4',
+        addressCountry: 'CA',
+      },
+    },
+    areaServed: { '@type': 'Country', name: 'Canada' },
+    serviceType: 'Band Merchandise Screen Printing',
+    url: 'https://tagteamprints.com/band-merch-printing-canada',
+    offers: {
+      '@type': 'Offer',
+      description:
+        'Custom band merch printing — 12-piece minimum, free quotes, ships anywhere in Canada.',
+      priceCurrency: 'CAD',
+      seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
+    },
+  };
 
   return (
     <Layout>
       <SEO
-        title="Band Merch Printing Canada - Tag Team Printing"
-        description="Get high-quality band merchandise printed in Canada with fast turnaround times and competitive pricing. Contact us today!"
+        title="Custom Band Merch Printing in Canada | Screen Printing for Bands & Artists"
+        description="Custom screen-printed merch for Canadian bands, tours, and independent artists. Tour shirts, hoodies, festival merchandise, and more — 12-piece minimum, fast turnaround, ships anywhere in Canada."
         url="/band-merch-printing-canada"
-        keywords="band merch printing Canada"
-        schema={schema ? [schema] : null}
+        keywords="band merch printing Canada, tour shirts, custom band merchandise, concert merch printing, musician apparel, screen printing Canada, tour merchandise"
+        schema={schema}
       />
       <PageContainer>
         <ContentCard>
-          <PageTitle>
-            Band Merch Printing Canada | Fast, Reliable Screen Printing Services
-          </PageTitle>
+          <PageTitle>Custom Band Merch Printing in Canada</PageTitle>
+
           <p>
-            > <strong>Band Merch Printing Canada</strong>
+            Whether you're printing concert merchandise for your first local
+            show, a cross-Canada tour, or your next album release, Tag Team
+            Printing helps bands create merch that looks great, sells well, and
+            arrives on time. We print custom band shirts and musician apparel
+            for independent artists across Canada — with a 12-piece minimum and
+            a standard one-week turnaround.
           </p>
-          <p>
-            At Tag Team Printing, we understand the importance of having
-            professional-grade band merchandise for your live shows and tours.
-            That's why we offer fast, reliable screen printing services
-            specifically designed for bands and musicians.
-          </p>
-          <p>
-            > <strong>Why Choose Us?</strong>
-          </p>
+
+          <h2>Why Bands Choose Tag Team Printing</h2>
           <ul>
             <li>
-              {' '}
-              Fast turnaround times to ensure you have your merch ready before
-              tour dates
+              Low 12-piece minimums — perfect for local shows and independent
+              artists
+            </li>
+            <li>Fast turnaround when tour dates are approaching</li>
+            <li>
+              Durable prints that hold up to life on the road and nights on
+              stage
             </li>
             <li>
-              {' '}
-              Competitive pricing with no minimum order requirements for small
-              bands
+              Full-colour artwork, multi-colour designs, and specialty inks
             </li>
-            <li> Dark garment options available for the best look on stage</li>
+            <li>We ship concert merchandise anywhere in Canada</li>
             <li>
-              {' '}
-              Multi-color designs allowed for unique, eye-catching designs
+              Design help available if your artwork isn't print-ready — see our{' '}
+              <a href="/design-services">design services</a>
             </li>
           </ul>
+
+          <h2>We're Musicians Too</h2>
           <p>
-            > <strong>Our Process:</strong>
+            Unlike most commercial print shops, Tag Team Printing is run by
+            people who actually play shows, book bands, and design posters.
+            Through <strong>Split Toe Records</strong>, we've worked directly
+            with independent artists and understand the realities of selling
+            band merch at a show — keeping costs down, nailing the artwork, and
+            making a tour deadline. That experience shapes how we approach every
+            order.
           </p>
           <p>
-            1. We start by reviewing your design and making any necessary
-            adjustments to ensure it looks its best.
+            Stacey Case has spent over 20 years in the Ontario music scene,
+            designing flyers and artwork for bands across Cornwall and London
+            and playing shows across the province. That background isn't a
+            marketing line — it's why we take band orders seriously and
+            understand what's actually at stake when your merch needs to be at
+            the venue by Friday.
           </p>
+
+          <h2>What We Print for Bands</h2>
           <p>
-            2. Next, we prepare your screen with our professional-grade
-            equipment and materials.
-          </p>
-          <p>
-            3. Once the screen is ready, we print your design onto high-quality
-            merchandise using eco-friendly inks.
-          </p>
-          <p>
-            4. Finally, we package and ship your merch to you or directly to
-            your fans.
-          </p>
-          <p>
-            > <strong>What Sets Us Apart:</strong>
+            We can put your artwork on almost any garment. Popular choices for
+            touring artists and concert merchandise include:
           </p>
           <ul>
+            <li>Tour shirts and custom band tees</li>
+            <li>Album release shirts and limited edition runs</li>
+            <li>Hoodies and crew necks</li>
+            <li>Long sleeves</li>
+            <li>Festival merchandise</li>
+            <li>VIP or limited merch drops</li>
+            <li>Tote bags</li>
+            <li>Hats</li>
+          </ul>
+          <p>
+            We use{' '}
+            <a href="/screen-printing-cornwall-ontario">screen printing</a> for
+            most band merch orders — it's durable, cost-effective at volume, and
+            gives you crisp, vibrant results under stage lights. For full-colour
+            artwork, photo prints, or smaller runs without screen setup,{' '}
+            <a href="/dtf-printing-canada">DTF printing</a> is a great option
+            with no colour limits. Not sure which is right for your design?{' '}
+            <a href="/contact">Ask us</a>.
+          </p>
+
+          <h2>From Idea to Merch Table</h2>
+          <ol>
             <li>
-              {' '}
-              We're a local business based in Cornwall, Ontario, with a deep
-              connection to the Canadian music scene
+              Send us your artwork — or we'll help you create or clean it up.
             </li>
-            <li>
-              {' '}
-              Our team is comprised of experienced print specialists who
-              understand what it takes to produce high-quality merchandise for
-              bands like you
-            </li>
-            <li>
-              {' '}
-              We offer a wide range of services, including DTF printing and
-              custom apparel, to help you stand out from the competition
-            </li>
-          </ul>
+            <li>Approve your digital proof.</li>
+            <li>We print your order.</li>
+            <li>Pick it up in Cornwall or ship it anywhere in Canada.</li>
+          </ol>
+
+          <h2>Band Merch FAQ</h2>
+
+          <h3>Can you print tour merch on a tight deadline?</h3>
           <p>
-            > <strong>Get in Touch:</strong>
+            Yes. Whether you're heading out for a weekend run or a cross-country
+            tour, we can produce musician apparel that arrives on schedule. Give
+            us your hard deadline upfront and we'll tell you whether rush
+            service is needed.
           </p>
+
+          <h3>Can you ship directly to our rehearsal space or a tour stop?</h3>
           <p>
-            Ready to take your band merch game to the next level? Contact us
-            today to learn more about our screen printing services and how we
-            can help you achieve your goals.
+            Yes. We ship anywhere in Canada — rehearsal space, home address, or
+            wherever you need it. Just let us know your timeline when you order.
           </p>
+
+          <h3>Can you help with merch design?</h3>
           <p>
-            You can reach us at 613-363-4997 or tagteam@tagteamprints.com. We
-            look forward to working with you!
+            Yes. We can build something from scratch or clean up artwork that
+            isn't quite print-ready. Design is billed at $50/hr and your first
+            proof is always free. See our{' '}
+            <a href="/design-services">design services page</a> for more.
           </p>
-          <p>
-            > <strong>FAQs:</strong>
-          </p>
+
+          <h3>What garments are most popular for bands?</h3>
+          <p>Most bands go for:</p>
           <ul>
-            <li>
-              {' '}
-              What is the minimum order quantity for band merch printing?
-            </li>
+            <li>Heavyweight or vintage-style tees</li>
+            <li>Hoodies</li>
+            <li>Long sleeves</li>
+            <li>Tote bags</li>
           </ul>
           <p>
-            Our minimum order quantity is just one item, making it easy for
-            small bands and musicians to get started.
+            Browse our <a href="/brands">brands page</a> to see what we carry,
+            or ask us for a recommendation based on your budget and look.
           </p>
-          <ul>
-            <li> How long does it take to receive my printed merchandise?</li>
-          </ul>
+
+          <h3>What's the minimum order for band merch?</h3>
           <p>
-            Turnaround times vary depending on the complexity of your design and
-            the volume of orders we're working on. However, we strive to meet or
-            beat our promised deadlines whenever possible.
+            12 pieces for{' '}
+            <a href="/screen-printing-cornwall-ontario">screen printing</a>, any
+            combination of sizes. For smaller runs,{' '}
+            <a href="/dtf-printing-canada">DTF printing</a> has no minimum.
           </p>
-          <ul>
-            <li> Can I print dark garments with my designs?</li>
-          </ul>
+
+          <h3>Can I reorder later?</h3>
           <p>
-            Absolutely! We offer a range of dark garment options that will give
-            your merch a premium look and feel.
+            Yes. Once your artwork is on file, reordering is straightforward and
+            setup costs may be reduced if we still have your screens. Reach out
+            and we'll check what's on file.
           </p>
-          <ul>
-            <li> Do you use eco-friendly inks for your printing process?</li>
-          </ul>
+
+          <h3>What's your standard turnaround?</h3>
           <p>
-            Yes, we take pride in using environmentally responsible inks to
-            minimize our impact on the environment.
-          </p>
-          <p>
-            > <strong>Get Started Today:</strong>
-          </p>
-          <p>
-            Ready to elevate your band merch game? Contact us today to learn
-            more about our screen printing services and how we can help you
-            achieve your goals. We're here to support you every step of the way.
+            One week after artwork approval and receipt of garments. Rush
+            service is available on most orders — contact us before placing your
+            order to confirm availability. See our <a href="/faq">FAQ</a> for
+            rush fee details.
           </p>
 
           <CTABox>
             <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>
-              Ready to get started? Get a free quote today.
+              Ready to get your merch made?
             </p>
-            <CTALink href="/design-order">Get a Free Quote</CTALink>
+            <CTALink href="/order">Get a Free Quote</CTALink>
           </CTABox>
         </ContentCard>
       </PageContainer>

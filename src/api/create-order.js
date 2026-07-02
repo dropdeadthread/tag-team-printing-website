@@ -18,24 +18,24 @@ async function initializeOrdersFile() {
 async function saveOrder(order) {
   try {
     await initializeOrdersFile();
-    
+
     // Read existing orders
     const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
     const orders = JSON.parse(ordersData);
-    
+
     // Add new order with timestamp and ID
     const newOrder = {
       id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date().toISOString(),
       status: 'pending',
-      ...order
+      ...order,
     };
-    
+
     orders.push(newOrder);
-    
+
     // Write back to file
     await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2));
-    
+
     return newOrder;
   } catch (error) {
     console.error('Error saving order:', error);
@@ -53,8 +53,8 @@ async function sendOrderEmails(order) {
       secure: false,
       auth: {
         user: process.env.SMTP_USER || 'info@tagteamprints.com',
-        pass: process.env.SMTP_PASS || '' // Use app password for Gmail
-      }
+        pass: process.env.SMTP_PASS || '', // Use app password for Gmail
+      },
     });
 
     // Customer confirmation email
@@ -103,7 +103,7 @@ async function sendOrderEmails(order) {
           <h3>Contact Us</h3>
           <p>Email: <a href="mailto:info@tagteamprints.com" style="color: #fff;">info@tagteamprints.com</a></p>
           <p>Phone: <a href="tel:+16133634997" style="color: #fff;">(613) 363-4997</a></p>
-          <p>Address: 1014 First St East, Cornwall, ON K6H 1N4</p>
+          <p>Address: 1016 First St E, Cornwall, ON K6H 1N4</p>
           <p>Hours: Monday - Friday, 9:00 AM - 5:00 PM</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ ${JSON.stringify(order, null, 2)}
       from: `"Tag Team Printing" <${process.env.SMTP_USER || 'info@tagteamprints.com'}>`,
       to: order.customer?.email || order.email,
       subject: `Order Confirmation - ${order.id} - Tag Team Printing`,
-      html: customerEmailHtml
+      html: customerEmailHtml,
     });
 
     // Send internal notification
@@ -158,12 +158,11 @@ ${JSON.stringify(order, null, 2)}
       from: `"Tag Team Website" <${process.env.SMTP_USER || 'info@tagteamprints.com'}>`,
       to: process.env.INTERNAL_EMAIL || 'info@tagteamprints.com',
       subject: `🚨 New Order: ${order.id} - ${order.customer?.name || order.customerName}`,
-      html: internalEmailHtml
+      html: internalEmailHtml,
     });
 
     console.log('✅ Order emails sent successfully');
     return true;
-
   } catch (error) {
     console.error('❌ Error sending order emails:', error);
     return false;
@@ -177,40 +176,39 @@ module.exports = async (req, res) => {
   }
 
   let body = '';
-  req.on('data', chunk => {
+  req.on('data', (chunk) => {
     body += chunk;
   });
-  
+
   req.on('end', async () => {
     try {
       const orderData = JSON.parse(body);
-      
+
       // Validate required fields
       if (!orderData.customer?.email && !orderData.email) {
         return res.status(400).json({ error: 'Customer email is required' });
       }
-      
+
       // Save order to database
       const savedOrder = await saveOrder(orderData);
       console.log('✅ Order saved:', savedOrder.id);
-      
+
       // Send email notifications
       const emailsSent = await sendOrderEmails(savedOrder);
-      
+
       // Respond with success
-      res.status(200).json({ 
-        success: true, 
+      res.status(200).json({
+        success: true,
         order: savedOrder,
         notifications: {
-          emailsSent: emailsSent
-        }
+          emailsSent: emailsSent,
+        },
       });
-      
     } catch (error) {
       console.error('❌ Error processing order:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to process order',
-        details: error.message 
+        details: error.message,
       });
     }
   });

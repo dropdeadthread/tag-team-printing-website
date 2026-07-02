@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 const SEO = ({
   title = 'Tag Team Printing',
   description = 'Custom screen printing and apparel services for your business, event, or organization.',
-  image = '/images/logo.png',
+  image = '/images/hero-tagteam.png',
   url = '',
   keywords = 'screen printing, custom apparel, t-shirts, business apparel, event printing',
   schema = null,
@@ -80,6 +80,14 @@ const SEO = ({
           name: 'viewport',
           content: 'width=device-width, initial-scale=1',
         },
+        {
+          name: 'theme-color',
+          content: '#c32b14',
+        },
+      ]}
+      link={[
+        ...(fullUrl ? [{ rel: 'canonical', href: fullUrl }] : []),
+        { rel: 'apple-touch-icon', href: '/images/logo.png' },
       ]}
     >
       {schemaItems.map((item, index) => (
