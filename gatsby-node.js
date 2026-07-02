@@ -325,6 +325,27 @@ exports.createPages = async ({ graphql, actions }) => {
         `Created product page: ${newPath} (${product.brandName || ''} ${product.styleName || ''}, styleID: ${product.styleID})`,
       );
     });
+
+    // Blog post pages
+    try {
+      const blogPostsPath = path.resolve('./data/blog-posts.json');
+      if (fs.existsSync(blogPostsPath)) {
+        const blogPosts = JSON.parse(fs.readFileSync(blogPostsPath, 'utf8'));
+        const publishedPosts = (
+          Array.isArray(blogPosts) ? blogPosts : []
+        ).filter((p) => p.status === 'published');
+        publishedPosts.forEach((post) => {
+          createPage({
+            path: `/blog/${post.slug}/`,
+            component: path.resolve('src/templates/BlogPostTemplate.jsx'),
+            context: { post },
+          });
+        });
+        console.log(`Created ${publishedPosts.length} blog post pages`);
+      }
+    } catch (err) {
+      console.warn('Blog posts unavailable:', err.message);
+    }
   } catch (error) {
     console.error('Error in createPages:', error);
   }
@@ -375,6 +396,12 @@ exports.onPostBuild = async ({ reporter }) => {
 
     // Copy reviews.json to public directory
     await fs.copy('./data/reviews.json', './public/data/reviews.json');
+
+    // Copy blog-posts.json to public directory (for client-side feed)
+    const blogPostsSrc = './data/blog-posts.json';
+    if (await fs.pathExists(blogPostsSrc)) {
+      await fs.copy(blogPostsSrc, './public/data/blog-posts.json');
+    }
 
     // Provide a root-level sitemap.xml convenience file.
     // gatsby-plugin-sitemap outputs an index at public/sitemap/sitemap-index.xml.
