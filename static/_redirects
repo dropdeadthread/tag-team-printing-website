@@ -26,4 +26,10 @@
 /category/*             /category/:splat/index.html      200
 
 # Gatsby 404 page fallback (for any non-matching routes)
-/*                      /index.html                      200
+# Was serving /index.html with a 200 -- meaning EVERY unmatched URL on the whole site,
+# including the deleted brewery-merch-printing page and genuinely made-up URLs, silently
+# served the homepage's real content as if it were a legitimate 200 page. Real 404 page
+# (src/pages/404.jsx) already exists and builds to /404.html -- this rule just pointed at
+# the wrong file. Status 404 keeps Netlify reporting a real not-found status to crawlers
+# while still serving the nicer custom 404 page content.
+/*                      /404.html                        404

@@ -10,7 +10,12 @@
   display: flex;
   justify-content: space-between; /* Moves nav links to the far right */
   align-items: center;
-  background: transparent;
+  /* Was transparent -- designed to float over a homepage hero image, but this same
+     component is shared by every page. Pages without a hero (FAQ, Brands, Contact,
+     Customer Dashboard, etc.) had nothing behind the header but their own page content,
+     so headings/body text rendered straight through the nav, illegible where they
+     crossed. Solid background fixes legibility everywhere at once. */
+  background: rgba(10, 10, 10, 0.95);
   height: 140px; /* or larger, to fit the bigger logo */
 }
 
