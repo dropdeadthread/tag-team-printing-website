@@ -85,6 +85,34 @@ const resolveDashboardStatus = (order, job) => {
 };
 
 /**
+ * customer-dashboard.jsx's OrderStatusDisplay component (the only real renderer of this
+ * data) expects a specific flat shape -- order.id, order.status, order.customerName,
+ * order.items (array, only .length is read), order.total, order.createdAt, and an optional
+ * order.estimatedDelivery. None of those names match Control Hub's real Order/Job fields,
+ * so this builds that exact shape rather than passing Control Hub's schema through as-is.
+ */
+const buildDashboardOrder = (order, job) => ({
+  id: order.orderId,
+  status: resolveDashboardStatus(order, job),
+  customerName: order.customer?.name || '',
+  items: order.garment
+    ? [
+        {
+          name:
+            order.garment.title ||
+            order.garment.style ||
+            order.garment.brand ||
+            'Item',
+          quantity: order.printing?.quantity || 1,
+        },
+      ]
+    : [],
+  total: order.quote?.totalWithTax ?? order.quote?.subtotal ?? 0,
+  createdAt: order.createdAt,
+  estimatedDelivery: job?.dueDate || null,
+});
+
+/**
  * Legacy local-file fallback — kept only for any pre-migration orders that might still be
  * sitting in these files from before Control Hub sync existed. Checked AFTER Control Hub,
  * not before, since Control Hub is the real, current source of truth.
@@ -126,10 +154,18 @@ const loadLegacyLocalOrder = async (orderId) => {
 };
 
 module.exports = async (req, res) => {
-  const { orderId } = req.query || {};
+  // customer-dashboard.jsx (the only real, live caller) sends ?id=... -- the sole other
+  // caller, OrderStatusWidget.jsx, sends ?orderId=... but that component is no longer
+  // imported anywhere (removed from order-confirmed.jsx as the root cause of a JSON-parse
+  // error). Accepting both means the live dashboard actually works and nothing regresses
+  // if that widget's ever wired back up.
+  const { id, orderId: orderIdParam } = req.query || {};
+  const orderId = id || orderIdParam;
 
   if (!orderId) {
-    res.status(400).json({ error: 'Missing orderId parameter' });
+    res
+      .status(400)
+      .json({ success: false, message: 'Missing orderId parameter' });
     return;
   }
 
@@ -145,39 +181,40 @@ module.exports = async (req, res) => {
     }
 
     if (hubResult?.order) {
-      const { order, job } = hubResult;
       res.status(200).json({
-        orderId: order.orderId,
-        status: resolveDashboardStatus(order, job),
-        estimatedCompletion: job?.dueDate || null,
-        actualCompletion:
-          order.workflow?.shipped || order.workflow?.productionComplete || null,
-        notes: job?.notes || '',
-        orderDate: order.createdAt,
-        customer: order.customer,
-        garment: order.garment,
-        printing: order.printing,
-        quote: order.quote,
+        success: true,
+        order: buildDashboardOrder(hubResult.order, hubResult.job),
       });
       return;
     }
 
     const legacyOrder = await loadLegacyLocalOrder(orderId);
     if (!legacyOrder) {
-      res.status(404).json({ error: 'Order not found' });
+      res.status(404).json({
+        success: false,
+        message: 'Order not found. Please check your order ID and try again.',
+      });
       return;
     }
 
     res.status(200).json({
-      ...legacyOrder,
-      orderId: legacyOrder.orderId || legacyOrder.id,
-      orderDate:
-        legacyOrder.orderDate ||
-        legacyOrder.createdAt ||
-        new Date().toISOString(),
+      success: true,
+      order: {
+        id: legacyOrder.orderId || legacyOrder.id,
+        status: legacyOrder.status || 'pending',
+        customerName:
+          legacyOrder.customerName || legacyOrder.customer?.name || '',
+        items: legacyOrder.items || [],
+        total: legacyOrder.total ?? legacyOrder.quote?.totalWithTax ?? 0,
+        createdAt:
+          legacyOrder.orderDate ||
+          legacyOrder.createdAt ||
+          new Date().toISOString(),
+        estimatedDelivery: legacyOrder.estimatedDelivery || null,
+      },
     });
   } catch (error) {
     console.error('Error fetching order:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
