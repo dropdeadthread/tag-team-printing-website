@@ -68,7 +68,7 @@ const BandMerchPrintingCanada = () => {
     '@type': 'Service',
     name: 'Custom Band Merch Printing Canada',
     description:
-      'Custom screen-printed band merchandise for Canadian bands and independent artists. Tour shirts, hoodies, concert merch, and musician apparel with a 12-piece minimum and fast turnaround. Based in Cornwall, Ontario.',
+      'Custom screen-printed band merchandise for Canadian bands and independent artists. Tour shirts, hoodies, concert merch, and musician apparel with a 15-piece minimum and fast turnaround. Based in Cornwall, Ontario.',
     provider: {
       '@type': 'LocalBusiness',
       name: 'Tag Team Printing',
@@ -89,7 +89,7 @@ const BandMerchPrintingCanada = () => {
     offers: {
       '@type': 'Offer',
       description:
-        'Custom band merch printing — 12-piece minimum, free quotes, ships anywhere in Canada.',
+        'Custom band merch printing — 15-piece minimum, free quotes, ships anywhere in Canada.',
       priceCurrency: 'CAD',
       seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
     },
@@ -99,7 +99,7 @@ const BandMerchPrintingCanada = () => {
     <Layout>
       <SEO
         title="Custom Band Merch Printing in Canada | Screen Printing for Bands & Artists"
-        description="Custom screen-printed merch for Canadian bands, tours, and independent artists. Tour shirts, hoodies, festival merchandise, and more — 12-piece minimum, fast turnaround, ships anywhere in Canada."
+        description="Custom screen-printed merch for Canadian bands, tours, and independent artists. Tour shirts, hoodies, festival merchandise, and more — 15-piece minimum, fast turnaround, ships anywhere in Canada."
         url="/band-merch-printing-canada"
         keywords="band merch printing Canada, tour shirts, custom band merchandise, concert merch printing, musician apparel, screen printing Canada, tour merchandise"
         schema={schema}
@@ -113,14 +113,14 @@ const BandMerchPrintingCanada = () => {
             show, a cross-Canada tour, or your next album release, Tag Team
             Printing helps bands create merch that looks great, sells well, and
             arrives on time. We print custom band shirts and musician apparel
-            for independent artists across Canada — with a 12-piece minimum and
+            for independent artists across Canada — with a 15-piece minimum and
             a standard one-week turnaround.
           </p>
 
           <h2>Why Bands Choose Tag Team Printing</h2>
           <ul>
             <li>
-              Low 12-piece minimums — perfect for local shows and independent
+              Low 15-piece minimums — perfect for local shows and independent
               artists
             </li>
             <li>Fast turnaround when tour dates are approaching</li>
@@ -231,7 +231,7 @@ const BandMerchPrintingCanada = () => {
 
           <h3>What's the minimum order for band merch?</h3>
           <p>
-            12 pieces for{' '}
+            15 pieces for{' '}
             <a href="/screen-printing-cornwall-ontario">screen printing</a>, any
             combination of sizes. For smaller runs,{' '}
             <a href="/dtf-printing-canada">DTF printing</a> has no minimum.

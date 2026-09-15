@@ -608,7 +608,7 @@ const IntegratedPrintOrderForm = ({
         Total items to be printed
         <span
           className="info-tooltip"
-          title={`MINIMUM ORDER: 12 pieces for all screen printing, regardless of color count. Orders under 12 pieces carry a $20 surcharge.`}
+          title={`MINIMUM ORDER: 15 pieces for all screen printing, regardless of color count. Orders under 15 pieces carry a $20 surcharge.`}
         >
           ❓
         </span>

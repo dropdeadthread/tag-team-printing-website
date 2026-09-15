@@ -11,7 +11,7 @@ const localBusinessSchema = {
   '@type': ['LocalBusiness', 'PrintingCompany'],
   name: 'Tag Team Printing',
   description:
-    'Custom screen printing and apparel in Cornwall, Ontario. T-shirts, hoodies, hats, and branded merch for bands, businesses, schools, breweries, and events. Minimum 12 pieces. Free quotes.',
+    'Custom screen printing and apparel in Cornwall, Ontario. T-shirts, hoodies, hats, and branded merch for bands, businesses, schools, breweries, and events. Minimum 15 pieces. Free quotes.',
   url: 'https://tagteamprints.com',
   telephone: '+1-613-363-4997',
   email: 'info@tagteamprints.com',
@@ -105,7 +105,7 @@ const IndexPage = () => {
     <Layout>
       <SEO
         title="Tag Team Printing — Custom Screen Printing in Cornwall, Ontario"
-        description="Custom screen printing in Cornwall, Ontario. T-shirts, hoodies, hats, and branded apparel for bands, businesses, schools, and events. Minimum 12 pieces. Get a free quote today."
+        description="Custom screen printing in Cornwall, Ontario. T-shirts, hoodies, hats, and branded apparel for bands, businesses, schools, and events. Minimum 15 pieces. Get a free quote today."
         url="/"
         keywords="screen printing Cornwall Ontario, custom t-shirts Cornwall, band merch printing Eastern Ontario, bulk t-shirt printing Canada, DTF printing Cornwall"
         schema={localBusinessSchema}
@@ -149,7 +149,7 @@ const IndexPage = () => {
               <p>
                 Professional screen printing with durable plastisol inks for
                 crisp, long-lasting prints on a wide range of apparel. Ideal for
-                orders of 12 pieces or more.
+                orders of 15 pieces or more.
               </p>
             </div>
             <div className="homepage-service-card">
@@ -184,7 +184,7 @@ const IndexPage = () => {
               organizations, bands, and customers across Canada.
             </p>
             <p>
-              <strong>Minimum order: 12 pieces.</strong> Standard turnaround: 1
+              <strong>Minimum order: 15 pieces.</strong> Standard turnaround: 1
               week. Rush orders available—<a href="/contact">contact us</a> to
               discuss your timeline.
             </p>

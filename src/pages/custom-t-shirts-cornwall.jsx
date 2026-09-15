@@ -92,7 +92,7 @@ const CustomTShirtsCornwall = () => {
     offers: {
       '@type': 'Offer',
       description:
-        'Custom t-shirt screen printing — minimum 12 pieces. Local pickup in Cornwall. Free quotes.',
+        'Custom t-shirt screen printing — minimum 15 pieces. Local pickup in Cornwall. Free quotes.',
       priceCurrency: 'CAD',
       seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
     },
@@ -102,7 +102,7 @@ const CustomTShirtsCornwall = () => {
     <Layout>
       <SEO
         title="Custom T Shirts in Cornwall Ontario - Screen Printing Services"
-        description="Custom t-shirt printing in Cornwall, Ontario. 12-piece minimum, one-week turnaround, local pickup available. Get a free quote today."
+        description="Custom t-shirt printing in Cornwall, Ontario. 15-piece minimum, one-week turnaround, local pickup available. Get a free quote today."
         url="/custom-t-shirts-cornwall"
         keywords="custom t-shirts Cornwall"
         schema={schema}
@@ -120,9 +120,9 @@ const CustomTShirtsCornwall = () => {
             surrounding areas. Our screen printing services are fast, reliable,
             and backed by a quality guarantee.
           </p>
-          <h2>12-Piece Minimum, Serious Results</h2>
+          <h2>15-Piece Minimum, Serious Results</h2>
           <p>
-            Screen printing starts at 12 pieces — the right minimum for teams,
+            Screen printing starts at 15 pieces — the right minimum for teams,
             businesses, and events that want professional results. Whether you
             need 12 shirts or 2,400, we can accommodate your order.
           </p>
@@ -160,7 +160,7 @@ const CustomTShirtsCornwall = () => {
                 What is the minimum order quantity for custom t-shirt printing?
               </h3>
               <p>
-                Screen printing starts at 12 pieces. Contact us to discuss your
+                Screen printing starts at 15 pieces. Contact us to discuss your
                 order.
               </p>
             </div>

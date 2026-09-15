@@ -16,6 +16,7 @@ const brandLogoMap = {
   'bella + canvas': '5_fm.jpg',
   'comfort colors': '8_fm.jpg',
   jerzees: '23_fm.jpg',
+  'next level': '123_fm.jpg',
   gildan: '35_fm.jpg', // Also have 73_fm.jpg as alternative
   valucap: '70_fm.jpg',
   'm&o': '169_fm.jpg',

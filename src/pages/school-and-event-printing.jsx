@@ -92,7 +92,7 @@ const SchoolAndEventPrinting = () => {
     offers: {
       '@type': 'Offer',
       description:
-        'School spirit wear and event shirts — minimum 12 pieces. Local pickup in Cornwall. Free quotes.',
+        'School spirit wear and event shirts — minimum 15 pieces. Local pickup in Cornwall. Free quotes.',
       priceCurrency: 'CAD',
       seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
     },
@@ -163,7 +163,7 @@ const SchoolAndEventPrinting = () => {
             Q: What is the minimum order quantity for custom school spirit wear?
           </h3>
           <p>
-            A: Our minimum order is 12 pieces for screen printing. Contact us to
+            A: Our minimum order is 15 pieces for screen printing. Contact us to
             discuss your order size.
           </p>
           <h3>Q: Can I request a specific design or color scheme?</h3>
@@ -200,7 +200,7 @@ const SchoolAndEventPrinting = () => {
                 wear?
               </h3>
               <p>
-                Our minimum order is 12 pieces for screen printing. Contact us
+                Our minimum order is 15 pieces for screen printing. Contact us
                 to discuss your order size.
               </p>
             </div>

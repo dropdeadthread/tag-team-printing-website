@@ -83,7 +83,7 @@ const FAQ = () => {
         name: 'What is your minimum order quantity?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Our minimum is 12 pieces for all screen printing, regardless of the number of colours. Orders under 12 pieces are accepted with a $20 surcharge.',
+          text: 'Our minimum is 15 pieces for all screen printing, regardless of the number of colours. Orders under 15 pieces are accepted with a $20 surcharge.',
         },
       },
       {
@@ -123,7 +123,7 @@ const FAQ = () => {
         name: 'Can I mix sizes in one order?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Your minimum is based on the total quantity across all sizes — not per size. So an order of 12 pieces can include any combination of sizes you need.',
+          text: 'Yes. Your minimum is based on the total quantity across all sizes — not per size. So an order of 15 pieces can include any combination of sizes you need.',
         },
       },
       {
@@ -279,7 +279,7 @@ const FAQ = () => {
             <strong>Can I mix sizes in one order?</strong>
             <br />
             Yes. Your minimum is based on the total quantity across all sizes —
-            not per size. An order of 12 pieces can include any combination of
+            not per size. An order of 15 pieces can include any combination of
             sizes you need.
           </p>
           <p>
@@ -313,8 +313,8 @@ const FAQ = () => {
           <p>
             <strong>What&apos;s your minimum order?</strong>
             <br />
-            Our minimum is 12 pieces for all screen printing, regardless of the
-            number of colours. Orders under 12 pieces are accepted with a $20
+            Our minimum is 15 pieces for all screen printing, regardless of the
+            number of colours. Orders under 15 pieces are accepted with a $20
             surcharge.
           </p>
           <p>
@@ -388,7 +388,7 @@ const FAQ = () => {
               <li>First virtual proof: Free</li>
               <li>Additional proofs (client changes): $5.00 each</li>
               <li>Virtual proof without order: $10.00</li>
-              <li>Under minimum surcharge (fewer than 12 pieces): $20.00</li>
+              <li>Under minimum surcharge (fewer than 15 pieces): $20.00</li>
               <li>Fold: $0.10 ea. &nbsp;|&nbsp; Fold &amp; Bag: $0.25 ea.</li>
               <li>1-colour name: $4.00 ea.</li>
               <li>1-colour number: $3.00 ea.</li>

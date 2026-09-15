@@ -68,7 +68,7 @@ const ScreenPrintingCornwallOntario = () => {
     '@type': 'Service',
     name: 'Screen Printing Services Cornwall Ontario',
     description:
-      'Professional screen printing in Cornwall, Ontario for businesses, sports teams, schools, and organizations. Fast turnaround, 12-piece minimum, transparent pricing. Serving Cornwall, SD&G, and Eastern Ontario.',
+      'Professional screen printing in Cornwall, Ontario for businesses, sports teams, schools, and organizations. Fast turnaround, 15-piece minimum, transparent pricing. Serving Cornwall, SD&G, and Eastern Ontario.',
     provider: {
       '@type': 'LocalBusiness',
       name: 'Tag Team Printing',
@@ -93,7 +93,7 @@ const ScreenPrintingCornwallOntario = () => {
     offers: {
       '@type': 'Offer',
       description:
-        'Custom screen printing — 12-piece minimum, fast turnaround, transparent pricing. Free quotes.',
+        'Custom screen printing — 15-piece minimum, fast turnaround, transparent pricing. Free quotes.',
       priceCurrency: 'CAD',
       seller: { '@type': 'LocalBusiness', name: 'Tag Team Printing' },
     },
@@ -112,7 +112,7 @@ const ScreenPrintingCornwallOntario = () => {
     <Layout>
       <SEO
         title="Screen Printing Cornwall Ontario | Tag Team Printing"
-        description="Professional screen printing in Cornwall, Ontario. 12-piece minimum, one-week turnaround, transparent pricing. Serving businesses, teams, and organizations across Eastern Ontario."
+        description="Professional screen printing in Cornwall, Ontario. 15-piece minimum, one-week turnaround, transparent pricing. Serving businesses, teams, and organizations across Eastern Ontario."
         url="/screen-printing-cornwall-ontario"
         keywords="screen printing Cornwall Ontario"
         schema={schema}
@@ -136,7 +136,7 @@ const ScreenPrintingCornwallOntario = () => {
             in every order.
           </p>
           <p>
-            We pride ourselves on fast turnaround times, a 12-piece minimum, and
+            We pride ourselves on fast turnaround times, a 15-piece minimum, and
             transparent pricing. Whether you need 12 shirts or 2,400, we'll work
             with you to bring your vision to life. Contact us today to request a
             quote!
@@ -149,7 +149,7 @@ const ScreenPrintingCornwallOntario = () => {
             <li>Most orders ready in one week; rush turnaround available</li>
             <li>Transparent pricing, no hidden fees, no surprises</li>
             <li>
-              12-piece minimum — right-sized for teams, businesses, and events
+              15-piece minimum — right-sized for teams, businesses, and events
             </li>
             <li>
               In-house production for quality and consistency on every run
@@ -164,7 +164,7 @@ const ScreenPrintingCornwallOntario = () => {
             <div className="faq-item" style={{ marginBottom: '1.5rem' }}>
               <h3>What is your minimum order quantity?</h3>
               <p>
-                Screen printing orders start at 12 pieces. Contact us for a
+                Screen printing orders start at 15 pieces. Contact us for a
                 quote — we'll find the right approach for your order size.
               </p>
             </div>
