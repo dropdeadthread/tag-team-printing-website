@@ -1,0 +1,121 @@
+{
+  "site": {
+    "name": "Tag Team Printing",
+    "tagline": "Custom Screen Printing Done Right",
+    "domain": "tagteamprints.com",
+    "established": 2020,
+    "location": "Cornwall, Ontario, Canada",
+    "owner": "Stacey Forrester"
+  },
+  "global": {
+    "title": "Tag Team Printing | Custom Screen Printing & Wholesale Apparel | Cornwall, Ontario",
+    "description": "Professional custom screen printing services in Cornwall, Ontario. Wholesale blank apparel, custom t-shirts, hoodies, and promotional products for businesses and events.",
+    "keywords": [
+      "Tag Team Printing",
+      "custom screen printing cornwall",
+      "wholesale apparel ontario",
+      "custom t-shirts cornwall",
+      "promotional products cornwall",
+      "screen printing services",
+      "bulk t-shirt printing",
+      "business apparel cornwall",
+      "event merchandise ontario"
+    ],
+    "author": "Stacey Forrester",
+    "twitterHandle": "@tagteamprints",
+    "facebookPage": "https://facebook.com/tagteamprinting",
+    "instagramHandle": "@tagteamprinting"
+  },
+  "pages": {
+    "home": {
+      "title": null,
+      "description": "Professional custom screen printing services in Cornwall, Ontario. Quality wholesale apparel and custom printing for businesses, events, and organizations.",
+      "keywords": [
+        "custom screen printing",
+        "wholesale apparel",
+        "cornwall ontario",
+        "business apparel",
+        "event merchandise"
+      ],
+      "priority": 1.0
+    },
+    "products": {
+      "title": "Shop Wholesale Apparel",
+      "description": "Browse our wholesale apparel catalog. Quality blank t-shirts, hoodies, and accessories from top brands. Competitive pricing for bulk orders.",
+      "keywords": [
+        "wholesale t-shirts",
+        "blank apparel",
+        "bulk hoodies",
+        "gildan wholesale",
+        "bella canvas"
+      ],
+      "priority": 0.9
+    },
+    "design-services": {
+      "title": "Design Services",
+      "description": "Professional design services for your custom apparel. Logo design, artwork preparation, and screen-ready files. Expert designers on staff.",
+      "keywords": [
+        "apparel design services",
+        "logo design cornwall",
+        "custom artwork"
+      ],
+      "priority": 0.8
+    },
+    "about": {
+      "title": "About Us",
+      "description": "Tag Team Printing is Cornwall, Ontario's trusted custom screen printing shop. Quality work, competitive pricing, and exceptional customer service.",
+      "keywords": [
+        "about tag team printing",
+        "cornwall screen printing",
+        "local print shop"
+      ],
+      "priority": 0.7
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "Get a quote for your custom screen printing project. Contact Tag Team Printing in Cornwall, Ontario for fast, friendly service.",
+      "keywords": [
+        "contact tag team printing",
+        "screen printing quote",
+        "cornwall printing"
+      ],
+      "priority": 0.7
+    }
+  },
+  "schema": {
+    "organization": {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Tag Team Printing",
+      "url": "https://tagteamprints.com",
+      "logo": "https://tagteamprints.com/images/logo.png",
+      "founder": {
+        "@type": "Person",
+        "name": "Stacey Forrester"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Cornwall",
+        "addressRegion": "Ontario",
+        "addressCountry": "CA"
+      }
+    },
+    "localBusiness": {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Tag Team Printing",
+      "image": "https://tagteamprints.com/images/logo.png",
+      "url": "https://tagteamprints.com",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Cornwall",
+        "addressRegion": "Ontario",
+        "addressCountry": "CA"
+      },
+      "description": "Professional custom screen printing services in Cornwall, Ontario."
+    }
+  },
+  "lastUpdated": "2026-02-10T00:00:00.000Z",
+  "updatedBy": "Control Hub AI"
+}

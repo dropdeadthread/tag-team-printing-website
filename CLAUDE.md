@@ -408,3 +408,59 @@ tag team printing website/
 - **Deployment:** Changes are currently local only (not pushed). Push to feature branch and run CI/Netlify build after 3pm deployment window.
 
 ---
+
+## Recent Fixes (July 27, 2026)
+
+### Session: Fixed multi-location print pricing + removed a fake "first order" discount
+
+- **Summary:** All three live quote calculators (`/order`, `/shop`, and individual product pages)
+  shared the same structural bug — the shared `calculatePrintQuote()` helper only supported a
+  single uniform colour count × a flat location multiplier, which doesn't match real orders
+  (e.g. 3-colour front + 1-colour sleeve, each needing its own underbase check). Every consuming
+  component worked around this locally for setup fees only (correctly, per-location) but never
+  fixed the printing-cost side, which was silently wrong for any multi-location order:
+  `StreamlinedOrderForm`/`ShopQuoteCalculator` summed every location's colours together and
+  charged every location at the combined rate; `IntegratedPrintOrderForm` charged every add-on
+  location at the _main_ design's rate regardless of the add-on's real colour count.
+- **Also found and fixed:** `IntegratedPrintOrderForm.jsx` had an unconditional "$30 off — first
+  setup fee waived" applied to _every_ quote for _every_ customer, with no check anywhere for
+  actual first-order status. On closer inspection it was purely a cosmetic display line — the
+  real subtotal/tax/total were never actually reduced by it — but the "Waived $0" / "Remaining
+  setup fees" copy was actively misleading. Removed entirely (no real first-order-history check
+  exists anywhere to build a genuine version of this promo on — that would be a separate,
+  bigger feature).
+- **Files modified:**
+  - `src/helpers/calculatePrintQuote.js` — rewritten to accept a `locations: [{ name,
+colorCount, needsUnderbase, inkColors }]` array, computing each location's screens/underbase/
+    printing charge independently via a new internal `calculateLocationCharge()` and summing the
+    results. The old flat `colorCount`/`locationCount` call shape still works unchanged
+    (wrapped internally as a single-item locations array) — verified via a standalone Node test
+    that the unused legacy path (`PrintOrderForm.jsx`, confirmed dead/unimported) still produces
+    identical output to before.
+  - `src/components/StreamlinedOrderForm.jsx`, `src/components/ShopQuoteCalculator.jsx`,
+    `src/components/IntegratedPrintOrderForm.jsx` — all three now build a real per-location
+    array from their existing `addOns`/`addOnColorCounts`/`addOnInkColors` state and pass it to
+    `calculatePrintQuote()`, trusting its `setupTotal`/`printingTotal` directly. Removed each
+    component's local `totalSetupFees` recalculation and `result.setupTotal = totalSetupFees`
+    override — that workaround only ever fixed setup fees, never printing cost.
+  - `IntegratedPrintOrderForm.jsx` also had this same setup-fee override duplicated in
+    `handleSubmit` (separate from the live-preview `useEffect`) — fixed there too, and removed
+    the "Waived"/"Remaining setup fees" JSX block entirely.
+- **Real pricing impact:** any multi-location order through these three pages will now show a
+  different (correct) total than before — for a mixed-colour-count order this could be higher
+  _or_ lower than the old (wrong) number, depending on which location previously charged for
+  the wrong colour count. `IntegratedPrintOrderForm` quotes are also $30 higher across the board
+  now that the fake discount is gone. Worth a quick before/after comparison on a few real
+  in-flight quotes if any exist.
+- **Testing notes:**
+  - `npx eslint` clean on all four touched files.
+  - Verified the new per-location math against hand-calculated values via a standalone Node
+    script (3-colour front + 1-colour white sleeve on a dark garment, dark-garment underbase
+    logic, white-ink special case) — exact match. Also confirmed the legacy single-location call
+    shape (no `locations` array) still returns identical output to the pre-fix version.
+  - Not yet tested in a running browser/dev server — recommend `npm run develop` and manually
+    exercising `/order`, `/shop`, and a product page with a multi-location, mixed-colour-count,
+    dark-garment scenario before deploying.
+- **Deployment:** Local changes only, not yet pushed/deployed.
+
+---

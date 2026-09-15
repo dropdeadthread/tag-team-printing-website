@@ -113,6 +113,163 @@ const DesignerFAQ = () => {
               at 300 DPI at actual print size.
             </p>
           </section>
+
+          {/* REPEAT CLIENT DISCOUNTS */}
+          <section style={{ marginBottom: '2.5rem' }}>
+            <h2 style={{ fontSize: '1.8rem', color: '#0070d1' }}>
+              Do you offer discounts for repeat clients?
+            </h2>
+            <p>
+              Yes — and we&apos;re upfront about it. We&apos;d rather you know
+              what the relationship looks like so you can decide where your
+              print budget goes. Clients who order consistently earn a standing
+              rate, applied automatically after a few orders. No signup. No
+              monthly fee. No penalty for a slow season.
+            </p>
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                marginTop: '1rem',
+                fontSize: '0.95rem',
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    borderBottom: '2px solid #0070d1',
+                    textAlign: 'left',
+                  }}
+                >
+                  <th style={{ padding: '0.4rem 0.8rem' }}>
+                    Ordering frequency
+                  </th>
+                  <th style={{ padding: '0.4rem 0.8rem' }}>Standing rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #333' }}>
+                  <td style={{ padding: '0.4rem 0.8rem' }}>
+                    Occasional — 2–3 orders/year
+                  </td>
+                  <td style={{ padding: '0.4rem 0.8rem' }}>
+                    10% off setup fees on repeat designs
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #333' }}>
+                  <td style={{ padding: '0.4rem 0.8rem' }}>
+                    Regular — quarterly or more
+                  </td>
+                  <td style={{ padding: '0.4rem 0.8rem' }}>
+                    10% off setup + 5% off per-piece pricing
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.4rem 0.8rem' }}>
+                    Volume — 100+ pieces/run, recurring
+                  </td>
+                  <td style={{ padding: '0.4rem 0.8rem' }}>
+                    Contract rate, quoted per project
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p
+              style={{
+                marginTop: '1rem',
+                fontSize: '0.9rem',
+                color: '#bbb',
+                fontFamily: 'sans-serif',
+              }}
+            >
+              This is what your year looks like if you order at this pace — not
+              a subscription, not a contract. Order when you have work. The rate
+              reflects the relationship.
+            </p>
+          </section>
+
+          {/* SCREEN REORDERS */}
+          <section style={{ marginBottom: '2.5rem' }}>
+            <h2 style={{ fontSize: '1.8rem', color: '#0070d1' }}>
+              Do I pay setup fees every time I reorder?
+            </h2>
+            <p>
+              No. We keep your screens on file. Reorders of the same design
+              within <strong>12 months</strong> carry no setup charge — just
+              per-piece print cost plus garments. After 12 months a reduced
+              re-burn fee may apply if the screen needs re-coating, but
+              we&apos;ll always confirm before charging anything new.
+            </p>
+          </section>
+
+          {/* CONTRACTS */}
+          <section style={{ marginBottom: '2.5rem' }}>
+            <h2 style={{ fontSize: '1.8rem', color: '#0070d1' }}>
+              Do you require contracts or minimum commitments?
+            </h2>
+            <p>
+              No. We don&apos;t require contracts or lock-in commitments for
+              loyalty pricing. If you order consistently, we recognize it and
+              price accordingly. If you need a written contract rate for your
+              own budgeting or procurement process, we can put one together —
+              but it&apos;s your call, never a requirement.
+            </p>
+            <p style={{ marginTop: '0.75rem' }}>
+              Volume contract pricing for corporate clients with recurring
+              minimum-order commitments is available and quoted on request.
+              These are volume rates based on order size and predictability —
+              we&apos;ll explain how they differ from loyalty pricing clearly
+              before you decide.
+            </p>
+          </section>
+
+          {/* COLOUR MATCHING */}
+          <section style={{ marginBottom: '2.5rem' }}>
+            <h2 style={{ fontSize: '1.8rem', color: '#0070d1' }}>
+              Can you match my exact colours?
+            </h2>
+            <p>
+              We always aim to get as close as possible to what you hand us.
+              That said, screen printing has real process limitations worth
+              knowing upfront:
+            </p>
+            <ul
+              style={{
+                marginTop: '0.75rem',
+                paddingLeft: '1.5rem',
+                lineHeight: '1.9',
+                fontFamily: 'sans-serif',
+                fontSize: '0.95rem',
+              }}
+            >
+              <li>
+                <strong>Stock inks:</strong> We carry a full range of standard
+                ink colours and will match as closely as possible at no extra
+                charge.
+              </li>
+              <li>
+                <strong>Custom/Pantone mixing:</strong> Exact Pantone or
+                brand-colour matching is available as an add-on — ask when
+                quoting.
+              </li>
+              <li>
+                <strong>Gradients and blending:</strong> These require halftone
+                simulation in screen printing. We&apos;ll flag any design
+                elements that will be affected and confirm with you before going
+                to press.
+              </li>
+              <li>
+                <strong>Garment colour:</strong> Ink appearance shifts depending
+                on the garment colour beneath it. We&apos;ll advise on underbase
+                requirements if your design needs it.
+              </li>
+            </ul>
+            <p style={{ marginTop: '0.75rem' }}>
+              We&apos;d rather have the conversation upfront than surprise you
+              at pickup. If something in your design will print differently than
+              it looks on screen, we&apos;ll tell you before we burn a screen.
+            </p>
+          </section>
         </div>
       </div>
     </Layout>
