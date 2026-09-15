@@ -1,8 +1,17 @@
 // Control Hub Integration Utilities
 // Handles all backend communication to your centralized control hub
 
-const CONTROL_HUB_URL = process.env.CONTROL_HUB_URL || 'http://localhost:4000';
-const CONTROL_HUB_API_KEY = process.env.CONTROL_HUB_API_KEY || 'dev-secret-key';
+// Gatsby only inlines GATSBY_-prefixed env vars into browser bundles -- this file is
+// imported by upload.jsx (a page component, part of the client bundle), so the plain
+// CONTROL_HUB_URL/CONTROL_HUB_API_KEY names (correct for server-side Netlify Functions like
+// streamlined-order.js) never resolved here. Confirmed 2026-09-15: the deployed bundle had
+// this hardcoded to the "http://localhost:4000" fallback regardless of what was set in
+// Netlify, silently breaking the client file-upload feature (validateUploadToken/
+// uploadClientFiles below) for as long as this file has existed.
+const CONTROL_HUB_URL =
+  process.env.GATSBY_CONTROL_HUB_URL || 'http://localhost:4000';
+const CONTROL_HUB_API_KEY =
+  process.env.GATSBY_CONTROL_HUB_API_KEY || 'dev-secret-key';
 
 /**
  * Send data to Control Hub backend

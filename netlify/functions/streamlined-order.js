@@ -12,6 +12,7 @@ async function sendToControlHub(orderData, orderId) {
     const hubOrderData = {
       orderId: orderId,
       source: 'tag-team-website',
+      requestType: orderData.requestType === 'quote' ? 'quote' : 'order',
       customer: {
         name: orderData.customer.name,
         email: orderData.customer.email,
