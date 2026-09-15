@@ -480,6 +480,43 @@ const SubmitButton = styled.button`
   }
 `;
 
+const QuoteButton = styled.button`
+  background: transparent;
+  color: #059669;
+  border: 2px solid #059669;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'HawlersEightRough', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(5, 150, 105, 0.08);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const SubmitButtonRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const StreamlinedOrderForm = () => {
   // Use shared state from context for mockup synchronization
   const {
@@ -753,7 +790,7 @@ const StreamlinedOrderForm = () => {
     return errors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, requestType = 'quote') => {
     e.preventDefault();
 
     const validationErrors = validateForm();
@@ -768,6 +805,7 @@ const StreamlinedOrderForm = () => {
     setIsSubmitting(true);
 
     const orderData = {
+      requestType, // 'quote' or 'order' -- which button the customer used
       garment: PRESET_GARMENTS[selectedGarment],
       color: selectedColor,
       quantity,
@@ -844,17 +882,30 @@ const StreamlinedOrderForm = () => {
         }
 
         // Show success message with tracking info
-        alert(`🎉 Order submitted successfully! 
-        
-📧 Check your email for confirmation details
-📞 We'll contact you within 24 hours to finalize your order
-🏷️  Your Order ID: ${orderId}
+        const successMessage =
+          requestType === 'order'
+            ? `Order submitted successfully!
 
-Redirecting to confirmation page...`);
+Check your email for confirmation details.
+We'll contact you within 24 hours to finalize your order.
+Your Order ID: ${orderId}
 
-        // Redirect to confirmation page with order ID
+Redirecting to confirmation page...`
+            : `Quote request submitted successfully!
+
+Check your email for a copy of your quote.
+We'll follow up if you have any questions.
+Your Quote ID: ${orderId}
+
+Redirecting...`;
+        alert(successMessage);
+
+        // Redirect to the matching confirmation page with order ID
         if (typeof window !== 'undefined') {
-          window.location.href = `/order-confirmed?orderId=${orderId}`;
+          window.location.href =
+            requestType === 'order'
+              ? `/order-confirmed?orderId=${orderId}`
+              : `/quote-confirmed?orderId=${orderId}`;
         }
 
         // Reset form
@@ -902,20 +953,22 @@ Redirecting to confirmation page...`);
         });
       } else {
         const errorData = await response.text();
-        alert(`❌ Order submission failed. 
+        const label = requestType === 'order' ? 'Order' : 'Quote request';
+        alert(`${label} submission failed.
 
 Please try again or contact us directly:
-📞 Call: (Your phone number)
-📧 Email: info@tagteamprinting.com
+Call: (Your phone number)
+Email: info@tagteamprinting.com
 
 Error details: ${errorData || 'Server error'}`);
       }
     } catch (error) {
-      alert(`❌ Order submission failed due to network error.
+      const label = requestType === 'order' ? 'Order' : 'Quote request';
+      alert(`${label} submission failed due to network error.
 
 Please check your internet connection and try again, or contact us directly:
-📞 Call: (Your phone number) 
-📧 Email: info@tagteamprinting.com
+Call: (Your phone number)
+Email: info@tagteamprinting.com
 
 Error: ${error.message}`);
     } finally {
@@ -1227,7 +1280,7 @@ Error: ${error.message}`);
   const currentGarment = PRESET_GARMENTS[selectedGarment];
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => handleSubmit(e, 'quote')}>
       <SectionHeader>Choose Your Garment</SectionHeader>
       <GarmentGrid>
         {Object.values(PRESET_GARMENTS).map((garment) => (
@@ -2081,18 +2134,32 @@ Error: ${error.message}`);
         />
       </InputGroup>
 
-      <SubmitButton
-        type="submit"
-        disabled={isSubmitting || !quote}
-        style={{
-          opacity: isSubmitting || !quote ? 0.6 : 1,
-          cursor: isSubmitting || !quote ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {isSubmitting
-          ? '🔄 Submitting Order...'
-          : `Submit Order - $${quote ? quote.totalWithTax : '0.00'}`}
-      </SubmitButton>
+      <SubmitButtonRow>
+        <QuoteButton
+          type="button"
+          disabled={isSubmitting || !quote}
+          onClick={(e) => handleSubmit(e, 'quote')}
+          style={{
+            opacity: isSubmitting || !quote ? 0.6 : 1,
+            cursor: isSubmitting || !quote ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Quote'}
+        </QuoteButton>
+        <SubmitButton
+          type="button"
+          disabled={isSubmitting || !quote}
+          onClick={(e) => handleSubmit(e, 'order')}
+          style={{
+            opacity: isSubmitting || !quote ? 0.6 : 1,
+            cursor: isSubmitting || !quote ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {isSubmitting
+            ? 'Submitting...'
+            : `Submit Order - $${quote ? quote.totalWithTax : '0.00'}`}
+        </SubmitButton>
+      </SubmitButtonRow>
     </form>
   );
 };

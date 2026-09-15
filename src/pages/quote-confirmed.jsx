@@ -1,14 +1,13 @@
-// src/pages/order-confirmed.jsx
+// src/pages/quote-confirmed.jsx
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { Link } from 'gatsby';
 import '../styles/orderconfirmed.css';
 
-const OrderConfirmedPage = ({ location }) => {
+const QuoteConfirmedPage = ({ location }) => {
   const [orderId, setOrderId] = useState(null);
 
   useEffect(() => {
-    // Get order ID from URL params or sessionStorage
     const searchParams = new URLSearchParams(location?.search || '');
     const urlOrderId = searchParams.get('orderId') || searchParams.get('id');
     const sessionOrderId = sessionStorage.getItem('lastOrderId');
@@ -22,18 +21,16 @@ const OrderConfirmedPage = ({ location }) => {
   return (
     <Layout>
       <div className="order-confirmed-container">
-        <h1 className="confirmed-title">Order Confirmed</h1>
+        <h1 className="confirmed-title">Quote Request Received</h1>
         <p className="confirmed-message">
-          Thank you for your order. We&apos;ll be in touch within 24 hours to
-          finalize details, then get it into production.
+          Thanks for reaching out. Check your email for a copy of your quote
+          &mdash; we&apos;ll follow up if you have any questions or want to move
+          forward with an order.
         </p>
 
-        {orderId && <p className="confirmed-order-id">Order ID: {orderId}</p>}
+        {orderId && <p className="confirmed-order-id">Quote ID: {orderId}</p>}
 
         <div className="confirmed-actions">
-          <Link to="/my-orders" className="back-to-shop-btn">
-            View All Orders
-          </Link>
           <Link to="/blanks" className="back-to-shop-btn">
             Continue Shopping
           </Link>
@@ -46,4 +43,4 @@ const OrderConfirmedPage = ({ location }) => {
   );
 };
 
-export default OrderConfirmedPage;
+export default QuoteConfirmedPage;
