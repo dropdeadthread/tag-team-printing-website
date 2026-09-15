@@ -7,18 +7,15 @@
 # API routes to Netlify functions
 /api/create-checkout  /.netlify/functions/create-checkout  200
 
-# Let Netlify's own Functions routing handle every other /api/* path -- the Gatsby
-# adapter (gatsby-adapter-netlify) already compiles each src/api/*.js file into a real
-# function with its correct path (e.g. src/api/get-order.js -> /api/get-order) as part
-# of the build; confirmed live in the deploy's function manifest. _redirects rules are
-# evaluated before Netlify checks a function's own declared path, so without this rule
-# the catch-all at the bottom of this file was intercepting these requests first --
-# meaning /api/get-order (and every other src/api/* endpoint) returned the 404 fallback
-# instead of ever reaching its real, correctly-compiled function. Source and destination
-# are identical on purpose: this "rewrite to itself" is a no-op that just claims the
-# /api/* pattern so the later catch-all can't also match it, letting Netlify proceed to
-# its normal function-path resolution for the (unchanged) URL.
-/api/*                /api/:splat            200
+# Route every other /api/* path straight to its compiled Gatsby-adapter function.
+# The adapter (gatsby-adapter-netlify) compiles each src/api/*.js file into a real
+# function named "<basename>-js" (e.g. src/api/get-order.js -> function "get-order-js"),
+# confirmed directly in the deploy's function manifest. First attempt at this fix used a
+# same-source/destination "claim the pattern" rule, which Netlify appears to treat as a
+# no-op and skip entirely rather than using it to stop the catch-all below from also
+# matching -- confirmed live, still 404 five minutes after that deploy. This explicit
+# form removes the ambiguity by naming the real destination directly.
+/api/*                /.netlify/functions/:splat-js   200
 
 # Redirect literal placeholder bracket routes (cleanup)
 /products/[styleID]/[slug]  /products/  301
