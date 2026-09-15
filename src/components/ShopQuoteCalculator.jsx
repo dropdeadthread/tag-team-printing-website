@@ -337,26 +337,35 @@ const ShopQuoteCalculator = ({ selectedGarment, selectedColor }) => {
   useEffect(() => {
     if (!selectedGarment || validationErrors.length > 0) return;
 
-    // Calculate total setup fees: main print + all active add-ons
-    let totalSetupFees = printColors * 30; // Main print setup
-
-    // Add setup fees for each active add-on location
+    // Build one entry per print location — main print plus any active add-on locations, each
+    // priced on its own actual colour count and ink colours.
+    // Fixed Jul 27 2026: this used to sum every location's colours together and pass that
+    // combined number to calculatePrintQuote with a flat location multiplier, which charged
+    // every location as if it printed the FULL combined colour count. Now each location is
+    // priced on its own actual colour count/ink colours (this form already tracks per-add-on
+    // ink colours via addOnInkColors — use that directly instead of guessing).
+    const printLocations = [
+      {
+        name: 'Main Print',
+        colorCount: printColors,
+        garmentColor: selectedColor || 'white',
+        inkColors,
+      },
+    ];
     Object.keys(addOns).forEach((addOnKey) => {
       if (addOns[addOnKey]) {
-        totalSetupFees += addOnColorCounts[addOnKey] * 30;
+        printLocations.push({
+          name: addOnKey,
+          colorCount: addOnColorCounts[addOnKey],
+          garmentColor: selectedColor || 'white',
+          inkColors: addOnInkColors[addOnKey] || [],
+        });
       }
     });
 
-    // Count active add-ons as additional locations
-    const activeAddOns = Object.values(addOns).filter(Boolean).length;
-    const totalLocations = 1 + activeAddOns;
-
     const result = calculatePrintQuote({
       garmentQty: quantity,
-      colorCount: printColors,
-      locationCount: totalLocations,
-      garmentColor: selectedColor || 'white',
-      inkColors: inkColors,
+      locations: printLocations,
       garmentWholesalePrice: selectedGarment.wholesalePrice || 2.5,
       rushOrder: rushOrder,
       garmentBrand: selectedGarment.brand || '',
@@ -364,13 +373,11 @@ const ShopQuoteCalculator = ({ selectedGarment, selectedColor }) => {
     });
 
     if (result.valid) {
-      // Override the setup total with our correctly calculated value
-      result.setupTotal = totalSetupFees;
-
-      // Recalculate subtotal and total with correct setup fees
+      // Recalculate subtotal and total (calculatePrintQuote's own setupTotal/printingTotal are
+      // now correct per-location — no local override needed here anymore).
       const garmentTotal = quantity * result.garmentCostPerShirt;
       const printingTotal = result.printingTotal || 0;
-      const subtotal = garmentTotal + totalSetupFees + printingTotal;
+      const subtotal = garmentTotal + result.setupTotal + printingTotal;
 
       // Apply rush order multiplier if applicable
       let finalSubtotal = subtotal;

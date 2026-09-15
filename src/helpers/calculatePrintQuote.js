@@ -9,6 +9,17 @@ const PRICING_CONFIG = {
   FALLBACK_GARMENT_PRICE: 12.0, // Reasonable mid-range fallback (includes markup)
 };
 
+// Light colors that don't need underbase
+const LIGHT_COLORS = [
+  'white',
+  'yellow',
+  'light-grey',
+  'light-gray',
+  'natural',
+  'cream',
+  'beige',
+];
+
 const getMinimumQuantity = (colorCount) => {
   switch (colorCount) {
     case 1:
@@ -28,62 +39,32 @@ const getMinimumQuantity = (colorCount) => {
   }
 };
 
-export function calculatePrintQuote({
-  garmentQty,
+/**
+ * Computes screens/underbase/per-shirt printing charge for ONE print location.
+ *
+ * Fixed Jul 27 2026: this used to be the only calculation calculatePrintQuote() did, with a
+ * flat `locationCount` multiplier applied afterward assuming every location has the same
+ * colour count and underbase need. Real orders don't work that way (e.g. 3-colour front +
+ * 1-colour sleeve, or a location that doesn't need underbase when the main print does) — every
+ * component calling calculatePrintQuote() ended up re-implementing a location-by-location setup
+ * fee calculation locally to work around this, but none of them fixed the printing-cost side
+ * the same way. This function is now run once per location (see calculatePrintQuote below) so
+ * both setup fees AND printing cost are correct for real multi-location orders.
+ */
+function calculateLocationCharge({
   colorCount,
-  locationCount = 1, // NEW: number of print locations (front, back, sleeve, etc.)
   garmentColor = '',
-  inkColors = [], // NEW: array of ink colors being used (e.g., ['white'], ['yellow', 'red'])
+  inkColors = [],
   polyesterPercent = 0,
   isPremiumInk = false,
-  garmentWholesalePrice = null, // NEW: actual garment cost from API
-  needsUnderbase = null, // NEW: allow override of underbase calculation
-  rushOrder = null, // NEW: rush order option (5day, 4day, 3day, 2day, or null)
-  garmentBrand = '', // eslint-disable-line no-unused-vars -- for premium pricing detection (reserved for future use)
-  garmentStyle = '', // eslint-disable-line no-unused-vars -- for premium pricing detection (reserved for future use)
+  needsUnderbase = null,
 }) {
-  if (garmentQty < 1 || colorCount < 1) {
-    return {
-      valid: false,
-      message: 'You must select at least 1 garment and 1 print color.',
-      total: 0,
-    };
-  }
-
-  // === Dynamic Minimums Based on Color Count ===
-  const requiredMinimum = getMinimumQuantity(colorCount);
-  if (garmentQty < requiredMinimum) {
-    return {
-      valid: false,
-      message: `Minimum order for ${colorCount} color print${colorCount > 1 ? 's' : ''} is ${requiredMinimum} pieces.`,
-      total: 0,
-    };
-  }
-
-  // === Screen Setup Logic ===
-  // CORRECTED LOGIC:
-  // - White ink on dark garments = 1 screen (white serves as both print color and underbase)
-  // - Other colors on dark garments = 2 screens (underbase + print color)
-  // - Any colors on light garments = 1 screen per color (no underbase needed)
-
-  // Light colors that don't need underbase
-  const lightColors = [
-    'white',
-    'yellow',
-    'light-grey',
-    'light-gray',
-    'natural',
-    'cream',
-    'beige',
-  ];
-  // Use the needsUnderbase parameter if provided, otherwise determine by color
   const isDarkGarment =
     needsUnderbase !== null
       ? needsUnderbase
-      : !lightColors.includes(garmentColor.toLowerCase());
+      : !LIGHT_COLORS.includes(garmentColor.toLowerCase());
   const isPolyester = polyesterPercent >= 50;
 
-  // Check if only white ink is being used
   const isOnlyWhiteInk =
     inkColors.length > 0 &&
     inkColors.every(
@@ -92,22 +73,17 @@ export function calculatePrintQuote({
         color.toLowerCase().includes('opaque white'),
     );
 
-  // Calculate total screens needed based on CORRECTED logic
   let totalScreens;
   let finalNeedsUnderbase;
 
   if (garmentColor === 'unknown' || !garmentColor) {
-    // When garment color is unknown (user choosing own blanks), use the underbase checkbox as provided
-    // Default to standard calculation: base colors + underbase if specified
-    finalNeedsUnderbase = needsUnderbase !== null ? needsUnderbase : true; // Default to true for safety
+    finalNeedsUnderbase = needsUnderbase !== null ? needsUnderbase : true;
     totalScreens = colorCount + (finalNeedsUnderbase ? 1 : 0);
   } else if (isDarkGarment || isPolyester) {
     if (isOnlyWhiteInk && colorCount === 1) {
-      // Special case: Single white ink on dark garment = 1 screen only
       totalScreens = 1;
-      finalNeedsUnderbase = false; // White ink serves as its own base
+      finalNeedsUnderbase = false;
     } else {
-      // Check if white is in the ink colors (meaning white underbase + white ink = same screen)
       const hasWhiteInk = inkColors.some(
         (color) =>
           color.toLowerCase().includes('white') ||
@@ -115,17 +91,14 @@ export function calculatePrintQuote({
       );
 
       if (hasWhiteInk) {
-        // White underbase and white ink are the same screen, so no extra screen needed
-        totalScreens = colorCount; // Just count the actual colors
-        finalNeedsUnderbase = true; // Still needs underbase, but it's combined with white ink
+        totalScreens = colorCount;
+        finalNeedsUnderbase = true;
       } else {
-        // Other colors on dark garments need underbase + color screens
-        totalScreens = colorCount + 1; // Add underbase screen
+        totalScreens = colorCount + 1;
         finalNeedsUnderbase = true;
       }
     }
   } else {
-    // Light garments: no underbase needed, just color screens
     totalScreens = colorCount;
     finalNeedsUnderbase = false;
   }
@@ -136,39 +109,13 @@ export function calculatePrintQuote({
     !(isOnlyWhiteInk && colorCount === 1 && isDarkGarment)
   ) {
     finalNeedsUnderbase = needsUnderbase;
-    if (needsUnderbase) {
-      totalScreens = colorCount + 1; // Force underbase screen
-    } else {
-      totalScreens = colorCount; // No underbase screen
-    }
+    totalScreens = needsUnderbase ? colorCount + 1 : colorCount;
   }
 
-  // Maximum 6 screens (6-color press limit)
-  if (totalScreens > 6) {
-    return {
-      valid: false,
-      message: `Maximum 6 screens allowed on our press. You have ${colorCount} colors${finalNeedsUnderbase ? ' + underbase' : ''} = ${totalScreens} screens.`,
-      total: 0,
-    };
-  }
-
-  // Setup fees: $30 per screen per location
-  const setupTotal =
-    totalScreens * locationCount * PRICING_CONFIG.PRINT_SETUP_FEE_PER_COLOR;
-
-  // === Per Shirt Costs ===
-  // Use garment price as provided (no markup calculations for now)
-  const garmentCostPerShirt = garmentWholesalePrice
-    ? parseFloat(garmentWholesalePrice) // Use provided price as-is
-    : PRICING_CONFIG.FALLBACK_GARMENT_PRICE;
-
-  // Special pricing logic for white ink on dark garments
   let firstColorCharge;
   if (isOnlyWhiteInk && colorCount === 1 && isDarkGarment) {
-    // White ink on dark garments always gets $2.00 charge even though no separate underbase is needed
     firstColorCharge = PRICING_CONFIG.PRINT_FIRST_COLOR_WITH_UNDERBASE;
   } else {
-    // Standard logic: use underbase pricing if underbase is needed
     firstColorCharge = finalNeedsUnderbase
       ? PRICING_CONFIG.PRINT_FIRST_COLOR_WITH_UNDERBASE
       : PRICING_CONFIG.PRINT_FIRST_COLOR_NO_UNDERBASE;
@@ -182,19 +129,113 @@ export function calculatePrintQuote({
           : PRICING_CONFIG.PRINT_ADDITIONAL_COLOR_STANDARD)
       : 0;
 
-  // Multiply print charges by location count
-  const totalColorCharges =
-    (firstColorCharge + additionalColorCharge) * locationCount;
-  const printingCostPerShirt = garmentCostPerShirt + totalColorCharges;
+  return {
+    totalScreens,
+    needsUnderbase: finalNeedsUnderbase,
+    setupTotal: totalScreens * PRICING_CONFIG.PRINT_SETUP_FEE_PER_COLOR,
+    chargePerShirt: firstColorCharge + additionalColorCharge,
+  };
+}
+
+export function calculatePrintQuote({
+  garmentQty,
+  colorCount,
+  locationCount = 1,
+  garmentColor = '',
+  inkColors = [],
+  polyesterPercent = 0,
+  isPremiumInk = false,
+  garmentWholesalePrice = null,
+  needsUnderbase = null,
+  rushOrder = null,
+  garmentBrand = '', // eslint-disable-line no-unused-vars -- for premium pricing detection (reserved for future use)
+  garmentStyle = '', // eslint-disable-line no-unused-vars -- for premium pricing detection (reserved for future use)
+  // NEW: real per-location breakdown — [{ name, colorCount, needsUnderbase, inkColors }].
+  // When provided, this is the source of truth and colorCount/locationCount/needsUnderbase/
+  // inkColors above are ignored for the per-location math (colorCount is still used for the
+  // minimum-quantity/press-limit checks below, taken from the main/first location).
+  locations = null,
+}) {
+  const resolvedLocations =
+    locations && locations.length > 0
+      ? locations
+      : Array.from({ length: Math.max(1, locationCount) }, () => ({
+          colorCount,
+          garmentColor,
+          inkColors,
+          polyesterPercent,
+          isPremiumInk,
+          needsUnderbase,
+        }));
+
+  const mainLocation = resolvedLocations[0];
+  const mainColorCount = mainLocation.colorCount;
+
+  if (garmentQty < 1 || mainColorCount < 1) {
+    return {
+      valid: false,
+      message: 'You must select at least 1 garment and 1 print color.',
+      total: 0,
+    };
+  }
+
+  // Minimum order quantity is driven by the main print location's colour count — a small
+  // add-on (e.g. a 1-colour sleeve print) shouldn't loosen or tighten the base minimum.
+  const requiredMinimum = getMinimumQuantity(mainColorCount);
+  if (garmentQty < requiredMinimum) {
+    return {
+      valid: false,
+      message: `Minimum order for ${mainColorCount} color print${mainColorCount > 1 ? 's' : ''} is ${requiredMinimum} pieces.`,
+      total: 0,
+    };
+  }
+
+  // Each location is computed independently — the 6-screen press limit applies per location
+  // (screens get swapped between locations on a manual press, not loaded simultaneously),
+  // not summed across every print location on the order.
+  const locationResults = [];
+  for (const loc of resolvedLocations) {
+    const result = calculateLocationCharge({
+      colorCount: loc.colorCount,
+      garmentColor: loc.garmentColor ?? garmentColor,
+      inkColors: loc.inkColors ?? inkColors,
+      polyesterPercent: loc.polyesterPercent ?? polyesterPercent,
+      isPremiumInk: loc.isPremiumInk ?? isPremiumInk,
+      needsUnderbase: loc.needsUnderbase ?? needsUnderbase,
+    });
+    if (result.totalScreens > 6) {
+      return {
+        valid: false,
+        message: `Maximum 6 screens allowed on our press. ${loc.name ? `"${loc.name}" needs` : 'A location needs'} ${loc.colorCount} colors${result.needsUnderbase ? ' + underbase' : ''} = ${result.totalScreens} screens.`,
+        total: 0,
+      };
+    }
+    locationResults.push(result);
+  }
+
+  const setupTotal = locationResults.reduce((sum, r) => sum + r.setupTotal, 0);
+  const totalScreens = locationResults.reduce(
+    (sum, r) => sum + r.totalScreens,
+    0,
+  );
+  const totalChargePerShirt = locationResults.reduce(
+    (sum, r) => sum + r.chargePerShirt,
+    0,
+  );
+
+  const garmentCostPerShirt = garmentWholesalePrice
+    ? parseFloat(garmentWholesalePrice)
+    : PRICING_CONFIG.FALLBACK_GARMENT_PRICE;
+
+  const printingCostPerShirt = garmentCostPerShirt + totalChargePerShirt;
 
   let subtotal = garmentQty * printingCostPerShirt + setupTotal;
 
-  // Apply rush order premium based on selected option
   const rushOrderOptions = {
-    '5day': 0.2, // 20%
-    '4day': 0.3, // 30%
-    '3day': 0.5, // 50% (fixed from 40%)
-    '2day': 1.0, // 100% (fixed from 50%)
+    '5day': 0.2,
+    '4day': 0.3,
+    '3day': 0.5,
+    '2day': 1.0,
   };
 
   let rushPremium = 0;
@@ -206,33 +247,42 @@ export function calculatePrintQuote({
   const taxRate = PRICING_CONFIG.TAX_RATE;
   const totalWithTax = subtotal * (1 + taxRate);
 
+  const mainNeedsUnderbase = locationResults[0].needsUnderbase;
+  const locationsSummary = resolvedLocations
+    .map((loc, i) => {
+      const r = locationResults[i];
+      return `${loc.name ? `${loc.name}: ` : ''}${loc.colorCount} color${loc.colorCount > 1 ? 's' : ''}${r.needsUnderbase ? ' + underbase' : ''} = ${r.totalScreens} screen${r.totalScreens > 1 ? 's' : ''}`;
+    })
+    .join(', ');
+
   console.log('💰 Final pricing breakdown:', {
     garmentCostPerShirt,
-    firstColorCharge,
-    additionalColorCharge,
-    totalColorCharges,
+    totalChargePerShirt,
     setupTotal,
     subtotal,
-    finalNeedsUnderbase,
     totalScreens,
+    locations: resolvedLocations.map((loc, i) => ({
+      ...loc,
+      ...locationResults[i],
+    })),
   });
 
   return {
     valid: true,
     message: 'Quote generated successfully.',
     garmentQty,
-    colorCount,
-    locationCount,
+    colorCount: mainColorCount,
+    locationCount: resolvedLocations.length,
     garmentCostPerShirt,
     setupTotal,
     printingCostPerShirt,
-    printingTotal: garmentQty * totalColorCharges, // NEW: separate printing total for breakdown
+    printingTotal: garmentQty * totalChargePerShirt,
     subtotal: subtotal.toFixed(2),
     totalWithTax: totalWithTax.toFixed(2),
-    needsUnderbase: finalNeedsUnderbase,
-    totalScreens, // Include screen count for display
-    screenBreakdown: `${colorCount} color${colorCount > 1 ? 's' : ''}${finalNeedsUnderbase ? ' + underbase' : ''} = ${totalScreens} screen${totalScreens > 1 ? 's' : ''} × ${locationCount} location${locationCount > 1 ? 's' : ''}`,
-    rushOrder, // Include rush order status
-    rushPremium: rushPremium * 100, // Convert to percentage for display
+    needsUnderbase: mainNeedsUnderbase,
+    totalScreens,
+    screenBreakdown: locationsSummary,
+    rushOrder,
+    rushPremium: rushPremium * 100,
   };
 }

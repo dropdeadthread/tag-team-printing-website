@@ -304,45 +304,52 @@ const IntegratedPrintOrderForm = ({
             }
           : {};
 
-    // Calculate total setup fees: main print + all active add-ons
-    let totalSetupFees = numColors * 30; // Main print setup
-    if (hasUnderbase) {
-      totalSetupFees += 30; // Underbase screen
-    }
-
-    // Add setup fees for each active add-on location (only if not headwear)
+    // Build one entry per print location — main print plus any active add-on locations
+    // (skipped entirely for headwear, which only has one print position), each priced on its
+    // own actual colour count and ink colours.
+    // Fixed Jul 27 2026: this used to pass only the MAIN location's colour count to
+    // calculatePrintQuote multiplied by a flat location count, charging every add-on location
+    // at the main design's rate regardless of the add-on's real colour count. Now each location
+    // is priced on its own actual colour count/ink colours, matching StreamlinedOrderForm.jsx
+    // and ShopQuoteCalculator.jsx's fix. Also removed the unconditional "$30 off / first setup
+    // fee waived" — it was never gated on actual first-order status (applied to every quote for
+    // every customer) and, on inspection, was purely a cosmetic display line that never actually
+    // reduced the real subtotal/tax/total anyway — the "waived" promise was never real.
+    const printLocations = [
+      {
+        name: 'Main Print',
+        colorCount: numColors,
+        needsUnderbase: hasUnderbase,
+        inkColors: inkColors.filter((color) => color.trim() !== ''),
+      },
+    ];
     if (!isHeadwear) {
       Object.keys(addOns).forEach((addOnKey) => {
         if (addOns[addOnKey]) {
-          totalSetupFees += addOnColorCounts[addOnKey] * 30;
+          printLocations.push({
+            name: addOnKey,
+            colorCount: addOnColorCounts[addOnKey],
+            needsUnderbase: hasUnderbase,
+            inkColors: addOnInkColors[addOnKey] || [],
+          });
         }
       });
     }
 
-    // Count active add-ons as additional locations (only if not headwear)
-    const activeAddOns =
-      !isHeadwear && Object.values(addOns).filter(Boolean).length;
-    const totalLocations = 1 + (activeAddOns || 0);
-
     const result = calculatePrintQuote({
       garmentQty: shirtCount,
-      colorCount: numColors,
-      locationCount: totalLocations,
-      inkColors: inkColors.filter((color) => color.trim() !== ''), // Only non-empty colors
-      needsUnderbase: hasUnderbase,
+      locations: printLocations,
       garmentBrand: preSelectedGarment?.brandName || '',
       garmentStyle: preSelectedGarment?.styleID || '',
       ...garmentData,
     });
 
     if (result.valid) {
-      // Override the setup total with our correctly calculated value
-      result.setupTotal = totalSetupFees;
-
-      // Recalculate subtotal and total with correct setup fees
+      // Recalculate subtotal and total (calculatePrintQuote's own setupTotal/printingTotal are
+      // now correct per-location — no local override needed here anymore).
       const garmentTotal = shirtCount * result.garmentCostPerShirt;
       const printingTotal = result.printingTotal || 0;
-      const subtotal = garmentTotal + totalSetupFees + printingTotal;
+      const subtotal = garmentTotal + result.setupTotal + printingTotal;
       const tax = subtotal * 0.13;
       const totalWithTax = subtotal + tax;
 
@@ -371,33 +378,33 @@ const IntegratedPrintOrderForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Calculate total setup fees: main print + all active add-ons
-    let totalSetupFees = numColors * 30; // Main print setup
-    if (hasUnderbase) {
-      totalSetupFees += 30; // Underbase screen
-    }
-
-    // Add setup fees for each active add-on location (only if not headwear)
+    // Same per-location build as the live-preview useEffect above — see the comment there for
+    // why this replaced the old flat colorCount/locationCount + local override approach.
+    const printLocations = [
+      {
+        name: 'Main Print',
+        colorCount: numColors,
+        needsUnderbase: hasUnderbase,
+        inkColors: inkColors.filter((color) => color.trim() !== ''),
+      },
+    ];
     if (!isHeadwear) {
       Object.keys(addOns).forEach((addOnKey) => {
         if (addOns[addOnKey]) {
-          totalSetupFees += addOnColorCounts[addOnKey] * 30;
+          printLocations.push({
+            name: addOnKey,
+            colorCount: addOnColorCounts[addOnKey],
+            needsUnderbase: hasUnderbase,
+            inkColors: addOnInkColors[addOnKey] || [],
+          });
         }
       });
     }
 
-    // Count active add-ons as additional locations
-    const activeAddOns =
-      !isHeadwear && Object.values(addOns).filter(Boolean).length;
-    const totalLocations = 1 + (activeAddOns || 0);
-
     const result = calculatePrintQuote({
       garmentQty: shirtCount,
-      colorCount: numColors,
-      locationCount: totalLocations,
+      locations: printLocations,
       garmentColor: preSelectedGarment?.color || '',
-      inkColors: inkColors.filter((color) => color.trim() !== ''),
-      needsUnderbase: hasUnderbase,
       garmentWholesalePrice: preSelectedGarment?.wholesalePrice || null,
       garmentBrand: preSelectedGarment?.brandName || '',
       garmentStyle: preSelectedGarment?.styleID || '',
@@ -407,9 +414,6 @@ const IntegratedPrintOrderForm = ({
       setError(result.message);
       return;
     }
-
-    // Override setup total
-    result.setupTotal = totalSetupFees;
 
     setError('');
     setStatus('Submitting...');
@@ -1211,24 +1215,10 @@ const IntegratedPrintOrderForm = ({
                 (quote.printingCostPerShirt - quote.garmentCostPerShirt)
               ).toFixed(2)}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>Set-up Fees ({quote.screenBreakdown})</span>
-              <span
-                className="info-tooltip"
-                title="First setup fee is waived—first one is on us!"
-              >
-                
-              </span>
-            </div>
-            <div style={{ marginLeft: 16, color: '#059669' }}>
-              Waived: $0 (first one is on us!)
-            </div>
-            <div style={{ marginLeft: 16 }}>
-              Remaining setup fees: $
-              {quote.setupTotal - 30 > 0
-                ? (quote.setupTotal - 30).toFixed(2)
-                : '0.00'}
-            </div>
+            <p>
+              Set-up Fees ({quote.screenBreakdown}): $
+              {quote.setupTotal.toFixed(2)}
+            </p>
             <p>Subtotal: ${quote.subtotal}</p>
             <p>
               Tax (HST): ${(quote.totalWithTax - quote.subtotal).toFixed(2)}

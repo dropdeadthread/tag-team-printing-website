@@ -584,27 +584,31 @@ const StreamlinedOrderForm = () => {
   useEffect(() => {
     const garment = PRESET_GARMENTS[selectedGarment];
 
-    // Calculate total setup fees: main print + all active add-ons
-    let totalSetupFees = printColors * 30; // Main print setup
-
-    // Add setup fees for each active add-on location based on their color counts
+    // Build one entry per print location — main print plus any active add-on locations, each
+    // with its own colour count. The garment is one physical colour, so underbase need and ink
+    // colours are shared across all locations on this order; only the colour count varies.
+    // Fixed Jul 27 2026: this used to sum every location's colours together and pass that
+    // combined number to calculatePrintQuote with a flat location multiplier, which charged
+    // every location as if it printed the FULL combined colour count. Now each location is
+    // priced on its own actual colour count.
+    const printLocations = [
+      {
+        name: 'Main Print',
+        colorCount: printColors,
+        garmentColor: selectedColor,
+        needsUnderbase: isCurrentGarmentDark,
+        inkColors: selectedInkColors.map((color) => color.value),
+      },
+    ];
     Object.keys(addOns.extraLocations).forEach((location) => {
       if (addOns.extraLocations[location]) {
-        totalSetupFees += addOnColorCounts[location] * 30;
-      }
-    });
-
-    // Count how many add-on locations are active
-    const activeAddOnCount = Object.values(addOns.extraLocations).filter(
-      Boolean,
-    ).length;
-    const totalLocationsForCalc = 1 + activeAddOnCount;
-
-    // Calculate total color count for printing costs (main print + add-on colors)
-    let totalColors = printColors;
-    Object.keys(addOns.extraLocations).forEach((location) => {
-      if (addOns.extraLocations[location]) {
-        totalColors += addOnColorCounts[location];
+        printLocations.push({
+          name: location,
+          colorCount: addOnColorCounts[location],
+          garmentColor: selectedColor,
+          needsUnderbase: isCurrentGarmentDark,
+          inkColors: [],
+        });
       }
     });
 
@@ -620,11 +624,7 @@ const StreamlinedOrderForm = () => {
 
     const result = calculatePrintQuote({
       garmentQty: quantity,
-      colorCount: totalColors,
-      locationCount: totalLocationsForCalc,
-      needsUnderbase: isCurrentGarmentDark,
-      garmentColor: selectedColor,
-      inkColors: selectedInkColors.map((color) => color.value), // Pass the selected ink colors
+      locations: printLocations,
       garmentWholesalePrice: retailPricePerShirt, // Use retail price, not wholesale
       rushOrder: addOns.rushOrder,
       garmentBrand: garment.brand,
@@ -632,13 +632,11 @@ const StreamlinedOrderForm = () => {
     });
 
     if (result.valid) {
-      // Override the setup total with our correctly calculated value
-      result.setupTotal = totalSetupFees;
-
-      // Recalculate subtotal and total with correct setup fees
+      // Recalculate subtotal and total (calculatePrintQuote's own setupTotal/printingTotal are
+      // now correct per-location — no local override needed here anymore).
       const garmentTotal = quantity * result.garmentCostPerShirt;
       const printingTotal = result.printingTotal || 0;
-      const subtotal = garmentTotal + totalSetupFees + printingTotal;
+      const subtotal = garmentTotal + result.setupTotal + printingTotal;
 
       // Apply rush order multiplier if applicable
       let finalSubtotal = subtotal;
@@ -1949,12 +1947,6 @@ Error: ${error.message}`);
                 }}
               >
                 * Shipping costs will be calculated at checkout
-                <span
-                  className="info-tooltip"
-                  title="First setup fee is waived—first one is on us!"
-                >
-                  
-                </span>
               </div>
             </div>
           </QuoteDisplay>
