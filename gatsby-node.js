@@ -424,13 +424,12 @@ exports.onPostBuild = async ({ reporter }) => {
   }
 };
 
-// Defer SSR for client-only pages
-exports.onCreatePage = async ({ page, actions }) => {
-  const { createPage } = actions;
-
-  // Defer upload page from SSR (client-only, requires token parameter)
-  if (page.path.match(/^\/upload/)) {
-    page.defer = true;
-    createPage(page);
-  }
-};
+// Fixed 2026-09-16: /upload was marked page.defer = true (Netlify DSG -- rendered on-demand
+// server-side per request instead of pre-built), on the assumption it "requires" a token
+// parameter server-side. It doesn't -- upload.jsx reads `?token=` entirely client-side via
+// useEffect/window.location.search (same pattern as customer-dashboard.jsx's Track Order,
+// which works fine as a normal static page). Confirmed live: /upload 404'd for every real
+// request, deferred or not, token or no token -- the DSG function routing for this page was
+// never actually reachable in production. Removing the defer makes it a normal
+// statically-generated page like every other page on the site, which is all it ever needed
+// to be.
