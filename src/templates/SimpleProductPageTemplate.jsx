@@ -4,6 +4,7 @@ import { CartContext } from '../context/CartContext';
 import Layout from '../components/Layout';
 import IntegratedPrintOrderForm from '../components/IntegratedPrintOrderForm';
 import SEO from '../components/SEO';
+import WishlistButton from '../components/WishlistButton';
 
 // Simple working product template that loads data directly
 const SimpleProductPageTemplate = ({ pageContext }) => {
@@ -1398,17 +1399,39 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
 
             {/* Product Details */}
             <div style={{ marginLeft: '4rem' }}>
-              <h1
+              <div
                 style={{
-                  fontSize: '2.5rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
                   marginBottom: '1rem',
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
                 }}
               >
-                {product.title}
-              </h1>
+                <h1
+                  style={{
+                    fontSize: '2.5rem',
+                    margin: 0,
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                  }}
+                >
+                  {product.title}
+                </h1>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <WishlistButton
+                    size="lg"
+                    product={{
+                      styleID: product.styleID,
+                      name: product.title,
+                      brand: product.brandName,
+                      price: currentPrice,
+                      image: getProductImageUrl(product, selectedColor),
+                    }}
+                  />
+                </div>
+              </div>
 
               <div
                 style={{

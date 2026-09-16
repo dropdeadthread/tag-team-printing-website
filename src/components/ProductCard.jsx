@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Link } from 'gatsby';
+import WishlistButton from './WishlistButton';
 import '../styles/productcard.css';
 
 // Slugify function
@@ -63,7 +64,7 @@ const ProductCard = ({ product }) => {
       className="wrestling-card-link"
     >
       <div className="wrestling-card">
-        <div className="product-image-wrapper">
+        <div className="product-image-wrapper" style={{ position: 'relative' }}>
           <img
             src={image}
             alt={name}
@@ -71,6 +72,11 @@ const ProductCard = ({ product }) => {
             onError={handleImageError}
             loading="lazy"
           />
+          <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
+            <WishlistButton
+              product={{ styleID, name, brand, price: product.Price, image }}
+            />
+          </div>
         </div>
         <div className="card-info">
           <h3 className="product-title">{name}</h3>
