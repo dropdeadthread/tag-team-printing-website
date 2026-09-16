@@ -452,11 +452,12 @@ const DualBioPage = () => {
     ],
     links: {
       Instagram: ['@dropdeadthreadapparel', '@tagteamprinting'],
+      // Fixed 2026-09-16: 'Design Portfolio'/'Creative Process'/'Brand Case Studies' were
+      // dead href="#" links with no real destination anywhere on either site -- removed
+      // rather than guess at URLs. Stacey Case's own Media list above (real press links)
+      // shows what a real entry here looks like.
       Media: {
         'Drop Dead Thread Website': 'https://dropdeadthread.ca',
-        'Design Portfolio': '#',
-        'Creative Process': '#',
-        'Brand Case Studies': '#',
       },
     },
   };

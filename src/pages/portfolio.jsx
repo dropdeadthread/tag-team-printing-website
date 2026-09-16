@@ -68,7 +68,7 @@ const CAPABILITIES = [
   {
     title: 'Screen Printing',
     icon: '🖨',
-    desc: 'Water-based and plastisol inks. Spot colour, halftone, simulated process. Up to 6 colours per location. Minimums from 24 pieces.',
+    desc: 'Water-based and plastisol inks. Spot colour, halftone, simulated process. Up to 6 colours per location. Minimums from 15 pieces.',
   },
   {
     title: 'DTF (Direct-to-Film)',
@@ -422,7 +422,7 @@ export default function PortfolioPage() {
             }}
           >
             Get a quote in minutes. No minimums on DTF. Competitive pricing on
-            screen print runs of 24+.
+            screen print runs of 15+.
           </p>
           <div
             style={{
