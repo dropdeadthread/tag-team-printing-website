@@ -135,6 +135,121 @@ html {
   }
 }
 
+/* === SEARCH PAGE === */
+/* Fixed 2026-09-15: this page previously rendered with no Layout wrapper at all (no header/
+   nav/footer/title) and no styling of its own -- these rules bring it in line with the
+   brands page's established look rather than leaving it as a bare unstyled stub. */
+.search-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 7rem 2rem 3rem;
+}
+
+.search-page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.search-page-title {
+  font-family: 'HawlersEightRough', 'Impact', 'Arial Black', sans-serif;
+  color: #c32b14;
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 0 0.75rem 0;
+}
+
+.search-page-desc {
+  color: rgba(255, 245, 209, 0.8);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-page-form {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+}
+
+.search-page-input {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 245, 209, 0.06);
+  border: 2px solid rgba(195, 43, 20, 0.35);
+  border-radius: 8px;
+  color: rgba(255, 245, 209, 0.95);
+  font-size: 1rem;
+}
+
+.search-page-input::placeholder {
+  color: rgba(255, 245, 209, 0.4);
+}
+
+.search-page-input:focus {
+  outline: none;
+  border-color: #c32b14;
+}
+
+.search-page-button {
+  padding: 0.85rem 1.75rem;
+  background: #c32b14;
+  color: rgba(255, 245, 209, 0.95);
+  border: none;
+  border-radius: 8px;
+  font-family: 'HawlersEightRough', 'Impact', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-page-button:hover:not(:disabled) {
+  background: #a3210f;
+}
+
+.search-page-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-page-error,
+.search-page-empty {
+  text-align: center;
+  color: rgba(255, 245, 209, 0.8);
+  margin-bottom: 2rem;
+}
+
+.search-page-error {
+  color: #f87171;
+}
+
+.search-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .search-page-wrapper {
+    padding: 6rem 1rem 2rem;
+  }
+
+  .search-page-title {
+    font-size: 1.6rem;
+  }
+
+  .search-page-form {
+    flex-direction: column;
+  }
+
+  .search-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
 /* === HOMEPAGE === */
 .homepage-wrapper {
   width: 100%;

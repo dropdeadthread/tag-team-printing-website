@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'gatsby';
 import Layout from '../components/Layout';
 import ShopQuoteCalculator from '../components/ShopQuoteCalculator';
 import TShirtMockup from '../components/TShirtMockup';
 import { OrderProvider, useOrder } from '../context/OrderContext';
 import styled from 'styled-components';
-import '../styles/shop.css';
 
 // Sample products - these would come from your product data
 const SHOP_PRODUCTS = [
@@ -43,30 +43,6 @@ const SHOP_PRODUCTS = [
       { name: 'Burgundy', value: 'burgundy', hex: '#7C2D12' },
       { name: 'Yellow', value: 'yellow', hex: '#FBBF24' },
     ],
-  },
-];
-
-const placeholderProducts = [
-  {
-    id: 1,
-    name: 'TTP001',
-    price: 15.99,
-    image: '/images/mock-shirt.png',
-    tier: 'Good',
-  },
-  {
-    id: 2,
-    name: 'TTP002',
-    price: 19.99,
-    image: '/images/mock-hoodie.png',
-    tier: 'Better',
-  },
-  {
-    id: 3,
-    name: 'TTP003',
-    price: 24.99,
-    image: '/images/mock-longsleeve.png',
-    tier: 'Best',
   },
 ];
 
@@ -261,6 +237,31 @@ const ConnectedMockup = ({
   );
 };
 
+const BrowseCatalogLink = styled(Link)`
+  display: inline-block;
+  margin: 2rem auto 0;
+  padding: 1rem 2.5rem;
+  background: #2563eb;
+  color: white;
+  font-family: 'HawlersEightRough', 'Impact', sans-serif;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+  }
+`;
+
+const BrowseCatalogWrapper = styled.div`
+  text-align: center;
+`;
+
 const ShopPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -271,12 +272,6 @@ const ShopPage = () => {
     if (product.colors && product.colors.length > 0) {
       setSelectedColor(product.colors[0].value);
     }
-  };
-
-  const tiers = {
-    Good: placeholderProducts.filter((p) => p.tier === 'Good'),
-    Better: placeholderProducts.filter((p) => p.tier === 'Better'),
-    Best: placeholderProducts.filter((p) => p.tier === 'Best'),
   };
 
   return (
@@ -402,37 +397,16 @@ const ShopPage = () => {
         <SectionDivider style={{ marginTop: '6rem' }}>
           <h2>📦 Browse Blank Garments</h2>
           <p>
-            Explore our selection of quality blank apparel for other products
-            like hats, hoodies, and more
+            Explore our full catalog of quality blank apparel — hats, hoodies,
+            and more
           </p>
         </SectionDivider>
 
-        <div className="shop-wrapper">
-          <div className="tier-row">
-            {Object.keys(tiers).map((tier) => (
-              <div
-                key={tier}
-                className={`tier-column tier-${tier.toLowerCase()}`}
-              >
-                <h2>{tier}</h2>
-                {tiers[tier].map((product) => (
-                  <div key={product.id} className="product-card-flip">
-                    <div className="card-inner">
-                      <div className="card-front">
-                        <img src={product.image} alt={product.name} />
-                        <h3>{product.name}</h3>
-                      </div>
-                      <div className="card-back">
-                        <p>${product.price}</p>
-                        <button>View</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
+        <BrowseCatalogWrapper>
+          <BrowseCatalogLink to="/categories/">
+            Browse Full Catalog
+          </BrowseCatalogLink>
+        </BrowseCatalogWrapper>
       </PageContainer>
     </Layout>
   );
