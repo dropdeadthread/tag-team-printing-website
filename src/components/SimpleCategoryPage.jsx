@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'gatsby';
+import WishlistButton from './WishlistButton';
 
 const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
   const [products, setProducts] = useState([]);
@@ -974,6 +975,7 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                         key={styleID || index}
                         className="product-card"
                         style={{
+                          position: 'relative',
                           border: '3px solid #333',
                           borderRadius: '12px',
                           padding: '1.5rem',
@@ -990,6 +992,18 @@ const SimpleCategoryPage = ({ categoryId, categoryName, categorySlug }) => {
                           flexDirection: 'column',
                         }}
                       >
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            zIndex: 2,
+                          }}
+                        >
+                          <WishlistButton
+                            product={{ styleID, name, brand, image: imageUrl }}
+                          />
+                        </div>
                         <Link
                           to={(() => {
                             const safeName = (name || styleName || '')
