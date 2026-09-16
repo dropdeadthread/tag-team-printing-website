@@ -43,7 +43,18 @@ async function sendToControlHub(orderData, orderId, attempt = 1) {
         colors: orderData.printColors,
         locations: orderData.printLocations || [orderData.printLocation],
         underbase: orderData.quote?.needsUnderbase || false,
-        inkColors: orderData.selectedInkColors || [],
+        // Fixed 2026-09-16: found live -- Control Hub's Order schema declares
+        // printing.inkColors as [String], but this passed through the full
+        // {name,value,hex} color objects the form's color picker uses internally.
+        // Mongoose's array-of-String cast rejects objects outright, so order.save()
+        // threw on every single real submission -- confirmed live via a real quote
+        // attempt through the actual form (502, no order ever created) and reproduced
+        // directly against the real backend by isolating this one field. Send the
+        // plain color name strings the schema (and Control Hub's own downstream ink-
+        // color logic, e.g. quoteCalculatorService's .toLowerCase() checks) expects.
+        inkColors: (orderData.selectedInkColors || []).map(
+          (color) => color?.name || color?.value || color,
+        ),
         addOns: {
           rushOrder: orderData.addOns?.rushOrder || null,
           premiumUpgrade: orderData.addOns?.premiumUpgrade || false,

@@ -124,7 +124,7 @@ const CustomTShirtsCornwall = () => {
           <p>
             Screen printing starts at 15 pieces — the right minimum for teams,
             businesses, and events that want professional results. Whether you
-            need 12 shirts or 2,400, we can accommodate your order.
+            need 15 shirts or 2,400, we can accommodate your order.
           </p>
           <h2>Local Pickup &amp; Fast Delivery</h2>
           <p>

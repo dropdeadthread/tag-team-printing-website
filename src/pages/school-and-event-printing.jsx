@@ -158,40 +158,6 @@ const SchoolAndEventPrinting = () => {
             </li>
             <li> Transparent pricing and no hidden fees</li>
           </ul>
-          <h2>Frequently Asked Questions</h2>
-          <h3>
-            Q: What is the minimum order quantity for custom school spirit wear?
-          </h3>
-          <p>
-            A: Our minimum order is 15 pieces for screen printing. Contact us to
-            discuss your order size.
-          </p>
-          <h3>Q: Can I request a specific design or color scheme?</h3>
-          <p>
-            A: Absolutely! Please provide us with your design concept and color
-            preferences, and we'll work with you to bring it to life.
-          </p>
-          <h3>Q: How long does shipping take for custom school spirit wear?</h3>
-          <p>
-            A: We strive to ship all orders within 3-5 business days. Shipping
-            times vary depending on your location, but most orders arrive within
-            7-10 business days.
-          </p>
-          <h3>Q: Can I cancel or change my order after it's been placed?</h3>
-          <p>
-            A: Please contact us as soon as possible if you need to make any
-            changes to your order. We'll do our best to accommodate your
-            request, but please note that we may not be able to make changes
-            once production has begun.
-          </p>
-          <h3>
-            Q: Do you offer wholesale pricing for schools and event organizers?
-          </h3>
-          <p>
-            A: Yes! We offer competitive wholesale pricing for bulk orders.
-            Please contact us for a custom quote and more information.
-          </p>
-
           <section className="faq-section" style={{ marginTop: '2.5rem' }}>
             <h2>Frequently Asked Questions</h2>
             <div className="faq-item" style={{ marginBottom: '1.5rem' }}>

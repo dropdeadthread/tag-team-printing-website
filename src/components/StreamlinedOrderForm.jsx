@@ -957,8 +957,8 @@ Redirecting...`;
         alert(`${label} submission failed.
 
 Please try again or contact us directly:
-Call: (Your phone number)
-Email: info@tagteamprinting.com
+Call: (613) 363-4997
+Email: info@tagteamprints.com
 
 Error details: ${errorData || 'Server error'}`);
       }
@@ -967,8 +967,8 @@ Error details: ${errorData || 'Server error'}`);
       alert(`${label} submission failed due to network error.
 
 Please check your internet connection and try again, or contact us directly:
-Call: (Your phone number)
-Email: info@tagteamprinting.com
+Call: (613) 363-4997
+Email: info@tagteamprints.com
 
 Error: ${error.message}`);
     } finally {
