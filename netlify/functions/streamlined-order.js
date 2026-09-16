@@ -1,9 +1,21 @@
 // Fixed version - CommonJS with built-in fetch (Node.js 18+)
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
- * Sends order data to Control Hub after successful order creation
+ * Sends order data to Control Hub after successful order creation.
+ *
+ * Fixed 2026-09-15: found live -- a real test order submitted during a brief Control Hub
+ * backend restart got a real orderId back and a "submitted successfully" message, but the
+ * order was never persisted anywhere (this function has no fallback storage of its own),
+ * so Track Order could never find it again. Root cause was two-fold: (1) no retry for a
+ * transient connection failure during exactly the kind of few-second restart window that's
+ * common for this desktop-hosted backend, and (2) even on total failure this always
+ * returned overall success to the caller (see handler below) with no way to distinguish a
+ * real submission from a silently-lost one. This adds a short retry for transient failures;
+ * true failure is now reported honestly (see handler).
  */
-async function sendToControlHub(orderData, orderId) {
+async function sendToControlHub(orderData, orderId, attempt = 1) {
   try {
     const CONTROL_HUB_URL =
       process.env.CONTROL_HUB_URL || 'http://localhost:4000';
@@ -80,6 +92,17 @@ async function sendToControlHub(orderData, orderId) {
       return false;
     }
   } catch (error) {
+    // A connection failure (backend mid-restart, ngrok blip) is exactly the transient case a
+    // retry can ride out -- one retry after a short pause, then give up for real.
+    if (attempt < 2) {
+      console.warn('Control Hub unreachable, retrying once', {
+        orderId,
+        attempt,
+        error: error.message,
+      });
+      await sleep(2000);
+      return sendToControlHub(orderData, orderId, attempt + 1);
+    }
     console.error('❌ Error sending order to Control Hub', {
       orderId,
       error: error.message,
@@ -170,16 +193,42 @@ exports.handler = async function (event) {
       hubSync: hubSuccess,
     });
 
+    // Control Hub is the ONLY place this order is ever persisted -- this function has no
+    // fallback storage of its own. Fixed 2026-09-15: this used to always return
+    // statusCode 200 / success: true even when hubSuccess was false, with a false claim
+    // that the order was "saved locally" -- meaning a customer could see "Order submitted
+    // successfully!", get redirected to the confirmation page, and the order would not
+    // exist anywhere, ever, with no way for them or us to know. Now a real sync failure
+    // (after the retry above) is reported honestly as a failure, so the frontend's existing
+    // error-handling path (already tells the customer to try again or contact directly)
+    // actually runs instead of the false-success path.
+    if (!hubSuccess) {
+      console.error(
+        'Order could not be persisted anywhere -- Control Hub sync failed after retry',
+        {
+          orderId,
+        },
+      );
+      return {
+        statusCode: 502,
+        body: JSON.stringify({
+          success: false,
+          message:
+            "We couldn't process your submission right now. Please try again in a moment, or contact us directly so we don't miss your order.",
+        }),
+      };
+    }
+
     // Return success response
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
         orderId,
-        jobId: hubSuccess ? hubResult.jobId : null,
-        controlHub: hubSuccess ? 'synced' : 'failed',
-        preflightCheck: hubSuccess ? hubResult.preflightCheck : null,
-        message: `Order submitted successfully!${hubSuccess ? ' Job created in Control Hub.' : ' Order saved locally, Control Hub sync pending.'}`,
+        jobId: hubResult.jobId,
+        controlHub: 'synced',
+        preflightCheck: hubResult.preflightCheck,
+        message: 'Order submitted successfully! Job created in Control Hub.',
       }),
     };
   } catch (error) {
