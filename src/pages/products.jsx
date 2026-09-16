@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import Layout from '../components/Layout';
+import SEO from '../components/SEO';
 import ProductCard from '../components/ProductCard';
 
+// Fixed 2026-09-16: this page loaded real product data correctly (it calls a genuine,
+// separately-hand-written Netlify function at /.netlify/functions/list-products -- not
+// affected by the routing bug found on /search and /api/get-order), but rendered with no
+// Layout wrapper (no header/nav/footer/title) and Tailwind utility classNames that do
+// nothing on this site (no tailwind.config.js exists here) -- so it always looked like a
+// bare, unstyled page despite working correctly underneath.
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch from Netlify Function endpoint
     fetch('/.netlify/functions/list-products?category=21&limit=50')
       .then((res) => {
         if (!res.ok) {
@@ -16,7 +23,6 @@ const ProductsPage = () => {
         return res.json();
       })
       .then((data) => {
-        // Handle both old format (array) and new format (object with products array)
         const productList = Array.isArray(data) ? data : data.products || [];
         setProducts(productList);
         setLoading(false);
@@ -28,22 +34,33 @@ const ProductsPage = () => {
       });
   }, []);
 
-  if (loading)
-    return <div className="p-8 text-center">Loading products...</div>;
-  if (error)
-    return <div className="p-8 text-center text-red-600">Error: {error}</div>;
-  if (!products.length)
-    return <div className="p-8 text-center">No products found.</div>;
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">All Products</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.styleID} product={product} />
-        ))}
+    <Layout>
+      <SEO
+        title="All Products | Tag Team Printing Cornwall"
+        description="Browse all available wholesale apparel at Tag Team Printing — available for custom screen printing and DTF."
+        url="/products"
+      />
+      <div className="search-page-wrapper">
+        <div className="search-page-header">
+          <h1 className="search-page-title">All Products</h1>
+        </div>
+
+        {loading && <p className="search-page-empty">Loading products...</p>}
+        {error && <p className="search-page-error">Error: {error}</p>}
+        {!loading && !error && products.length === 0 && (
+          <p className="search-page-empty">No products found.</p>
+        )}
+
+        {!loading && !error && products.length > 0 && (
+          <div className="search-product-grid">
+            {products.map((product) => (
+              <ProductCard key={product.styleID} product={product} />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </Layout>
   );
 };
 
