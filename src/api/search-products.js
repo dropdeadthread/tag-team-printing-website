@@ -40,9 +40,14 @@ module.exports = async (req, res) => {
       const rawData = fs.readFileSync(dataPath, 'utf8');
       data = JSON.parse(rawData);
     } else {
-      // Use real-time S&S API
+      // Use real-time S&S API. Fixed 2026-09-15: this required('node-fetch'), which threw
+      // "fetch is not a function" in production (confirmed live) -- node-fetch is an
+      // ESM-only package in the version installed here, so require() doesn't get back a
+      // callable function the way it would with a CommonJS module. Every other function in
+      // this codebase (get-order.js, streamlined-order.js) already relies on Node 18+'s
+      // built-in global fetch with no require at all -- this only ever needed that same
+      // built-in, and never actually needed the node-fetch dependency.
       console.log('Fetching search data from real-time S&S API');
-      const fetch = require('node-fetch');
       const authHeader =
         'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64');
 
