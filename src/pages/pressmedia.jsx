@@ -168,75 +168,21 @@ const PressPage = () => (
               >
                 Complete company overview and statistics
               </p>
-              <button
-                onClick={() => {
-                  // Generate and download company info sheet
-                  const companyInfo = `
-TAG TEAM PRINTING - COMPANY INFORMATION
-
-COMPANY OVERVIEW:
-Tag Team Printing is Cornwall, Ontario's premier custom screen printing and apparel service, specializing in high-quality custom designs for businesses, events, and organizations.
-
-CONTACT INFORMATION:
-Address: 1016 First St E, Cornwall, ON K6H 1N4
-Phone: (613) 363-4997
-Email: info@tagteamprints.com
-Website: https://tagteamprints.com
-
-BUSINESS HOURS:
-Monday - Friday: 9:00 AM - 5:00 PM
-
-SERVICES:
-- Custom Screen Printing
-- Apparel Design Services
-- Blank Apparel Sales
-- Corporate Branding
-- Event Merchandise
-- Small to Large Volume Orders
-
-SPECIALTIES:
-- High-quality screen printing
-- Custom design services
-- Fast turnaround times
-- Competitive pricing
-- Local Cornwall business
-
-FOUNDED: 2020
-
-TARGET MARKETS:
-- Local businesses
-- Schools and educational institutions
-- Sports teams and clubs
-- Non-profit organizations
-- Corporate events
-- Community groups
-
-For media inquiries, please contact:
-info@tagteamprints.com
-(613) 363-4997
-                  `;
-
-                  const blob = new Blob([companyInfo], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'Tag_Team_Printing_Company_Info.txt';
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }}
+              <a
+                href="/Tag_Team_Printing_Company_Info.txt"
+                download
                 style={{
                   background: '#c32b14',
                   color: 'white',
                   padding: '0.75rem 1.5rem',
-                  border: '2px solid #000',
+                  textDecoration: 'none',
                   borderRadius: '6px',
-                  cursor: 'pointer',
+                  border: '2px solid #000',
+                  display: 'inline-block',
                 }}
               >
                 Download Info Sheet
-              </button>
+              </a>
             </div>
           </div>
         </div>
