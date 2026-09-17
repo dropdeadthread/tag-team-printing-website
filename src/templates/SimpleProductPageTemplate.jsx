@@ -581,6 +581,19 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
             padding: 0 !important;
             width: 100% !important;
           }
+
+          /* Fixed 2026-09-17: this 2-column image/details grid was set as an inline style
+             (gridTemplateColumns: '1fr 1fr'), which a media query can't override directly --
+             confirmed via mobile QA that on a real phone width this squeezed the product
+             photo and all the pricing/size/color/quote controls into two ~half-screen
+             columns with no adjustment. Every other 2-column layout on this site already
+             collapses to 1 column on mobile; this one had no equivalent at all. */
+          @media (max-width: 768px) {
+            .product-detail-grid {
+              grid-template-columns: 1fr !important;
+              gap: 2rem !important;
+            }
+          }
         `}</style>
 
         <div
@@ -723,6 +736,7 @@ const SimpleProductPageTemplate = ({ pageContext }) => {
             )}
           </div>
           <div
+            className="product-detail-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',

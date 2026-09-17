@@ -226,9 +226,13 @@ const GarmentSubtitle = styled.p`
   line-height: 1.4;
 `;
 
+// Fixed 2026-09-17: this was a rigid 7-column grid with no mobile override at all -- on a
+// real phone width the swatches (already a compact 30px) would get squeezed well under a
+// comfortable tap-target size. flex-wrap scales naturally at any width instead of needing a
+// hardcoded breakpoint column count.
 const ColorSwatchGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
 `;
