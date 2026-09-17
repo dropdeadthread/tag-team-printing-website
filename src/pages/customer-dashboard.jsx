@@ -566,7 +566,14 @@ const CustomerDashboard = () => {
     ],
   );
 
-  // Check URL params on load
+  // Check URL params on load. Fixed 2026-09-17: this used to depend on
+  // [handleTrackOrder, handleEmailLogin] -- but handleEmailLogin is itself rebuilt (new
+  // function identity) every time customerEmail changes, so this effect re-ran on every
+  // email change, including Logout resetting customerEmail to ''. Re-running re-read the
+  // still-present ?email=... from the URL and called handleEmailLogin again, silently
+  // logging the customer straight back in -- confirmed live: clicking Logout appeared to do
+  // nothing. This is genuinely a mount-only effect (per its own comment), so an empty
+  // dependency array is correct here, not a lint-silencing oversight.
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const orderIdParam = urlParams.get('id');
@@ -587,7 +594,7 @@ const CustomerDashboard = () => {
       setActiveTab('history');
       handleEmailLogin(emailParam);
     }
-  }, [handleTrackOrder, handleEmailLogin]);
+  }, []);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
