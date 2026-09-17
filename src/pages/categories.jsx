@@ -22,6 +22,20 @@ const CategoriesPage = () => {
         description="Browse custom apparel categories at Tag Team Printing in Cornwall, Ontario. Screen-printed t-shirts, hoodies, crewnecks, headwear, and more for businesses, schools, and events."
         url="/categories"
       />
+      {/* Fixed 2026-09-17: confirmed via real-device mobile QA -- this grid clipped
+          symmetrically on both edges starting right below the header. Two compounding
+          causes: (1) the grid items (the category <Link> cards) had no min-width override,
+          and grid/flex items default to min-width: auto -- they refuse to shrink below their
+          own content's natural width even when the grid track is sized smaller, a well-known
+          CSS Grid overflow pattern; (2) 2rem (32px) of horizontal padding on each side eats a
+          meaningful chunk of an already-narrow phone viewport. */}
+      <style>{`
+        @media (max-width: 480px) {
+          .categories-grid {
+            padding: 0 1rem !important;
+          }
+        }
+      `}</style>
       <div
         style={{
           paddingTop: '180px', // Account for header height
@@ -99,6 +113,7 @@ const CategoriesPage = () => {
 
         {/* Grid layout for buttons in rows of 3 */}
         <div
+          className="categories-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -129,6 +144,7 @@ const CategoriesPage = () => {
                 transition: 'all 0.3s ease',
                 boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
                 minHeight: '80px',
+                minWidth: 0,
               }}
               onMouseOver={(e) => {
                 e.target.style.backgroundColor = '#fff5d1';
