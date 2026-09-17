@@ -1,148 +1,135 @@
-const fs = require('fs').promises;
-const path = require('path');
+/**
+ * Fixed 2026-09-17: same bug class already found and fixed on Track Order (get-order.js) --
+ * this only ever read a local data/orders.json file, which is never populated in Netlify's
+ * stateless Functions environment. Every real email lookup on the Customer Dashboard's
+ * "Order History" tab silently returned "no orders found," always, for every real customer,
+ * regardless of how many real orders they actually had. Now queries Control Hub's real
+ * cross-model /api/orders endpoint (the same one Control Hub's own staff "All Orders" page
+ * uses) with x-api-key, and maps each result onto the dashboard's status vocabulary the same
+ * way get-order.js does for a single order.
+ */
 
-const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.json');
+const JOB_STAGE_TO_DASHBOARD_STATUS = {
+  prepress: 'approved',
+  'screen-cleaning': 'production',
+  'screen-drying': 'production',
+  'screen-coating': 'production',
+  'emulsion-drying': 'production',
+  'screen-exposure': 'production',
+  'screen-washout': 'production',
+  'screens-ready': 'production',
+  'press-setup': 'production',
+  printing: 'production',
+  curing: 'production',
+  'quality-check': 'quality-check',
+  packaging: 'quality-check',
+  shipping: 'shipped',
+};
+
+// Covers both the generic Order model's status enum (submitted/confirmed/in-production/
+// completed/shipped) and TagTeamOrder's richer one (adds quote-requested/quoted/
+// pre-production/quality-check) -- this list endpoint has no per-order Job populate the way
+// GET /orders/:id does, so status comes from the order's own status field only.
+const ORDER_STATUS_TO_DASHBOARD_STATUS = {
+  submitted: 'pending',
+  'quote-requested': 'pending',
+  quoted: 'artwork-review',
+  confirmed: 'approved',
+  'pre-production': 'approved',
+  'in-production': 'production',
+  'quality-check': 'quality-check',
+  completed: 'delivered',
+  shipped: 'shipped',
+};
+
+const resolveDashboardStatus = (order) => {
+  if (
+    order.jobCurrentStage &&
+    JOB_STAGE_TO_DASHBOARD_STATUS[order.jobCurrentStage]
+  ) {
+    return JOB_STAGE_TO_DASHBOARD_STATUS[order.jobCurrentStage];
+  }
+  return ORDER_STATUS_TO_DASHBOARD_STATUS[order.status] || 'pending';
+};
+
+const buildDashboardOrder = (order) => ({
+  id: order.orderId,
+  status: resolveDashboardStatus(order),
+  customerName: order.customer?.name || '',
+  items: order.garment
+    ? [
+        {
+          name:
+            order.garment.title ||
+            order.garment.style ||
+            order.garment.brand ||
+            'Item',
+          quantity: order.printing?.quantity || 1,
+        },
+      ]
+    : [],
+  total: order.quote?.totalWithTax ?? order.quote?.subtotal ?? 0,
+  createdAt: order.createdAt,
+  estimatedDelivery: null,
+});
 
 module.exports = async (req, res) => {
-  if (req.method !== 'GET') {
-    res.status(405).json({ error: 'Method not allowed' });
+  if (req.method && req.method !== 'GET') {
+    res.status(405).json({ success: false, message: 'Method not allowed' });
     return;
   }
 
+  const { email } = req.query || {};
+  if (!email) {
+    res.status(400).json({ success: false, message: 'Email is required' });
+    return;
+  }
+
+  const CONTROL_HUB_URL =
+    process.env.CONTROL_HUB_URL || 'http://localhost:4000';
+  const CONTROL_HUB_API_KEY = process.env.CONTROL_HUB_API_KEY || '';
+
   try {
-    // Get query parameters
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const email = url.searchParams.get('email');
-    const orderId = url.searchParams.get('orderId');
-    
-    if (!email && !orderId) {
-      return res.status(400).json({ error: 'Email or Order ID is required' });
+    const response = await fetch(
+      `${CONTROL_HUB_URL}/api/orders?search=${encodeURIComponent(email.trim())}&limit=100`,
+      { headers: { 'x-api-key': CONTROL_HUB_API_KEY } },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Control Hub responded with ${response.status}`);
     }
-    
-    // Read orders from file
-    try {
-      const ordersData = await fs.readFile(ORDERS_FILE, 'utf8');
-      const orders = JSON.parse(ordersData);
-      
-      let filteredOrders = [];
-      
-      if (orderId) {
-        // Find specific order by ID
-        const order = orders.find(order => order.id === orderId);
-        if (order) {
-          filteredOrders = [order];
-        }
-      } else if (email) {
-        // Find orders by customer email
-        filteredOrders = orders.filter(order => 
-          (order.customer?.email || order.email) === email
-        );
-      }
-      
-      // Sort by timestamp (newest first)
-      filteredOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
-      // Add computed fields for frontend
-      const enrichedOrders = filteredOrders.map(order => ({
-        ...order,
-        customerName: order.customer?.name || order.customerName,
-        customerEmail: order.customer?.email || order.email,
-        estimatedDelivery: calculateEstimatedDelivery(order),
-        statusDisplay: formatStatusForDisplay(order.status),
-        daysInCurrentStatus: calculateDaysInStatus(order)
-      }));
-      
-      console.log(`✅ Retrieved ${enrichedOrders.length} orders for ${email || orderId}`);
-      
-      res.status(200).json({
-        success: true,
-        orders: enrichedOrders,
-        totalOrders: enrichedOrders.length
-      });
-      
-    } catch (fileError) {
-      // If file doesn't exist, return empty array
-      if (fileError.code === 'ENOENT') {
-        res.status(200).json({
-          success: true,
-          orders: [],
-          totalOrders: 0
-        });
-      } else {
-        throw fileError;
-      }
-    }
-    
+
+    const data = await response.json();
+    const allOrders = Array.isArray(data.orders) ? data.orders : [];
+
+    // This TTP website's Customer Dashboard should only ever show orders placed through
+    // Tag Team Printing -- Control Hub's /api/orders merges in DDT's orders too (by design,
+    // for its own internal staff view), which would be confusing/wrong context to surface
+    // here if a customer happens to share an email across both businesses.
+    const ttpOrders = allOrders.filter((o) => o.orderModel !== 'DDTOrder');
+
+    // Exact-match the email -- Control Hub's search is a substring/regex match across
+    // multiple fields (orderId, customer.name, customer.email), so confirm the match is
+    // really on this email, not an orderId or name that happens to contain it.
+    const matchedOrders = ttpOrders.filter(
+      (o) =>
+        (o.customer?.email || '').toLowerCase() === email.trim().toLowerCase(),
+    );
+
+    const orders = matchedOrders
+      .map(buildDashboardOrder)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.status(200).json({
+      success: true,
+      orders,
+      totalOrders: orders.length,
+    });
   } catch (error) {
-    console.error('❌ Error retrieving orders:', error);
+    console.error('Error retrieving customer orders from Control Hub:', error);
     res.status(500).json({
-      error: 'Failed to retrieve orders',
-      details: error.message
+      success: false,
+      message: 'Unable to fetch order history. Please try again later.',
     });
   }
 };
-
-// Helper function to calculate estimated delivery
-function calculateEstimatedDelivery(order) {
-  const createdDate = new Date(order.timestamp);
-  const status = order.status;
-  
-  // Estimated days based on status
-  const estimatedDays = {
-    'pending': 14,
-    'artwork-review': 12,
-    'approved': 10,
-    'in-production': 7,
-    'completed': 3,
-    'shipped': 1,
-    'delivered': 0,
-    'cancelled': null
-  };
-  
-  const daysToAdd = estimatedDays[status];
-  if (daysToAdd === null || daysToAdd === 0) {
-    return null;
-  }
-  
-  const estimatedDate = new Date(createdDate);
-  estimatedDate.setDate(estimatedDate.getDate() + daysToAdd);
-  
-  return estimatedDate.toISOString();
-}
-
-// Helper function to format status for display
-function formatStatusForDisplay(status) {
-  const statusMap = {
-    'pending': 'Order Received',
-    'artwork-review': 'Artwork Review',
-    'approved': 'Approved for Production',
-    'in-production': 'In Production',
-    'completed': 'Production Complete',
-    'shipped': 'Shipped',
-    'delivered': 'Delivered',
-    'cancelled': 'Cancelled'
-  };
-  
-  return statusMap[status] || status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
-
-// Helper function to calculate days in current status
-function calculateDaysInStatus(order) {
-  const statusHistory = order.statusHistory || [];
-  
-  if (statusHistory.length === 0) {
-    // Use order creation date if no status history
-    const createdDate = new Date(order.timestamp);
-    const now = new Date();
-    const diffTime = Math.abs(now - createdDate);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  }
-  
-  // Get the most recent status change
-  const latestStatusChange = statusHistory[statusHistory.length - 1];
-  const statusDate = new Date(latestStatusChange.timestamp);
-  const now = new Date();
-  const diffTime = Math.abs(now - statusDate);
-  
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
