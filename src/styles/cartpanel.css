@@ -7,6 +7,15 @@
   background-color: #111;
   color: #fff;
   padding: 20px;
+  /* Fixed 2026-09-17: confirmed via real-device mobile QA -- the heading rendered as "OUR
+     CART" with the leading "Y" clipped off-screen. Root cause: this panel is `right: 0` +
+     `width: 100%` on mobile (see media query below) with no box-sizing: border-box anywhere
+     on the site, so the browser's default content-box sizing adds this 20px padding on TOP
+     of that 100% width instead of including it -- and because `right: 0` anchors the right
+     edge, the extra 40px of total width gets pushed off-screen to the LEFT, clipping
+     whatever sits flush against the panel's own left edge (the heading text). box-sizing:
+     border-box makes width: 100% correctly include the padding, eliminating the overflow. */
+  box-sizing: border-box;
   z-index: 1001;
   overflow-y: auto;
   box-shadow: -3px 0 10px rgba(0, 0, 0, 0.5);

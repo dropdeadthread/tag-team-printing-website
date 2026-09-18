@@ -33,6 +33,18 @@ html {
   justify-content: flex-start;
 }
 
+/* Fixed 2026-09-17: confirmed via real-device mobile QA -- background-attachment: fixed is
+   notoriously unreliable on mobile Safari/Chrome-on-iOS (WebKit has never fully supported
+   true fixed backgrounds on touch devices), which showed up as a visible gap where the
+   paper-texture background didn't reach the screen edges in the hero section. Fixed
+   backgrounds are a desktop-only visual nicety anyway -- switching to scroll on mobile is
+   the standard fix for this exact bug class. */
+@media (max-width: 768px) {
+  .layout-wrapper {
+    background-attachment: scroll;
+  }
+}
+
 /* Cart page specific layout - no hero background */
 .layout-wrapper.cart-layout {
   background: none;
